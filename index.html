@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning COT</title>
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Planning">
+  <meta name="theme-color" content="#1a3a5c">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --bg: #f0f2f5; --surface: #ffffff; --surface2: #f8f9fb;
+      --border: #d1d5db; --border-light: #e5e7eb;
+      --accent: #1a3a5c; --accent-light: #eef2f7; --accent-hover: #14304f;
+      --text: #222222; --text-muted: #555555; --text-light: #888888;
+      --green: #16a34a; --green-light: #dcfce7;
+      --amber: #c0540a; --amber-light: #fef3c7;
+      --red: #dc2626; --red-light: #fee2e2;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-hover: 0 6px 24px rgba(26,33,51,0.10);
+      --radius: 12px;
+
+      --c-diferida: #64748b;
+      --c-diferida-light: #f1f5f9;
+      --c-qui-m: #1a3a5c;
+      --c-qui-m-light: #e8eef5;
+      --c-cons-m: #16a34a;
+      --c-cons-m-light: #dcfce7;
+      --c-saliente: #f59e0b;
+      --c-saliente-light: #fef3c7;
+      --c-cons-t: #0d9488;
+      --c-cons-t-light: #ccfbf1;
+      --c-qui-t: #3b82f6;
+      --c-qui-t-light: #dbeafe;
+      --c-guardia: #dc2626;
+      --c-guardia-light: #fee2e2;
+      --c-localizado: #7c3aed;
+      --c-localizado-light: #f0ebff;
+      --c-gestion: #ca8a04;
+      --c-gestion-light: #fef9c3;
+    }
+
+    [data-theme="dark"] {
+      --bg: #111827; --surface: #1f2937; --surface2: #283244;
+      --border: #374151; --border-light: #4b5563;
+      --text: #f1f5f9; --text-muted: #94a3b8; --text-light: #64748b;
+      --accent-light: #1e3a5f;
+      --green-light: #14352a; --amber-light: #3b2a10; --red-light: #3b1010;
+      --shadow: 0 2px 12px rgba(0,0,0,0.3);
+      --shadow-hover: 0 6px 24px rgba(0,0,0,0.4);
+
+      --c-diferida-light: #334155;
+      --c-qui-m-light: #1e3a5f;
+      --c-cons-m-light: #14352a;
+      --c-saliente-light: #3b2a10;
+      --c-cons-t-light: #134e4a;
+      --c-qui-t-light: #1e3a5f;
+      --c-guardia-light: #3b1010;
+      --c-localizado-light: #2e1065;
+      --c-gestion-light: #3b2a10;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', Arial, sans-serif; background: var(--bg);
+      color: var(--text); min-height: 100vh; padding: 30px 20px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .app-container { max-width: 1100px; margin: 0 auto; }
+
+    .back-home {
+      position: fixed; top: 10px; left: 10px;
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; letter-spacing: 0.05em;
+      color: var(--text-muted); text-decoration: none;
+      padding: 6px 12px; border-radius: 999px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      transition: border-color 0.2s, color 0.2s; z-index: 100;
+    }
+    .back-home:hover { border-color: var(--accent); color: var(--accent); }
+
+    .app-header { text-align: center; margin-bottom: 28px; position: relative; }
+    .app-header h1 {
+      font-family: 'Lora', serif; color: var(--accent);
+      font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 700;
+    }
+    .app-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+    .theme-toggle {
+      position: absolute; top: 0.3rem; right: 0.3rem;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 50%; width: 38px; height: 38px; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow); transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .theme-toggle:hover { border-color: var(--accent); box-shadow: var(--shadow-hover); }
+
+    /* Upload zone */
+    .upload-zone {
+      background: var(--surface); border: 2px dashed var(--border);
+      border-radius: var(--radius); padding: 40px 24px; text-align: center;
+      cursor: pointer; transition: border-color 0.3s, background 0.3s;
+      margin-bottom: 20px;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--accent); background: var(--accent-light);
+    }
+    .upload-zone .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .upload-zone .title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+    .upload-zone .subtitle { font-size: 12px; color: var(--text-muted); }
+    .upload-zone input[type="file"] { display: none; }
+
+    .upload-info {
+      background: var(--accent-light); border: 1px solid var(--accent);
+      border-radius: 8px; padding: 10px 16px; margin-bottom: 20px;
+      font-size: 13px; display: flex; align-items: center; gap: 8px;
+    }
+    .upload-info .check { color: var(--green); font-weight: 700; }
+
+    /* Surgeon selector */
+    .controls {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .controls label {
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .controls select {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; font-size: 14px; font-family: 'Inter', Arial, sans-serif;
+      color: var(--text); background: var(--surface);
+      transition: border-color 0.2s, box-shadow 0.2s; flex: 1; min-width: 200px;
+    }
+    .controls select:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(26,58,92,0.10);
+    }
+
+    /* Results layout */
+    .results { display: none; }
+    .results.visible { display: flex; flex-direction: column; gap: 20px; }
+
+    /* Calendar */
+    .calendar-section {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px;
+    }
+    .calendar-section h2 {
+      font-family: 'Lora', serif; font-size: 1.1rem; color: var(--accent);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .cal-nav {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+    }
+    .cal-nav button {
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 6px; width: 32px; height: 32px; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; color: var(--text);
+    }
+    .cal-nav button:hover { border-color: var(--accent); color: var(--accent); }
+    .cal-nav .month-label {
+      font-weight: 600; font-size: 14px; min-width: 140px; text-align: center;
+    }
+    .cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
+    }
+    .cal-header {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-light); text-align: center;
+      padding: 4px 0;
+    }
+    .cal-cell {
+      min-height: 54px; border-radius: 8px; display: flex;
+      flex-direction: column; align-items: stretch;
+      font-size: 13px; font-weight: 500; position: relative;
+      border: 1px solid transparent; transition: all 0.2s; cursor: default;
+      overflow: hidden; padding: 3px; gap: 2px;
+    }
+    .cal-cell.empty { background: transparent; min-height: 40px; align-items: center; justify-content: center; }
+    .cal-cell.has-activity {
+      background: var(--surface2); border-color: var(--border-light);
+    }
+    .cal-cell.has-activity:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+    .cal-cell .day-num {
+      font-weight: 700; font-size: 11px; line-height: 1;
+      padding: 0 1px; color: var(--text); flex-shrink: 0;
+    }
+    .cal-cell.empty .day-num { color: var(--text-light); text-align: center; }
+
+    /* Activity tags inside calendar cells */
+    .cell-acts { display: flex; flex-direction: column; gap: 1px; }
+    .act-tag {
+      display: block; padding: 1px 3px; border-radius: 3px;
+      font-size: 8.5px; font-weight: 700; color: white;
+      text-align: center; line-height: 1.3;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .act-tag.light-bg { color: #1a1a1a; }
+    .cell-sep {
+      height: 0; border-top: 1px dashed var(--border); margin: 1px 0;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px;
+      padding-top: 14px; border-top: 1px solid var(--border-light);
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 4px; font-size: 10px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    }
+
+    /* Bottom grid: summary + turns */
+    .bottom-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+
+    /* Summary */
+    .summary-section {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .summary-section h2 {
+      font-family: 'Lora', serif; font-size: 1.1rem; color: var(--accent);
+      margin-bottom: 2px;
+    }
+    .summary-toggle {
+      display: flex; gap: 4px; margin-bottom: 4px;
+    }
+    .summary-toggle button {
+      padding: 5px 14px; border-radius: 6px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; color: var(--text-muted);
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .summary-toggle button:hover { border-color: var(--accent); color: var(--accent); }
+    .summary-toggle button.active {
+      background: var(--accent); color: white; border-color: var(--accent);
+    }
+    .summary-card {
+      background: var(--surface2); border: 1px solid var(--border-light);
+      border-radius: 8px; padding: 10px 14px; display: flex;
+      align-items: center; gap: 12px; transition: box-shadow 0.2s;
+    }
+    .summary-card:hover { box-shadow: var(--shadow); }
+    .summary-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .summary-content { flex: 1; min-width: 0; }
+    .summary-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 2px;
+    }
+    .summary-days {
+      font-size: 12px; color: var(--text-muted); line-height: 1.4;
+    }
+    .summary-count {
+      font-size: 20px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* Turns section */
+    .turns-section {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
+    }
+    .turns-section h2 {
+      font-family: 'Lora', serif; font-size: 1.1rem; color: var(--accent);
+      margin-bottom: 14px;
+    }
+    .turn-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--border-light);
+      font-size: 13px;
+    }
+    .turn-row:last-child { border-bottom: none; }
+    .turn-week-label { color: var(--text-muted); }
+    .turn-week-range { font-size: 11px; color: var(--text-light); margin-left: 4px; }
+    .turn-count { font-weight: 700; color: var(--accent); }
+    .turn-count-zero { font-weight: 600; color: var(--text-light); }
+    .turn-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0 0; margin-top: 4px;
+      border-top: 2px solid var(--accent);
+      font-size: 15px; font-weight: 700; color: var(--accent);
+    }
+    .turn-total-label { display: flex; align-items: center; gap: 6px; }
+
+    .app-footer { text-align: center; flex-shrink: 0; padding: 24px 0 8px; }
+    .app-footer span { font-size: 0.7rem; color: var(--text-light); letter-spacing: 0.03em; }
+
+    .toast-banner {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #7c3aed; color: white;
+      padding: 12px 28px; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600;
+      font-family: 'Inter', Arial, sans-serif;
+      box-shadow: 0 8px 32px rgba(124,58,237,0.30);
+      z-index: 9999; opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
+      pointer-events: none; display: flex; align-items: center; gap: 8px;
+    }
+    .toast-banner.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 768px) {
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      body { padding: 20px 12px; }
+      .back-home { padding: 4px 8px; font-size: 10px; top: 6px; left: 6px; }
+      .upload-zone { padding: 28px 16px; }
+      .cal-grid { gap: 2px; }
+      .cal-cell { min-height: 44px; padding: 2px; }
+      .cal-cell .day-num { font-size: 10px; }
+      .act-tag { font-size: 7px; padding: 1px 2px; }
+      .summary-card { padding: 8px 10px; }
+      .summary-icon { width: 30px; height: 30px; font-size: 14px; }
+      .summary-count { font-size: 17px; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .controls select { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <a class="back-home" href="https://jmacot.github.io/" title="Volver al inicio">&larr; Inicio</a>
+
+  <div class="app-header">
+    <h1>Analizador de Planning</h1>
+    <p>Sube el archivo del planning mensual para ver el desglose por cirujano</p>
+    <button class="theme-toggle" id="btn-theme" title="Cambiar tema"></button>
+  </div>
+
+  <!-- Upload -->
+  <div class="upload-zone" id="upload-zone">
+    <div class="icon">&#128203;</div>
+    <div class="title">Arrastra el archivo (Excel, ODS, CSV) o haz clic para seleccionar</div>
+    <div class="subtitle">Planning mensual del servicio &middot; .xlsx .xls .ods .csv</div>
+    <input type="file" id="file-input" accept=".xlsx,.xls,.ods,.csv">
+  </div>
+
+  <div class="upload-info" id="upload-info" style="display:none">
+    <span class="check">&#10003;</span>
+    <span id="upload-summary"></span>
+    <button onclick="resetApp()" style="margin-left:auto; background:none; border:1.5px solid var(--border); border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; color:var(--text-muted);">Cambiar archivo</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls" id="controls" style="display:none">
+    <label for="surgeon-select">Cirujano</label>
+    <select id="surgeon-select">
+      <option value="">Selecciona un cirujano...</option>
+    </select>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+    <!-- Calendar: full width -->
+    <div class="calendar-section">
+      <h2>&#128197; Calendario</h2>
+      <div class="cal-nav">
+        <button id="cal-prev" title="Mes anterior">&larr;</button>
+        <span class="month-label" id="cal-month-label"></span>
+        <button id="cal-next" title="Mes siguiente">&rarr;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <!-- Bottom: summary + turns -->
+    <div class="bottom-grid">
+      <div class="summary-section" id="summary-section">
+        <h2>&#128202; Resumen de actividades</h2>
+        <div class="summary-toggle" id="summary-toggle">
+          <button class="active" data-mode="month">Mes actual</button>
+          <button data-mode="total">Total</button>
+        </div>
+        <div id="summary-cards"></div>
+      </div>
+      <div class="turns-section" id="turns-section">
+        <h2>&#9201; Turnos</h2>
+        <div id="turns-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-footer"><span>COT &mdash; Planning Analyzer v2.0</span></div>
+  <div id="toast" class="toast-banner"></div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  CONFIGURACION
+// ─────────────────────────────────────────────
+const SURGEONS = {
+  1:'Fernando Baquero', 2:'Bea Grijalvo', 3:'Miguel Villa', 4:'Manuel Cintado',
+  5:'Silvia Exposito', 6:'Antonio Ortiz', 7:'Marta del Rio', 8:'Alejandro Linan',
+  9:'Pepe Contreras', 10:'Jairo Hijazi', 11:'Manuel Centeno', 12:'Javier Martin',
+  13:'Laura Hernandez', 14:'Libertad Caceres', 15:'Paco Barrionuevo',
+  16:'Lorena Rial', 17:'Guille Estrada', 18:'Sara Gonzalez', 19:'Antonio Soler',
+  20:'Eduardo Pereira', 21:'Alejandro Monge', 23:'Monica Sanchez',
+  24:'Miriam Barcia', 25:'Veronica Delgado', 26:'Jose Maria Perez', 27:'Jaime Diez'
+};
+
+const ACTIVITIES = {
+  diferida:    { label: 'Diferida/Planta', tag: 'Diferida',   icon: '&#127973;', color: 'var(--c-diferida)',    bg: 'var(--c-diferida-light)',    period: 'morning' },
+  qui_m:       { label: 'Quirofano M',     tag: 'Quirof M',   icon: '&#129657;', color: 'var(--c-qui-m)',       bg: 'var(--c-qui-m-light)',       period: 'morning' },
+  cons_m:      { label: 'Consulta M',      tag: 'Cons M',     icon: '&#128196;', color: 'var(--c-cons-m)',      bg: 'var(--c-cons-m-light)',      period: 'morning' },
+  saliente:    { label: 'Saliente',         tag: 'Saliente',   icon: '&#128164;', color: 'var(--c-saliente)',    bg: 'var(--c-saliente-light)',    period: 'allday',  lightTag: true },
+  cons_t:      { label: 'Consulta T',       tag: 'Cons T',     icon: '&#128203;', color: 'var(--c-cons-t)',      bg: 'var(--c-cons-t-light)',      period: 'afternoon' },
+  qui_t:       { label: 'Quirofano T',      tag: 'Quirof T',   icon: '&#128137;', color: 'var(--c-qui-t)',       bg: 'var(--c-qui-t-light)',       period: 'afternoon' },
+  guardia:     { label: 'Guardia',          tag: 'Guardia',    icon: '&#128680;', color: 'var(--c-guardia)',     bg: 'var(--c-guardia-light)',     period: 'allday'  },
+  localizado:  { label: 'Localizado',       tag: 'Localiz',    icon: '&#128222;', color: 'var(--c-localizado)',  bg: 'var(--c-localizado-light)',  period: 'allday'  },
+  gestion:     { label: 'Gestion',          tag: 'Gestion',    icon: '&#128188;', color: 'var(--c-gestion)',     bg: 'var(--c-gestion-light)',     period: 'allday',  lightTag: true }
+};
+
+// Row offsets from URG row
+const ROW_OFFSETS = {
+  diferida: 0,   // URG
+  qui_m: 1,      // QUI (1st)
+  cons_m: 2,     // CONS (1st)
+  saliente: 3,   // SAL
+  cons_t: 5,     // CONS (2nd)
+  qui_t: 6,      // QUI (2nd)
+  guardia: 7,    // GPF
+  localizado: 8  // GLOC
+};
+
+const DAY_NAMES = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
+const DAY_LABELS_SHORT = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+let parsedData = null;   // { surgeonId: [{ date, month, year, dayOfWeek, activity }] }
+let allDates = [];        // [{ day, month, year, dayOfWeek }] sorted
+let currentMonth = null;
+let currentYear = null;
+let availableMonths = [];
+let summaryMode = 'month'; // 'month' or 'total'
+let loadedFileName = '';
+
+// ─────────────────────────────────────────────
+//  TOAST
+// ─────────────────────────────────────────────
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerHTML = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─────────────────────────────────────────────
+//  THEME
+// ─────────────────────────────────────────────
+const btnTheme = document.getElementById('btn-theme');
+function applyTheme(dark) {
+  if (dark) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    btnTheme.textContent = '\u2600\uFE0F';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    btnTheme.textContent = '\uD83C\uDF19';
+  }
+}
+function getAutoTheme() {
+  const hour = new Date().getHours();
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return (hour >= 21 || hour < 7 || prefersDark) ? 'dark' : 'light';
+}
+function initTheme() {
+  const saved = localStorage.getItem('planning-theme');
+  const savedDate = localStorage.getItem('planning-theme-date');
+  const today = new Date().toDateString();
+  if (saved && savedDate === today) {
+    applyTheme(saved === 'dark');
+  } else {
+    localStorage.removeItem('planning-theme');
+    localStorage.removeItem('planning-theme-date');
+    applyTheme(getAutoTheme() === 'dark');
+  }
+}
+btnTheme.addEventListener('click', () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  applyTheme(!isDark);
+  localStorage.setItem('planning-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('planning-theme-date', new Date().toDateString());
+});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  const saved = localStorage.getItem('planning-theme');
+  const savedDate = localStorage.getItem('planning-theme-date');
+  if (!saved || savedDate !== new Date().toDateString()) {
+    applyTheme(getAutoTheme() === 'dark');
+  }
+});
+initTheme();
+
+// ─────────────────────────────────────────────
+//  FILE UPLOAD
+// ─────────────────────────────────────────────
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('file-input');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processFile(file);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) processFile(e.target.files[0]);
+});
+
+function resetApp() {
+  parsedData = null;
+  allDates = [];
+  summaryMode = 'month';
+  fileInput.value = '';
+  document.getElementById('upload-zone').style.display = '';
+  document.getElementById('upload-info').style.display = 'none';
+  document.getElementById('controls').style.display = 'none';
+  document.getElementById('results').classList.remove('visible');
+}
+
+function processFile(file) {
+  loadedFileName = file.name;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      parseWorksheet(ws);
+      mostrarToast('&#10003; Planning cargado correctamente');
+    } catch(err) {
+      console.error(err);
+      mostrarToast('&#10060; Error al leer el archivo');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ─────────────────────────────────────────────
+//  EXCEL PARSING (preserved exactly)
+// ─────────────────────────────────────────────
+function cellVal(ws, r, c) {
+  const addr = XLSX.utils.encode_cell({ r: r - 1, c: c - 1 });
+  const cell = ws[addr];
+  return cell ? cell.v : null;
+}
+
+function findURGRows(ws) {
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const urgRows = [];
+  for (let r = range.s.r; r <= range.e.r; r++) {
+    const val = cellVal(ws, r + 1, 2); // col B
+    if (val === 'URG') urgRows.push(r + 1); // 1-indexed
+  }
+  return urgRows;
+}
+
+function findDayColumnsInRow(ws, row) {
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const dayCols = {};
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const val = cellVal(ws, row, c + 1);
+    if (val) {
+      const normalized = String(val).trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      for (const dayName of DAY_NAMES) {
+        const dayNorm = dayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        if (normalized === dayNorm || normalized.startsWith(dayNorm)) {
+          dayCols[dayName] = c + 1; // 1-indexed
+        }
+      }
+    }
+  }
+  return dayCols;
+}
+
+function findDayColumns(ws, urgRow) {
+  // Search upward from URG row for the nearest row with day headers
+  for (let offset = 2; offset <= 6; offset++) {
+    const row = urgRow - offset;
+    if (row < 1) continue;
+    const dayCols = findDayColumnsInRow(ws, row);
+    if (Object.keys(dayCols).length >= 5) return dayCols;
+  }
+  return null;
+}
+
+function getDayRanges(dayCols) {
+  if (!dayCols) return {};
+  const sortedDays = DAY_NAMES.filter(d => dayCols[d] !== undefined);
+  const ranges = {};
+  for (let i = 0; i < sortedDays.length; i++) {
+    const day = sortedDays[i];
+    const startCol = (day === 'LUNES') ? 3 : dayCols[day]; // LUNES extends to col C
+    const endCol = (i < sortedDays.length - 1)
+      ? dayCols[sortedDays[i + 1]] - 1
+      : dayCols[day] + 7; // DOMINGO: extend 7 cols
+    ranges[day] = { start: startCol, end: endCol, headerCol: dayCols[day] };
+  }
+  return ranges;
+}
+
+// Date offsets from day header column (verified from Excel structure)
+const DATE_OFFSETS = {
+  LUNES: 4, MARTES: 4, MIERCOLES: 4,
+  JUEVES: 5, VIERNES: 5, SABADO: 4, DOMINGO: 4
+};
+
+function getDateForDay(ws, dateRow, dayRange, dayName) {
+  // First try the expected date column position based on header offset
+  const expectedCol = dayRange.headerCol + DATE_OFFSETS[dayName];
+  const expectedVal = cellVal(ws, dateRow, expectedCol);
+  if (expectedVal !== null && expectedVal !== undefined) {
+    const num = parseInt(String(expectedVal).replace(/[^0-9]/g, ''), 10);
+    if (!isNaN(num) && num >= 1 && num <= 31) return num;
+  }
+  // Fallback: try nearby columns around the expected position
+  for (let delta = -1; delta <= 2; delta++) {
+    if (delta === 0) continue; // already tried
+    const c = expectedCol + delta;
+    if (c < dayRange.start || c > dayRange.end) continue;
+    const val = cellVal(ws, dateRow, c);
+    if (val !== null && val !== undefined) {
+      const num = parseInt(String(val).replace(/[^0-9]/g, ''), 10);
+      if (!isNaN(num) && num >= 1 && num <= 31) return num;
+    }
+  }
+  return null;
+}
+
+function extractSurgeonIds(ws, row, dayRange) {
+  const ids = [];
+  for (let c = dayRange.start; c <= dayRange.end; c++) {
+    const val = cellVal(ws, row, c);
+    if (val === null || val === undefined) continue;
+    const str = String(val).trim();
+    if (str === '' || str.toUpperCase() === 'R') continue;
+    const isGestion = str.includes('*');
+    const num = parseInt(str.replace(/[^0-9]/g, ''), 10);
+    if (!isNaN(num) && num >= 1 && num <= 30) {
+      ids.push({ id: num, gestion: isGestion });
+    }
+  }
+  return ids;
+}
+
+function parseWorksheet(ws) {
+  const urgRows = findURGRows(ws);
+  parsedData = {};
+  allDates = [];
+  const dateSet = new Set();
+
+  // Determine month/year from date sequences
+  // Collect all dates first to figure out months
+  const rawWeeks = [];
+
+  let lastDayCols = null;
+  for (const urgRow of urgRows) {
+    const dateRow = urgRow - 1;
+    let dayCols = findDayColumns(ws, urgRow);
+    if (!dayCols && lastDayCols) {
+      dayCols = lastDayCols; // Reuse previous block's day columns
+    }
+    if (dayCols) lastDayCols = dayCols;
+    const dayRanges = getDayRanges(dayCols);
+
+    const weekDates = [];
+    for (const dayName of DAY_NAMES) {
+      if (!dayRanges[dayName]) continue;
+      const date = getDateForDay(ws, dateRow, dayRanges[dayName], dayName);
+      if (date !== null) {
+        weekDates.push({ dayName, date, dayRange: dayRanges[dayName], urgRow });
+      }
+    }
+    rawWeeks.push(weekDates);
+  }
+
+  // ── Determine starting month/year from date pattern ──
+  // Strategy: find month boundaries, detect February (28 days) as anchor
+  const flatDates = rawWeeks.flat().map(d => d.date);
+
+  // Find month boundaries (date drops from high to low)
+  const boundaries = []; // indices where new month starts
+  for (let i = 1; i < flatDates.length; i++) {
+    if (flatDates[i] < flatDates[i - 1] - 5) {
+      boundaries.push({ index: i, prevMax: flatDates[i - 1] });
+    }
+  }
+
+  // Month segments: [start..boundary0], [boundary0..boundary1], ...
+  const segments = [];
+  let segStart = 0;
+  for (const b of boundaries) {
+    const segDates = flatDates.slice(segStart, b.index);
+    segments.push({ maxDate: Math.max(...segDates), count: segDates.length });
+    segStart = b.index;
+  }
+  if (segStart < flatDates.length) {
+    const segDates = flatDates.slice(segStart);
+    segments.push({ maxDate: Math.max(...segDates), count: segDates.length });
+  }
+
+  // Find February: the segment with maxDate 28 (non-leap) or 29 (leap)
+  let febSegIndex = -1;
+  for (let i = 0; i < segments.length; i++) {
+    if (segments[i].maxDate === 28 || segments[i].maxDate === 29) {
+      // Verify it's a full month (has enough dates, not just a partial segment)
+      if (segments[i].count >= 20) { febSegIndex = i; break; }
+    }
+  }
+
+  // Determine starting month/year by counting back from February
+  const now = new Date();
+  let startMonth, startYear;
+  if (febSegIndex >= 0) {
+    // February is at segment index febSegIndex
+    const febMonth = 1; // February = month index 1
+    const febYear = now.getFullYear();
+    startMonth = febMonth - febSegIndex;
+    startYear = febYear;
+    while (startMonth < 0) { startMonth += 12; startYear--; }
+  } else {
+    // Fallback: guess from current date
+    startMonth = now.getMonth() - 1;
+    startYear = now.getFullYear();
+    if (startMonth < 0) { startMonth = 11; startYear--; }
+    if (flatDates[0] > 15) {
+      startMonth--;
+      if (startMonth < 0) { startMonth = 11; startYear--; }
+    }
+  }
+
+  let trackMonth = startMonth;
+  let trackYear = startYear;
+  let prevDate = 0;
+
+  function maxDaysInMonth(m, y) {
+    return new Date(y, m + 1, 0).getDate();
+  }
+
+  for (const weekDates of rawWeeks) {
+    for (const wd of weekDates) {
+      // Detect month rollover (big drop in date number)
+      if (wd.date < prevDate - 5) {
+        trackMonth++;
+        if (trackMonth > 11) { trackMonth = 0; trackYear++; }
+      }
+      // Validate: if day exceeds the max for this month, bump to next month
+      if (wd.date > maxDaysInMonth(trackMonth, trackYear)) {
+        trackMonth++;
+        if (trackMonth > 11) { trackMonth = 0; trackYear++; }
+      }
+      prevDate = wd.date;
+
+      const dayOfWeek = DAY_NAMES.indexOf(wd.dayName);
+      const dateKey = `${trackYear}-${trackMonth}-${wd.date}`;
+
+      if (!dateSet.has(dateKey)) {
+        dateSet.add(dateKey);
+        allDates.push({ day: wd.date, month: trackMonth, year: trackYear, dayOfWeek });
+      }
+
+      // Parse activities for this day
+      for (const [actKey, offset] of Object.entries(ROW_OFFSETS)) {
+        const actRow = wd.urgRow + offset;
+        const surgeonIds = extractSurgeonIds(ws, actRow, wd.dayRange);
+        for (const { id, gestion } of surgeonIds) {
+          if (!parsedData[id]) parsedData[id] = [];
+          const activity = gestion ? 'gestion' : actKey;
+          parsedData[id].push({
+            day: wd.date, month: trackMonth, year: trackYear,
+            dayOfWeek, activity
+          });
+        }
+      }
+    }
+  }
+
+  allDates.sort((a, b) => {
+    if (a.year !== b.year) return a.year - b.year;
+    if (a.month !== b.month) return a.month - b.month;
+    return a.day - b.day;
+  });
+
+  // Determine available months
+  const monthSet = new Set();
+  allDates.forEach(d => monthSet.add(`${d.year}-${d.month}`));
+  availableMonths = Array.from(monthSet).sort().map(s => {
+    const [y, m] = s.split('-').map(Number);
+    return { year: y, month: m };
+  });
+
+  // Find the month with most dates
+  const monthCounts = {};
+  allDates.forEach(d => {
+    const key = `${d.year}-${d.month}`;
+    monthCounts[key] = (monthCounts[key] || 0) + 1;
+  });
+  const mainMonthKey = Object.entries(monthCounts).sort((a,b) => b[1] - a[1])[0]?.[0];
+  if (mainMonthKey) {
+    const [y, m] = mainMonthKey.split('-').map(Number);
+    currentMonth = m;
+    currentYear = y;
+  } else if (availableMonths.length > 0) {
+    currentMonth = availableMonths[0].month;
+    currentYear = availableMonths[0].year;
+  }
+
+  // Populate UI
+  showUploadSuccess();
+  populateSurgeonSelect();
+}
+
+function showUploadSuccess() {
+  document.getElementById('upload-zone').style.display = 'none';
+  document.getElementById('upload-info').style.display = 'flex';
+  document.getElementById('upload-summary').textContent = loadedFileName;
+  document.getElementById('controls').style.display = 'flex';
+}
+
+function populateSurgeonSelect() {
+  const select = document.getElementById('surgeon-select');
+  select.innerHTML = '<option value="">Selecciona un cirujano...</option>';
+  const ids = Object.keys(parsedData).map(Number).sort((a, b) => a - b);
+  for (const id of ids) {
+    const name = SURGEONS[id] || `Cirujano ${id}`;
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = `T${id} \u2014 ${name}`;
+    select.appendChild(opt);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  SURGEON SELECT & RENDER
+// ─────────────────────────────────────────────
+document.getElementById('surgeon-select').addEventListener('change', function() {
+  const id = parseInt(this.value, 10);
+  if (isNaN(id)) {
+    document.getElementById('results').classList.remove('visible');
+    return;
+  }
+  renderResults(id);
+});
+
+document.getElementById('cal-prev').addEventListener('click', () => navigateMonth(-1));
+document.getElementById('cal-next').addEventListener('click', () => navigateMonth(1));
+
+function navigateMonth(dir) {
+  const idx = availableMonths.findIndex(m => m.month === currentMonth && m.year === currentYear);
+  const newIdx = idx + dir;
+  if (newIdx >= 0 && newIdx < availableMonths.length) {
+    currentMonth = availableMonths[newIdx].month;
+    currentYear = availableMonths[newIdx].year;
+    const surgeonId = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(surgeonId)) renderResults(surgeonId);
+  }
+}
+
+function renderResults(surgeonId) {
+  document.getElementById('results').classList.add('visible');
+  renderCalendar(surgeonId);
+  renderSummary(surgeonId);
+  renderTurns(surgeonId);
+  renderLegend();
+}
+
+// ─────────────────────────────────────────────
+//  SUMMARY TOGGLE
+// ─────────────────────────────────────────────
+document.querySelectorAll('#summary-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#summary-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    summaryMode = this.dataset.mode;
+    const surgeonId = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(surgeonId)) renderSummary(surgeonId);
+  });
+});
+
+// ─────────────────────────────────────────────
+//  CALENDAR RENDER
+// ─────────────────────────────────────────────
+function renderCalendar(surgeonId) {
+  const grid = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-month-label');
+  label.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+
+  const entries = (parsedData[surgeonId] || []).filter(
+    e => e.month === currentMonth && e.year === currentYear
+  );
+
+  // Group by day
+  const dayMap = {};
+  entries.forEach(e => {
+    if (!dayMap[e.day]) dayMap[e.day] = [];
+    if (!dayMap[e.day].includes(e.activity)) dayMap[e.day].push(e.activity);
+  });
+
+  // Build calendar grid
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  let html = '';
+  // Headers
+  for (const dl of DAY_LABELS_SHORT) {
+    html += `<div class="cal-header">${dl}</div>`;
+  }
+
+  // Empty cells before start
+  for (let i = 0; i < startOffset; i++) {
+    html += '<div class="cal-cell empty"></div>';
+  }
+
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const acts = dayMap[d] || [];
+    if (acts.length === 0) {
+      html += `<div class="cal-cell empty"><span class="day-num">${d}</span></div>`;
+      continue;
+    }
+
+    // Group activities by period
+    const morningActs = acts.filter(a => ACTIVITIES[a]?.period === 'morning');
+    const afternoonActs = acts.filter(a => ACTIVITIES[a]?.period === 'afternoon');
+    const alldayActs = acts.filter(a => ACTIVITIES[a]?.period === 'allday');
+
+    const tooltip = acts.map(a => ACTIVITIES[a]?.label || a).join(' + ');
+
+    html += `<div class="cal-cell has-activity" title="${tooltip}">`;
+    html += `<span class="day-num">${d}</span>`;
+    html += '<div class="cell-acts">';
+
+    // Allday tags
+    for (const a of alldayActs) {
+      const info = ACTIVITIES[a];
+      const lightClass = info.lightTag ? ' light-bg' : '';
+      html += `<span class="act-tag${lightClass}" style="background:${info.color}">${info.tag}</span>`;
+    }
+
+    // Morning tags
+    for (const a of morningActs) {
+      const info = ACTIVITIES[a];
+      html += `<span class="act-tag" style="background:${info.color}">${info.tag}</span>`;
+    }
+
+    // Separator if both morning/allday AND afternoon
+    if ((morningActs.length > 0 || alldayActs.length > 0) && afternoonActs.length > 0) {
+      html += '<span class="cell-sep"></span>';
+    }
+
+    // Afternoon tags
+    for (const a of afternoonActs) {
+      const info = ACTIVITIES[a];
+      html += `<span class="act-tag" style="background:${info.color}">${info.tag}</span>`;
+    }
+
+    html += '</div></div>';
+  }
+
+  // Fill remaining cells
+  const totalCells = startOffset + daysInMonth;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let i = 0; i < remaining; i++) {
+    html += '<div class="cal-cell empty"></div>';
+  }
+
+  grid.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+//  SUMMARY RENDER
+// ─────────────────────────────────────────────
+function renderSummary(surgeonId) {
+  const container = document.getElementById('summary-cards');
+  const allEntries = parsedData[surgeonId] || [];
+
+  // Filter based on mode
+  const entries = (summaryMode === 'month')
+    ? allEntries.filter(e => e.month === currentMonth && e.year === currentYear)
+    : allEntries;
+
+  // Group by activity
+  const grouped = {};
+  for (const e of entries) {
+    if (!grouped[e.activity]) grouped[e.activity] = [];
+    grouped[e.activity].push(e);
+  }
+
+  // Order
+  const order = ['guardia', 'saliente', 'localizado', 'qui_m', 'diferida', 'qui_t', 'cons_m', 'cons_t', 'gestion'];
+
+  let html = '';
+  for (const actKey of order) {
+    const actEntries = grouped[actKey];
+    if (!actEntries || actEntries.length === 0) continue;
+    const actInfo = ACTIVITIES[actKey];
+    if (!actInfo) continue;
+
+    let daysText = '';
+    if (summaryMode === 'month') {
+      // Show just days for current month
+      const days = [...new Set(actEntries.map(e => e.day))].sort((a, b) => a - b);
+      daysText = `D\u00edas: ${days.join(', ')}`;
+    } else {
+      // Group by month for total view
+      const byMonth = {};
+      actEntries.forEach(e => {
+        const mKey = MONTH_NAMES[e.month];
+        if (!byMonth[mKey]) byMonth[mKey] = [];
+        byMonth[mKey].push(e.day);
+      });
+      for (const [month, days] of Object.entries(byMonth)) {
+        const sorted = [...new Set(days)].sort((a, b) => a - b);
+        daysText += `<strong>${month}:</strong> ${sorted.join(', ')}<br>`;
+      }
+    }
+
+    html += `
+      <div class="summary-card">
+        <div class="summary-icon" style="background:${actInfo.bg}; color:${actInfo.color}">${actInfo.icon}</div>
+        <div class="summary-content">
+          <div class="summary-label" style="color:${actInfo.color}">${actInfo.label}</div>
+          <div class="summary-days">${daysText}</div>
+        </div>
+        <div class="summary-count" style="color:${actInfo.color}">${actEntries.length}</div>
+      </div>`;
+  }
+
+  if (!html) {
+    html = '<div style="text-align:center;padding:30px;color:var(--text-light);font-size:13px;">Sin actividades registradas</div>';
+  }
+
+  container.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+//  TURNS RENDER
+// ─────────────────────────────────────────────
+function renderTurns(surgeonId) {
+  const container = document.getElementById('turns-content');
+  const entries = (parsedData[surgeonId] || []).filter(
+    e => e.month === currentMonth && e.year === currentYear
+  );
+
+  // Calculate weeks of the month (Mon-Sun)
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const startOffset = (firstDay === 0) ? 6 : firstDay - 1; // days before first Monday
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  const weeks = [];
+  // First week: day 1 to first Sunday
+  let firstWeekEnd = 7 - startOffset;
+  if (firstWeekEnd > daysInMonth) firstWeekEnd = daysInMonth;
+  weeks.push({ start: 1, end: firstWeekEnd });
+
+  // Subsequent full weeks
+  let day = firstWeekEnd + 1;
+  while (day <= daysInMonth) {
+    const end = Math.min(day + 6, daysInMonth);
+    weeks.push({ start: day, end: end });
+    day = end + 1;
+  }
+
+  // Count turns per week
+  let totalTurns = 0;
+  let html = '';
+  weeks.forEach((w, i) => {
+    const weekTurns = entries.filter(e => e.day >= w.start && e.day <= w.end).length;
+    totalTurns += weekTurns;
+    const countClass = weekTurns > 0 ? 'turn-count' : 'turn-count-zero';
+    html += `
+      <div class="turn-row">
+        <span>
+          <span class="turn-week-label">Semana ${i + 1}</span>
+          <span class="turn-week-range">(${w.start}-${w.end})</span>
+        </span>
+        <span class="${countClass}">${weekTurns} turno${weekTurns !== 1 ? 's' : ''}</span>
+      </div>`;
+  });
+
+  html += `
+    <div class="turn-total">
+      <span class="turn-total-label">Total ${MONTH_NAMES[currentMonth]}</span>
+      <span>${totalTurns} turnos</span>
+    </div>`;
+
+  container.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+//  LEGEND
+// ─────────────────────────────────────────────
+function renderLegend() {
+  const legend = document.getElementById('legend');
+  let html = '';
+  for (const [key, info] of Object.entries(ACTIVITIES)) {
+    html += `<div class="legend-item"><span class="legend-dot" style="background:${info.color}"></span>${info.label}</div>`;
+  }
+  legend.innerHTML = html;
+}
+</script>
+</body>
+</html>
