@@ -709,6 +709,15 @@
             <div class="chart-card-title">Ranking Actividad Total</div>
             <canvas id="canvas-ranking-turnos"></canvas>
           </div>
+          <!-- Row 5: Mañana/Tarde + Festivos -->
+          <div class="chart-card" id="card-morning-afternoon">
+            <div class="chart-card-title">Ma&ntilde;ana vs Tarde</div>
+            <canvas id="canvas-morning-afternoon"></canvas>
+          </div>
+          <div class="chart-card" id="card-festivos">
+            <div class="chart-card-title">Festivos Trabajados</div>
+            <canvas id="canvas-festivos"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -804,7 +813,7 @@ let availableMonths = [];
 let summaryMode = 'month'; // 'month' or 'total'
 let currentJornada = 100;  // 100, 80, or 60
 let chartsExpanded = false;
-let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null, radar: null };
+let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null, radar: null, morningAfternoon: null, festivos: null };
 let loadedFileName = '';
 
 // ─────────────────────────────────────────────
@@ -2362,6 +2371,138 @@ function renderRankingTurnosChart(surgeonId) {
   });
 }
 
+// ── Mañana vs Tarde chart ──
+function renderMorningAfternoonChart(surgeonId) {
+  const ctx = document.getElementById('canvas-morning-afternoon').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.morningAfternoon) { chartInstances.morningAfternoon.destroy(); chartInstances.morningAfternoon = null; }
+
+  const morningActs = new Set(['qui_m', 'cons_m', 'diferida']);
+  const afternoonActs = new Set(['qui_t', 'cons_t', 'diferida_t']);
+
+  const stats = {};
+  for (const id of Object.keys(parsedData).map(Number)) {
+    const entries = getMonthEntries(id);
+    const m = entries.filter(e => morningActs.has(e.activity)).length;
+    const t = entries.filter(e => afternoonActs.has(e.activity)).length;
+    const total = m + t;
+    if (total > 0) stats[id] = { m, t, total };
+  }
+
+  const sorted = Object.keys(stats).map(Number)
+    .sort((a, b) => stats[b].total - stats[a].total).slice(0, 15);
+  const labels = sorted.map(id => getSurnameOf(id));
+  const mData = sorted.map(id => Math.round(stats[id].m / stats[id].total * 100));
+  const tData = sorted.map(id => Math.round(stats[id].t / stats[id].total * 100));
+
+  const mBorderColors = sorted.map(id => id === surgeonId ? '#0369a1' : '#60a5fa');
+  const tBorderColors = sorted.map(id => id === surgeonId ? '#c2410c' : '#fb923c');
+
+  chartInstances.morningAfternoon = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Mañana %', data: mData, backgroundColor: sorted.map(id => id === surgeonId ? 'rgba(3,105,161,0.85)' : 'rgba(96,165,250,0.6)'), borderColor: mBorderColors, borderWidth: 1, borderRadius: 3 },
+        { label: 'Tarde %', data: tData, backgroundColor: sorted.map(id => id === surgeonId ? 'rgba(194,65,12,0.85)' : 'rgba(251,146,60,0.5)'), borderColor: tBorderColors, borderWidth: 1, borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      indexAxis: 'y',
+      scales: {
+        x: { stacked: true, max: 100, ticks: { color: theme.textColor, font: { size: 10 }, callback: v => v + '%' }, grid: { color: theme.gridColor } },
+        y: { stacked: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: true, labels: { color: theme.textColor, font: { size: 10 }, boxWidth: 12 } },
+        tooltip: {
+          ...makeTooltipOpts(theme),
+          callbacks: {
+            label: ctx2 => {
+              const id = sorted[ctx2.dataIndex];
+              const s = stats[id];
+              const abs = ctx2.datasetIndex === 0 ? s.m : s.t;
+              return `${ctx2.dataset.label}: ${ctx2.raw}% (${abs} turnos)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Festivos Trabajados chart ──
+function renderFestivosChart(surgeonId) {
+  const ctx = document.getElementById('canvas-festivos').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.festivos) { chartInstances.festivos.destroy(); chartInstances.festivos = null; }
+
+  const stats = {};
+  for (const id of Object.keys(parsedData).map(Number)) {
+    const entries = getMonthEntries(id);
+    let fiestas = 0, fines = 0;
+    const seen = new Set();
+    for (const e of entries) {
+      const key = `${e.year}-${e.month}-${e.day}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      if (isHoliday(e.year, e.month, e.day)) fiestas++;
+      else {
+        const dow = new Date(e.year, e.month, e.day).getDay();
+        if (dow === 0 || dow === 6) fines++;
+      }
+    }
+    const total = fiestas + fines;
+    if (total > 0) stats[id] = { fiestas, fines, total };
+  }
+
+  const sorted = Object.keys(stats).map(Number)
+    .sort((a, b) => stats[b].total - stats[a].total).slice(0, 15);
+  if (sorted.length === 0) {
+    document.getElementById('card-festivos').style.display = 'none';
+    return;
+  }
+  document.getElementById('card-festivos').style.display = '';
+  const labels = sorted.map(id => getSurnameOf(id));
+  const fiestasData = sorted.map(id => stats[id].fiestas);
+  const finesData = sorted.map(id => stats[id].fines);
+
+  const fiestasColors = sorted.map(id => id === surgeonId ? 'rgba(220,38,38,0.85)' : 'rgba(220,38,38,0.4)');
+  const finesColors = sorted.map(id => id === surgeonId ? 'rgba(124,58,237,0.85)' : 'rgba(124,58,237,0.4)');
+
+  chartInstances.festivos = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Festivos', data: fiestasData, backgroundColor: fiestasColors, borderRadius: 3 },
+        { label: 'Fines de semana', data: finesData, backgroundColor: finesColors, borderRadius: 3 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      scales: {
+        x: { ticks: { color: theme.textColor, font: { size: 10 }, maxRotation: 45 }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 }, stepSize: 1 }, grid: { color: theme.gridColor } }
+      },
+      plugins: {
+        legend: { display: true, labels: { color: theme.textColor, font: { size: 10 }, boxWidth: 12 } },
+        tooltip: {
+          ...makeTooltipOpts(theme),
+          callbacks: {
+            label: ctx2 => {
+              const id = sorted[ctx2.dataIndex];
+              const s = stats[id];
+              return `${ctx2.dataset.label}: ${ctx2.raw} días (total: ${s.total})`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
 // ── Comparador Table (by Cirujano or Unidad) ──
 function countActivitiesOf(entries) {
   const qxM = entries.filter(e => e.activity === 'qui_m').length;
@@ -2460,6 +2601,8 @@ function renderCharts(surgeonId) {
     renderRankingLocalizadosChart(surgeonId);
     renderRankingGestionChart(surgeonId);
     renderRankingTurnosChart(surgeonId);
+    renderMorningAfternoonChart(surgeonId);
+    renderFestivosChart(surgeonId);
   });
 }
 
