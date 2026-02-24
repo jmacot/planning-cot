@@ -2323,6 +2323,8 @@ function renderRankingGestionChart(surgeonId) {
     if (g > 0) counts[id] = g;
   }
   const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
+  if (sorted.length === 0) { document.getElementById('card-ranking-gestion').style.display = 'none'; return; }
+  document.getElementById('card-ranking-gestion').style.display = '';
   const labels = sorted.map(id => getSurnameOf(id));
   const data = sorted.map(id => counts[id]);
   const colors = sorted.map(id => id === surgeonId ? '#ca8a04' : theme.mutedBarColor);
