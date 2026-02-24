@@ -51,8 +51,11 @@
       --bg: #111827; --surface: #1f2937; --surface2: #283244;
       --border: #374151; --border-light: #4b5563;
       --text: #f1f5f9; --text-muted: #94a3b8; --text-light: #64748b;
+      --accent: #7bafd4; --accent-hover: #93c5fd;
       --accent-light: #1e3a5f;
-      --green-light: #14352a; --amber-light: #3b2a10; --red-light: #3b1010;
+      --green: #4ade80; --green-light: #14352a;
+      --amber: #fbbf24; --amber-light: #3b2a10;
+      --red: #f87171; --red-light: #3b1010;
       --shadow: 0 2px 12px rgba(0,0,0,0.3);
       --shadow-hover: 0 6px 24px rgba(0,0,0,0.4);
 
@@ -112,7 +115,7 @@
     .upload-zone {
       background: var(--surface); border: 2px dashed var(--border);
       border-radius: var(--radius); padding: 16px 20px;
-      display: flex; align-items: center; gap: 12px; text-align: left;
+      display: flex; align-items: center; justify-content: center; gap: 12px; text-align: center;
       cursor: pointer; transition: border-color 0.3s, background 0.3s;
       max-width: 480px; margin: 0 auto 20px;
     }
@@ -125,12 +128,12 @@
     .upload-zone input[type="file"] { display: none; }
 
     .upload-info {
-      background: var(--accent-light); border: 1px solid var(--accent);
-      border-radius: 8px; padding: 10px 16px;
-      max-width: 480px; margin: 0 auto 20px;
-      font-size: 13px; display: flex; align-items: center; gap: 8px;
+      background: var(--accent-light); border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 10px;
+      max-width: 280px; margin: 0 auto 10px;
+      font-size: 11px; display: flex; align-items: center; gap: 4px;
     }
-    .upload-info .check { color: var(--green); font-weight: 700; }
+    .upload-info .check { color: var(--green); font-weight: 700; font-size: 10px; }
 
     /* Surgeon selector */
     .controls {
@@ -147,17 +150,72 @@
       color: var(--text); background: var(--surface);
       transition: border-color 0.2s, box-shadow 0.2s; min-width: 200px; max-width: 320px;
     }
-    .unit-badges { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-    .unit-badge {
-      display: inline-block; font-size: 10px; font-weight: 700;
-      padding: 3px 10px; border-radius: 999px;
-      background: var(--accent-light); color: var(--accent);
-      border: 1px solid var(--accent); letter-spacing: 0.3px;
-      text-transform: uppercase;
+    .export-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .export-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .export-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600;
+      border-radius: 6px; padding: 5px 12px; cursor: pointer;
+      transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+    }
+    .export-btn-ics, .export-btn-pdf {
+      color: var(--text-muted); background: var(--surface);
+      border: 1.5px solid var(--border);
+    }
+    .export-btn-ics:hover, .export-btn-pdf:hover {
+      border-color: var(--accent); color: var(--accent); background: var(--accent-light);
+    }
+    .export-menu {
+      display: flex; gap: 4px; align-items: center; margin-top: 4px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 4px 8px; box-shadow: var(--shadow);
+    }
+    .export-menu-opt {
+      font-size: 11px; font-weight: 600; color: var(--text);
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 4px 10px; cursor: pointer;
+      transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+    }
+    .export-menu-opt:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .export-menu-close {
+      font-size: 14px; color: var(--text-muted); background: none; border: none;
+      cursor: pointer; padding: 2px 6px; line-height: 1;
     }
     .controls select:focus {
       outline: none; border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(26,58,92,0.10);
+    }
+    .custom-select { position: relative; min-width: 200px; max-width: 320px; }
+    .custom-select-btn {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; font-size: 14px; font-family: 'Inter', Arial, sans-serif;
+      color: var(--text); background: var(--surface); cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s; text-align: left;
+    }
+    .custom-select-btn:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,58,92,0.10); }
+    .custom-select-arrow { font-size: 10px; color: var(--text-muted); transition: transform 0.2s; }
+    .custom-select.open .custom-select-arrow { transform: rotate(180deg); }
+    .custom-select-dropdown {
+      display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 200;
+      max-height: 240px; overflow-y: auto; overscroll-behavior: contain;
+    }
+    .custom-select.open .custom-select-dropdown { display: block; }
+    .custom-select-option {
+      padding: 8px 14px; font-size: 13px; cursor: pointer;
+      transition: background 0.15s; border-bottom: 1px solid var(--border-light);
+    }
+    .custom-select-option:last-child { border-bottom: none; }
+    .custom-select-option:hover, .custom-select-option:focus { background: var(--accent-light); }
+    .custom-select-option.selected { color: var(--accent); font-weight: 600; background: var(--accent-light); }
+    [data-theme="dark"] .custom-select-dropdown { box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    @media (max-width: 600px) {
+      .custom-select { min-width: unset; max-width: 260px; width: auto; }
+      .custom-select-btn { padding: 6px 10px; font-size: 13px; }
+      .custom-select-dropdown { max-height: 200px; }
+      .custom-select-option { padding: 7px 12px; font-size: 12px; }
     }
 
     /* Results layout */
@@ -174,6 +232,7 @@
     .calendar-section h2 {
       font-family: 'Lora', serif; font-size: 1rem; color: var(--accent);
       margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+      justify-content: center;
     }
     .cal-nav {
       display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
@@ -270,6 +329,7 @@
     .sparkbar-pct { font-size: 10px; font-weight: 700; min-width: 28px; }
     [data-theme="dark"] .sparkbar { background: var(--border); }
     .perc-info { cursor: help; color: var(--text-light); font-size: 12px; position: relative; text-align: center; }
+    [data-theme="dark"] .perc-info { color: #94a3b8; }
     .perc-info .perc-tip {
       display: none; position: absolute; right: -8px; bottom: calc(100% + 6px);
       background: #1a1a1a; color: #f1f5f9; padding: 10px 14px;
@@ -283,9 +343,10 @@
     /* Retribution section */
     .retrib-section {
       background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 4px;
     }
-    .retrib-section h2 { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent); margin-bottom: 8px; }
+    .retrib-section h2 { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent); margin-bottom: 8px; text-align: center; }
     .retrib-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .retrib-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 5px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
     .retrib-table th:not(:first-child) { text-align: center; }
@@ -311,9 +372,9 @@
       overflow: hidden; text-overflow: ellipsis;
     }
 
-    /* Bottom grid: summary + turns */
+    /* Bottom grid: summary + turns + retrib */
     .bottom-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+      display: grid; grid-template-columns: 1fr 1.4fr 1.2fr; gap: 14px;
     }
 
     /* Summary — compact table */
@@ -324,7 +385,7 @@
     }
     .summary-section h2 {
       font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent);
-      margin-bottom: 0;
+      margin-bottom: 0; text-align: center;
     }
     .summary-toggle {
       display: flex; gap: 4px; margin-bottom: 0; align-items: center;
@@ -370,18 +431,33 @@
     }
     .turns-section h2 {
       font-family: 'Lora', serif; font-size: 1rem; color: var(--accent);
-      margin-bottom: 10px;
+      margin-bottom: 10px; text-align: center;
     }
     .turn-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 5px 0; border-bottom: 1px solid var(--border-light);
-      font-size: 12px;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 12px; cursor: pointer; transition: background 0.2s;
     }
     .turn-row:last-child { border-bottom: none; }
+    .turn-row:hover { background: var(--surface2); }
+    .turn-row-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 5px 0;
+    }
     .turn-week-label { color: var(--text-muted); }
     .turn-week-range { font-size: 10px; color: var(--text-light); margin-left: 4px; }
-    .turn-count { font-weight: 700; color: var(--accent); }
+    .turn-count { font-weight: 700; color: var(--accent); display: inline-flex; align-items: center; gap: 4px; }
     .turn-count-zero { font-weight: 600; color: var(--text-light); }
+    .turn-chevron { font-size: 8px; color: var(--text-light); transition: transform 0.2s; }
+    .turn-row.open .turn-chevron { transform: rotate(180deg); }
+    .turn-days {
+      display: none; padding: 2px 0 6px 8px;
+      font-size: 11px; color: var(--text-muted); line-height: 1.7;
+    }
+    .turn-days .turn-day-item { display: flex; align-items: center; gap: 6px; }
+    .turn-days .turn-day-dot {
+      width: 6px; height: 6px; border-radius: 2px; flex-shrink: 0;
+    }
+    .turn-row.open .turn-days { display: block; }
     .turn-total {
       display: flex; justify-content: space-between; align-items: center;
       padding: 8px 0 0; margin-top: 2px;
@@ -412,14 +488,16 @@
       border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
     }
     .charts-header {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: center;
       padding: 12px 16px; cursor: pointer; transition: background 0.2s;
+      position: relative;
     }
     .charts-header:hover { background: var(--surface2); }
     .charts-header h2 {
       font-family: 'Lora', serif; font-size: 1rem; color: var(--accent); margin: 0;
     }
     .charts-collapse-btn {
+      position: absolute; right: 16px;
       background: var(--surface2); border: 1.5px solid var(--border);
       border-radius: 6px; width: 28px; height: 28px; cursor: pointer;
       font-size: 11px; display: flex; align-items: center; justify-content: center;
@@ -444,6 +522,12 @@
     .chart-card-title {
       font-size: 11px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.5px; color: var(--text-muted);
+    }
+    .radar-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .radar-col { text-align: center; }
+    .radar-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--accent); margin-bottom: 4px;
     }
 
     /* Bubbles chart */
@@ -515,6 +599,35 @@
     .comparador-table tr.highlight .td-pct { font-weight: 700; color: var(--accent); }
     .comparador-table tbody tr:hover td { background: var(--surface2); }
 
+    /* Ranking Gestión list */
+    .rank-gestion-list { display: flex; flex-direction: column; gap: 6px; }
+    .rank-gestion-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; border-radius: 8px;
+      background: var(--surface2); border: 1px solid var(--border-light);
+      cursor: pointer; transition: all 0.2s; position: relative;
+    }
+    .rank-gestion-item:hover { border-color: var(--c-gestion); box-shadow: var(--shadow); }
+    .rank-gestion-item.highlight { border-color: var(--c-gestion); background: var(--c-gestion-light); }
+    .rank-gestion-pos {
+      font-size: 11px; font-weight: 700; color: var(--text-light);
+      min-width: 18px; text-align: center;
+    }
+    .rank-gestion-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+    .rank-gestion-count {
+      font-size: 13px; font-weight: 700; color: var(--c-gestion);
+      background: var(--c-gestion-light); padding: 2px 10px; border-radius: 6px;
+    }
+    .rank-gestion-days {
+      display: none; width: 100%; padding: 6px 0 2px 28px;
+      font-size: 11px; color: var(--text-muted); line-height: 1.6;
+    }
+    .rank-gestion-item.open .rank-gestion-days { display: block; }
+    .rank-gestion-chevron {
+      font-size: 10px; color: var(--text-light); transition: transform 0.2s;
+    }
+    .rank-gestion-item.open .rank-gestion-chevron { transform: rotate(180deg); }
+
     .app-footer { text-align: center; flex-shrink: 0; padding: 24px 0 8px; }
     .app-footer span { font-size: 0.7rem; color: var(--text-light); letter-spacing: 0.03em; }
 
@@ -553,8 +666,35 @@
       .summary-card { padding: 8px 10px; }
       .summary-icon { width: 30px; height: 30px; font-size: 14px; }
       .summary-count { font-size: 17px; }
-      .controls { flex-direction: column; align-items: stretch; }
-      .controls select { min-width: unset; }
+      .controls { flex-direction: column; align-items: center; gap: 4px; margin-bottom: 14px; }
+      .controls select { min-width: unset; padding: 6px 10px; font-size: 13px; max-width: 260px; width: auto; }
+
+      /* Charts mobile */
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .charts-body { padding: 0 6px; }
+      .charts-body.expanded { padding: 0 6px 12px; max-height: 9000px; }
+      .chart-card { padding: 10px; overflow-x: auto; }
+
+      /* Percentiles table: smaller font, scrollable */
+      .perc-table { font-size: 10px; }
+      .perc-table th { padding: 4px 4px; font-size: 8px; }
+      .perc-table td { padding: 3px 4px; }
+      .perc-table td:first-child { font-size: 10px; }
+      .sparkbar { max-width: 50px; }
+      .sparkbar-pct { font-size: 9px; min-width: 24px; }
+      .perc-info .perc-tip { width: 220px; right: 0; }
+
+      /* Ranking Gestión list */
+      .rank-gestion-item { padding: 8px 8px; gap: 6px; flex-wrap: wrap; }
+      .rank-gestion-name { font-size: 12px; }
+      .rank-gestion-count { font-size: 11px; padding: 2px 8px; }
+      .rank-gestion-days { padding-left: 18px; font-size: 10px; }
+
+      /* Comparador table */
+      .comparador-table { font-size: 10px; }
+      .comparador-table th, .comparador-table td { padding: 3px 4px; }
+
+      .radar-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -571,24 +711,40 @@
   <!-- Upload -->
   <div class="upload-zone" id="upload-zone">
     <div class="icon">&#128203;</div>
-    <div class="title">Arrastra el archivo (Excel, ODS, CSV) o haz clic para seleccionar</div>
-    <div class="subtitle">Planning mensual del servicio &middot; .xlsx .xls .ods .csv</div>
+    <div class="title">Insertar archivo</div>
+    <div class="subtitle">.xlsx .xls .ods .csv</div>
     <input type="file" id="file-input" accept=".xlsx,.xls,.ods,.csv">
   </div>
 
   <div class="upload-info" id="upload-info" style="display:none">
     <span class="check">&#10003;</span>
     <span id="upload-summary"></span>
-    <button onclick="resetApp()" style="margin-left:auto; background:none; border:1.5px solid var(--border); border-radius:6px; padding:4px 10px; font-size:11px; cursor:pointer; color:var(--text-muted);">Cambiar archivo</button>
+    <button onclick="resetApp()" style="margin-left:auto; background:none; border:1px solid var(--border); border-radius:4px; padding:2px 8px; font-size:10px; cursor:pointer; color:var(--text-muted);">Cambiar</button>
   </div>
 
   <!-- Controls -->
   <div class="controls" id="controls" style="display:none">
-    <label for="surgeon-select">Cirujano</label>
-    <select id="surgeon-select">
+    <label>Cirujano</label>
+    <div class="custom-select" id="custom-select">
+      <button class="custom-select-btn" id="custom-select-btn" type="button">
+        <span id="custom-select-label">Selecciona un cirujano...</span>
+        <span class="custom-select-arrow">&#9662;</span>
+      </button>
+      <div class="custom-select-dropdown" id="custom-select-dropdown"></div>
+    </div>
+    <select id="surgeon-select" style="display:none">
       <option value="">Selecciona un cirujano...</option>
     </select>
-    <div class="unit-badges" id="unit-badges"></div>
+    <div class="export-group" id="export-group" style="display:none">
+      <span class="export-label">Exportar:</span>
+      <button class="export-btn export-btn-ics" onclick="showExportMenu('ics')" title="Exportar a calendario (.ics)">&#128197; Calendario</button>
+      <button class="export-btn export-btn-pdf" onclick="showExportMenu('pdf')" title="Exportar a PDF">&#128196; PDF</button>
+    </div>
+    <div class="export-menu" id="export-menu" style="display:none">
+      <button class="export-menu-opt" id="export-opt-month" onclick="doExport('month')"></button>
+      <button class="export-menu-opt" id="export-opt-all" onclick="doExport('all')"></button>
+      <button class="export-menu-close" onclick="closeExportMenu()">&times;</button>
+    </div>
   </div>
 
   <!-- Results -->
@@ -627,18 +783,17 @@
         </div>
         <div id="turns-content"></div>
       </div>
-    </div>
-    <!-- Retribution -->
-    <div class="retrib-section" id="retrib-section">
-      <h2>&#128176; Retribuci&oacute;n Guardias</h2>
-      <div class="toggle-btns" id="retrib-toggle">
-        <button class="active" data-mode="contaje">Contaje</button>
-        <button data-mode="bruto">Bruto</button>
-        <button data-mode="neto">Neto</button>
-      </div>
-      <div id="retrib-content"></div>
-      <div class="retrib-footer">
-        <a id="retrib-calc-link" class="retrib-calc-link" href="https://jmacot.github.io/calculadora-guardias/" target="_blank">&#129518; Abrir Calculadora</a>
+      <div class="retrib-section" id="retrib-section">
+        <h2>&#128176; Retribuci&oacute;n Guardias</h2>
+        <div class="toggle-btns" id="retrib-toggle">
+          <button class="active" data-mode="contaje">Contaje</button>
+          <button data-mode="bruto">Bruto</button>
+          <button data-mode="neto">Neto</button>
+        </div>
+        <div id="retrib-content"></div>
+        <div class="retrib-footer">
+          <a id="retrib-calc-link" class="retrib-calc-link" href="https://jmacot.github.io/calculadora-guardias/" target="_blank">&#129518; Abrir Calculadora</a>
+        </div>
       </div>
     </div>
     <!-- Dashboard Stats -->
@@ -662,7 +817,16 @@
           </div>
           <div class="chart-card dash-wide" id="card-radar">
             <div class="chart-card-title">Perfil del Cirujano</div>
-            <div style="max-width:450px;margin:0 auto"><canvas id="canvas-radar"></canvas></div>
+            <div class="radar-grid">
+              <div class="radar-col">
+                <div class="radar-label">Mes</div>
+                <canvas id="canvas-radar"></canvas>
+              </div>
+              <div class="radar-col">
+                <div class="radar-label">Total</div>
+                <canvas id="canvas-radar-total"></canvas>
+              </div>
+            </div>
           </div>
           <!-- Row 2: Comparativa -->
           <div class="chart-card" id="card-comparativa">
@@ -703,7 +867,7 @@
           <!-- Row 4: Global -->
           <div class="chart-card" id="card-ranking-gestion">
             <div class="chart-card-title">Ranking Gesti&oacute;n</div>
-            <canvas id="canvas-ranking-gestion"></canvas>
+            <div id="ranking-gestion-content"></div>
           </div>
           <div class="chart-card" id="card-ranking-turnos">
             <div class="chart-card-title">Ranking Actividad Total</div>
@@ -802,7 +966,33 @@ function isHoliday(y, m, d) {
 }
 function isNonWorkingDay(y, m, d) {
   const dow = new Date(y, m, d).getDay();
-  return dow === 0 || dow === 6 || isHoliday(y, m, d);
+  return dow === 0 || dow === 6 || isHoliday(y, m, d) || isInferredHoliday(y, m, d);
+}
+
+// Detect inferred holidays: weekdays where the entire service only has guardia/saliente/localizado
+const inferredHolidays = new Set();
+function buildInferredHolidays() {
+  inferredHolidays.clear();
+  if (!parsedData) return;
+  const workActivities = new Set(['qui_m', 'qui_t', 'cons_m', 'cons_t', 'diferida', 'diferida_t', 'gestion', 'rucot']);
+  const dayActivities = {};
+  for (const id of Object.keys(parsedData).map(Number)) {
+    for (const e of parsedData[id]) {
+      const key = `${e.year}-${e.month}-${e.day}`;
+      if (!dayActivities[key]) dayActivities[key] = { year: e.year, month: e.month, day: e.day, hasWork: false };
+      if (workActivities.has(e.activity)) dayActivities[key].hasWork = true;
+    }
+  }
+  for (const key of Object.keys(dayActivities)) {
+    const d = dayActivities[key];
+    const dow = new Date(d.year, d.month, d.day).getDay();
+    if (dow >= 1 && dow <= 5 && !d.hasWork && !isHoliday(d.year, d.month, d.day)) {
+      inferredHolidays.add(key);
+    }
+  }
+}
+function isInferredHoliday(y, m, d) {
+  return inferredHolidays.has(`${y}-${m}-${d}`);
 }
 
 let parsedData = null;   // { surgeonId: [{ date, month, year, dayOfWeek, activity }] }
@@ -813,7 +1003,8 @@ let availableMonths = [];
 let summaryMode = 'month'; // 'month' or 'total'
 let currentJornada = 100;  // 100, 80, or 60
 let chartsExpanded = false;
-let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null, radar: null, morningAfternoon: null, festivos: null };
+let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null, radar: null, radarTotal: null, morningAfternoon: null, festivos: null };
+let pendingExportType = null; // 'ics' or 'pdf'
 let loadedFileName = '';
 
 // ─────────────────────────────────────────────
@@ -1363,6 +1554,9 @@ function parseWorksheet(ws) {
     currentYear = availableMonths[0].year;
   }
 
+  // Build inferred holidays from parsed data
+  buildInferredHolidays();
+
   // Populate UI
   showUploadSuccess();
   populateSurgeonSelect();
@@ -1386,23 +1580,61 @@ function populateSurgeonSelect() {
     opt.textContent = `T${id} \u2014 ${name}`;
     select.appendChild(opt);
   }
+  populateCustomSelect();
 }
+
+// ─────────────────────────────────────────────
+//  CUSTOM SELECT DROPDOWN
+// ─────────────────────────────────────────────
+function populateCustomSelect() {
+  const select = document.getElementById('surgeon-select');
+  const dropdown = document.getElementById('custom-select-dropdown');
+  const label = document.getElementById('custom-select-label');
+  dropdown.innerHTML = '';
+  for (const opt of select.options) {
+    const div = document.createElement('div');
+    div.className = 'custom-select-option';
+    div.dataset.value = opt.value;
+    div.textContent = opt.textContent;
+    if (opt.value === select.value) div.classList.add('selected');
+    div.addEventListener('click', function() {
+      select.value = this.dataset.value;
+      select.dispatchEvent(new Event('change', {bubbles: true}));
+      label.textContent = this.textContent;
+      dropdown.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+      this.classList.add('selected');
+      document.getElementById('custom-select').classList.remove('open');
+    });
+    dropdown.appendChild(div);
+  }
+  label.textContent = select.options[select.selectedIndex]?.textContent || 'Selecciona un cirujano...';
+}
+
+(function() {
+  const wrap = document.getElementById('custom-select');
+  const btn = document.getElementById('custom-select-btn');
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    wrap.classList.toggle('open');
+  });
+  document.addEventListener('click', function(e) {
+    if (!wrap.contains(e.target)) wrap.classList.remove('open');
+  });
+})()
 
 // ─────────────────────────────────────────────
 //  SURGEON SELECT & RENDER
 // ─────────────────────────────────────────────
 document.getElementById('surgeon-select').addEventListener('change', function() {
   const id = parseInt(this.value, 10);
-  const badgesEl = document.getElementById('unit-badges');
+  const exportGroup = document.getElementById('export-group');
+  closeExportMenu();
   if (isNaN(id)) {
     document.getElementById('results').classList.remove('visible');
-    badgesEl.innerHTML = '';
+    exportGroup.style.display = 'none';
     return;
   }
-  const units = SURGEON_UNITS[id];
-  badgesEl.innerHTML = (units && units.length > 0)
-    ? units.map(u => `<span class="unit-badge">${u}</span>`).join('')
-    : '';
+  exportGroup.style.display = 'flex';
   renderResults(id);
 });
 
@@ -1514,11 +1746,12 @@ function renderCalendar(surgeonId) {
 
     const tooltip = actKeys.map(a => ACTIVITIES[a]?.label || a).join(' + ');
 
-    // Festive detection: official holidays get gradient, weekends just center
+    // Festive detection: official holidays + inferred holidays get gradient, weekends just center
     const jsDay = new Date(currentYear, currentMonth, d).getDay();
     const isWeekend = (jsDay === 0 || jsDay === 6);
     const isOfficialHoliday = isHoliday(currentYear, currentMonth, d);
-    const festiveClass = isOfficialHoliday ? ' festive' : (isWeekend ? ' weekend' : '');
+    const isInferred = isInferredHoliday(currentYear, currentMonth, d);
+    const festiveClass = (isOfficialHoliday || isInferred) ? ' festive' : (isWeekend ? ' weekend' : '');
 
     html += `<div class="cal-cell has-activity${festiveClass}" title="${tooltip}">`;
     html += `<span class="day-num">${d}</span>`;
@@ -1684,20 +1917,49 @@ function renderTurns(surgeonId) {
   let totalExpected = 0;
   let html = '';
 
+  const dayNames = ['Dom', 'Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b'];
+
   weeks.forEach((w, i) => {
-    const weekTurns = entries.filter(e => e.day >= w.start && e.day <= w.end).length;
+    const weekEntries = entries.filter(e => {
+      if (e.day < w.start || e.day > w.end) return false;
+      if (e.activity === 'localizado') return false;
+      const dow = new Date(currentYear, currentMonth, e.day).getDay();
+      return dow >= 1 && dow <= 5;
+    });
+    const weekTurns = weekEntries.length;
     totalTurns += weekTurns;
     const workdays = countWorkdays(w.start, w.end);
     totalExpected += turnsPerFullWeek * workdays / 5;
 
+    // Group entries by day for detail view
+    const byDay = {};
+    weekEntries.forEach(e => {
+      if (!byDay[e.day]) byDay[e.day] = [];
+      byDay[e.day].push(e.activity);
+    });
+    const sortedDays = Object.keys(byDay).map(Number).sort((a, b) => a - b);
+    let daysHtml = '';
+    for (const d of sortedDays) {
+      const dow = new Date(currentYear, currentMonth, d).getDay();
+      const acts = byDay[d].map(a => {
+        const info = ACTIVITIES[a];
+        return info ? `<span class="turn-day-dot" style="background:${info.color}"></span>${info.label}` : a;
+      }).join(', ');
+      daysHtml += `<div class="turn-day-item">${dayNames[dow]} ${d}: ${acts}</div>`;
+    }
+
     const countClass = weekTurns > 0 ? 'turn-count' : 'turn-count-zero';
+    const chevron = weekTurns > 0 ? '<span class="turn-chevron">\u25BC</span>' : '';
     html += `
-      <div class="turn-row">
-        <span>
-          <span class="turn-week-label">Semana ${i + 1}</span>
-          <span class="turn-week-range">(${w.start}-${w.end})</span>
-        </span>
-        <span class="${countClass}">${weekTurns} turno${weekTurns !== 1 ? 's' : ''}</span>
+      <div class="turn-row${weekTurns > 0 ? '' : ''}" ${weekTurns > 0 ? 'onclick="this.classList.toggle(\'open\')"' : ''}>
+        <div class="turn-row-header">
+          <span>
+            <span class="turn-week-label">Semana ${i + 1}</span>
+            <span class="turn-week-range">(${w.start}-${w.end})</span>
+          </span>
+          <span class="${countClass}">${weekTurns} turno${weekTurns !== 1 ? 's' : ''} ${chevron}</span>
+        </div>
+        ${weekTurns > 0 ? `<div class="turn-days">${daysHtml}</div>` : ''}
       </div>`;
   });
 
@@ -2030,20 +2292,98 @@ function renderRadarChart(surgeonId) {
         {
           label: surgeonName,
           data: surgeonVals,
-          backgroundColor: 'rgba(26,58,92,0.25)',
-          borderColor: '#1a3a5c',
+          backgroundColor: isDark ? 'rgba(96,165,250,0.30)' : 'rgba(26,58,92,0.25)',
+          borderColor: isDark ? '#60a5fa' : '#1a3a5c',
           borderWidth: 2,
-          pointBackgroundColor: '#1a3a5c',
+          pointBackgroundColor: isDark ? '#60a5fa' : '#1a3a5c',
           pointRadius: 3
         },
         {
           label: 'Media servicio',
           data: avgVals,
-          backgroundColor: isDark ? 'rgba(148,163,184,0.15)' : 'rgba(107,107,107,0.12)',
-          borderColor: isDark ? '#64748b' : '#9ca3af',
+          backgroundColor: isDark ? 'rgba(251,191,36,0.15)' : 'rgba(107,107,107,0.12)',
+          borderColor: isDark ? '#fbbf24' : '#9ca3af',
           borderWidth: 1.5,
           borderDash: [4, 4],
-          pointBackgroundColor: isDark ? '#64748b' : '#9ca3af',
+          pointBackgroundColor: isDark ? '#fbbf24' : '#9ca3af',
+          pointRadius: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          ticks: { stepSize: 1, color: theme.textColor, font: { size: 9 }, backdropColor: 'transparent' },
+          grid: { color: theme.gridColor },
+          angleLines: { color: theme.gridColor },
+          pointLabels: { color: theme.textColor, font: { size: 10, weight: '500', family: "'Inter',sans-serif" } }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: theme.textColor, font: { family: "'Inter',sans-serif", size: 11 }, padding: 12, usePointStyle: true }
+        },
+        tooltip: makeTooltipOpts(theme)
+      }
+    }
+  });
+}
+
+// ── Radar — Perfil Total ──
+function renderRadarTotalChart(surgeonId) {
+  const ctx = document.getElementById('canvas-radar-total').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.radarTotal) { chartInstances.radarTotal.destroy(); chartInstances.radarTotal = null; }
+
+  const radarMetrics = [
+    { label: 'Guardias', fn: e => e.activity === 'guardia' },
+    { label: 'Qx Ma\u00f1ana', fn: e => e.activity === 'qui_m' },
+    { label: 'Qx Tarde', fn: e => e.activity === 'qui_t' },
+    { label: 'Consultas M', fn: e => e.activity === 'cons_m' },
+    { label: 'Consultas T', fn: e => e.activity === 'cons_t' },
+    { label: 'Gesti\u00f3n', fn: e => e.activity === 'gestion' },
+    { label: 'Localizados', fn: e => e.activity === 'localizado' },
+    { label: 'Diferida', fn: e => e.activity === 'diferida' || e.activity === 'diferida_t' }
+  ];
+
+  const allIds = Object.keys(parsedData).map(Number);
+  const surgeonName = getSurnameOf(surgeonId);
+
+  // ALL entries (not just current month)
+  const surgeonVals = radarMetrics.map(m => (parsedData[surgeonId] || []).filter(m.fn).length);
+  const avgVals = radarMetrics.map(m => {
+    const total = allIds.reduce((sum, id) => sum + (parsedData[id] || []).filter(m.fn).length, 0);
+    return Math.round((total / allIds.length) * 10) / 10;
+  });
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+  chartInstances.radarTotal = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: radarMetrics.map(m => m.label),
+      datasets: [
+        {
+          label: surgeonName,
+          data: surgeonVals,
+          backgroundColor: isDark ? 'rgba(96,165,250,0.30)' : 'rgba(26,58,92,0.25)',
+          borderColor: isDark ? '#60a5fa' : '#1a3a5c',
+          borderWidth: 2,
+          pointBackgroundColor: isDark ? '#60a5fa' : '#1a3a5c',
+          pointRadius: 3
+        },
+        {
+          label: 'Media servicio',
+          data: avgVals,
+          backgroundColor: isDark ? 'rgba(251,191,36,0.15)' : 'rgba(107,107,107,0.12)',
+          borderColor: isDark ? '#fbbf24' : '#9ca3af',
+          borderWidth: 1.5,
+          borderDash: [4, 4],
+          pointBackgroundColor: isDark ? '#fbbf24' : '#9ca3af',
           pointRadius: 2
         }
       ]
@@ -2311,36 +2651,42 @@ function renderRankingLocalizadosChart(surgeonId) {
   });
 }
 
-// ── Ranking Gestión (global) ──
+// ── Ranking Gestión (global, list with day details) ──
 function renderRankingGestionChart(surgeonId) {
-  const ctx = document.getElementById('canvas-ranking-gestion').getContext('2d');
-  const theme = getChartTheme();
-  if (chartInstances.rankGestion) chartInstances.rankGestion.destroy();
+  const container = document.getElementById('ranking-gestion-content');
 
-  const counts = {};
+  const dayNames = ['Dom', 'Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b'];
+  const gestionData = {};
   for (const id of Object.keys(parsedData).map(Number)) {
-    const g = getMonthEntries(id).filter(e => e.activity === 'gestion').length;
-    if (g > 0) counts[id] = g;
+    const entries = getMonthEntries(id).filter(e => e.activity === 'gestion');
+    if (entries.length > 0) {
+      gestionData[id] = entries.map(e => {
+        const dow = new Date(e.year, e.month, e.day).getDay();
+        return { day: e.day, dowName: dayNames[dow] };
+      }).sort((a, b) => a.day - b.day);
+    }
   }
-  const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
+  const sorted = Object.keys(gestionData).map(Number)
+    .sort((a, b) => gestionData[b].length - gestionData[a].length);
+
   if (sorted.length === 0) { document.getElementById('card-ranking-gestion').style.display = 'none'; return; }
   document.getElementById('card-ranking-gestion').style.display = '';
-  const labels = sorted.map(id => getSurnameOf(id));
-  const data = sorted.map(id => counts[id]);
-  const colors = sorted.map(id => id === surgeonId ? '#ca8a04' : theme.mutedBarColor);
 
-  chartInstances.rankGestion = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Gesti\u00f3n', data, backgroundColor: colors, borderRadius: 4 }] },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      scales: {
-        y: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
-        x: { ticks: { color: theme.textColor, font: { size: 10 }, maxRotation: 45 }, grid: { display: false } }
-      },
-      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
-    }
+  let html = '<div class="rank-gestion-list">';
+  sorted.forEach((id, i) => {
+    const days = gestionData[id];
+    const isMe = id === surgeonId;
+    const daysStr = days.map(d => `${d.dowName} ${d.day}`).join(', ');
+    html += `<div class="rank-gestion-item${isMe ? ' highlight' : ''}" onclick="this.classList.toggle('open')">
+      <span class="rank-gestion-pos">${i + 1}</span>
+      <span class="rank-gestion-name">${getSurnameOf(id)}</span>
+      <span class="rank-gestion-count">${days.length} d\u00eda${days.length !== 1 ? 's' : ''}</span>
+      <span class="rank-gestion-chevron">\u25BC</span>
+      <div class="rank-gestion-days">${daysStr}</div>
+    </div>`;
   });
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 // ── Ranking Actividad Total (global) ──
@@ -2449,7 +2795,7 @@ function renderFestivosChart(surgeonId) {
       const key = `${e.year}-${e.month}-${e.day}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      if (isHoliday(e.year, e.month, e.day)) fiestas++;
+      if (isHoliday(e.year, e.month, e.day) || isInferredHoliday(e.year, e.month, e.day)) fiestas++;
       else {
         const dow = new Date(e.year, e.month, e.day).getDay();
         if (dow === 0 || dow === 6) fines++;
@@ -2520,29 +2866,31 @@ function buildComparadorHeader(firstCol) {
     <thead>
       <tr>
         <th rowspan="2">${firstCol}</th>
-        <th colspan="4" class="th-group th-group-qx">Quir\u00f3fano</th>
-        <th colspan="4" class="th-group th-group-cons">Consultas</th>
+        <th colspan="5" class="th-group th-group-qx">Quir\u00f3fano</th>
+        <th colspan="5" class="th-group th-group-cons">Consultas</th>
         <th rowspan="2" class="th-group th-group-gest">Gesti\u00f3n</th>
       </tr>
       <tr>
         <th class="th-sub">Ma\u00f1</th><th class="th-sub">Tarde</th>
-        <th class="th-sub">Total</th><th class="th-sub">%</th>
+        <th class="th-sub">Total</th><th class="th-sub">%M</th><th class="th-sub">%T</th>
         <th class="th-sub">Ma\u00f1</th><th class="th-sub">Tarde</th>
-        <th class="th-sub">Total</th><th class="th-sub">%</th>
+        <th class="th-sub">Total</th><th class="th-sub">%M</th><th class="th-sub">%T</th>
       </tr>
     </thead><tbody>`;
 }
 
 function buildComparadorRow(label, c, isHighlight, grandQx, grandCons) {
   const hl = isHighlight ? ' class="highlight"' : '';
-  const qxPct = grandQx > 0 ? Math.round(c.qxTotal / grandQx * 100) : 0;
-  const consPct = grandCons > 0 ? Math.round(c.consTotal / grandCons * 100) : 0;
+  const qxMPct = c.qxTotal > 0 ? Math.round(c.qxM / c.qxTotal * 100) : 0;
+  const qxTPct = c.qxTotal > 0 ? Math.round(c.qxT / c.qxTotal * 100) : 0;
+  const consMPct = c.consTotal > 0 ? Math.round(c.consM / c.consTotal * 100) : 0;
+  const consTPct = c.consTotal > 0 ? Math.round(c.consT / c.consTotal * 100) : 0;
   return `<tr${hl}>
     <td>${label}</td>
     <td>${c.qxM}</td><td>${c.qxT}</td>
-    <td class="td-total">${c.qxTotal}</td><td class="td-pct">${qxPct}%</td>
+    <td class="td-total">${c.qxTotal}</td><td class="td-pct">${qxMPct}%</td><td class="td-pct">${qxTPct}%</td>
     <td>${c.consM}</td><td>${c.consT}</td>
-    <td class="td-total">${c.consTotal}</td><td class="td-pct">${consPct}%</td>
+    <td class="td-total">${c.consTotal}</td><td class="td-pct">${consMPct}%</td><td class="td-pct">${consTPct}%</td>
     <td>${c.gestion}</td>
   </tr>`;
 }
@@ -2596,6 +2944,7 @@ function renderCharts(surgeonId) {
     renderBubblesChart(surgeonId);
     renderPercentilesCard(surgeonId);
     renderRadarChart(surgeonId);
+    renderRadarTotalChart(surgeonId);
     renderUnitComparisonChart(surgeonId);
     renderComparadorChart(surgeonId);
     renderQxUnitChart(surgeonId);
@@ -2662,6 +3011,521 @@ document.querySelectorAll('#comparador-toggle button').forEach(btn => {
     if (!isNaN(sid) && chartsExpanded) renderComparadorChart(sid);
   });
 });
+
+// ─────────────────────────────────────────────
+//  EXPORT: Menu logic
+// ─────────────────────────────────────────────
+function showExportMenu(type) {
+  pendingExportType = type;
+  const menu = document.getElementById('export-menu');
+  const monthName = MONTH_NAMES[currentMonth];
+  document.getElementById('export-opt-month').textContent = `Solo ${monthName}`;
+  document.getElementById('export-opt-all').textContent = 'Todos los meses';
+  menu.style.display = 'flex';
+}
+function closeExportMenu() {
+  document.getElementById('export-menu').style.display = 'none';
+  pendingExportType = null;
+}
+function doExport(scope) {
+  const type = pendingExportType;
+  closeExportMenu();
+  if (type === 'ics') exportICS(scope);
+  else if (type === 'pdf') exportPDF(scope);
+}
+
+// ─────────────────────────────────────────────
+//  EXPORT: ICS (iCalendar)
+// ─────────────────────────────────────────────
+function exportICS(scope) {
+  const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+  if (isNaN(sid) || !parsedData[sid]) return;
+
+  const entries = scope === 'all'
+    ? (parsedData[sid] || [])
+    : getMonthEntries(sid);
+  if (!entries.length) { mostrarToast('No hay datos para exportar'); return; }
+
+  const surgeonName = SURGEONS[sid] || `T${sid}`;
+  const surname = getSurnameOf(sid);
+  const units = SURGEON_UNITS[sid];
+  const unitStr = units ? units.join(', ') : '';
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function icsDate(y, m, d) { return `${y}${pad2(m + 1)}${pad2(d)}`; }
+  function icsDateTime(y, m, d, h, min) { return `${y}${pad2(m + 1)}${pad2(d)}T${pad2(h)}${pad2(min)}00`; }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  let ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//COT Planning//ES\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:Planning ${surname}\r\n`;
+
+  for (const e of entries) {
+    const info = ACTIVITIES[e.activity];
+    if (!info) continue;
+    const title = info.tag;
+    let desc = `Cirujano: ${surgeonName}`;
+    if (unitStr) desc += `\\nUnidad: ${unitStr}`;
+    if (e.companions && e.companions.length > 0) {
+      const compNames = e.companions.map(cid => SURGEONS[cid] || `T${cid}`).join(', ');
+      desc += `\\nCompa\u00f1ero: ${compNames}`;
+    }
+
+    ics += `BEGIN:VEVENT\r\n`;
+    ics += `UID:${uid()}@cot-planning\r\n`;
+    ics += `SUMMARY:${title}\r\n`;
+    ics += `DESCRIPTION:${desc}\r\n`;
+    ics += `LOCATION:Hospital San Juan de Dios del Aljarafe\r\n`;
+
+    if (info.period === 'morning') {
+      ics += `DTSTART:${icsDateTime(e.year, e.month, e.day, 8, 0)}\r\n`;
+      ics += `DTEND:${icsDateTime(e.year, e.month, e.day, 15, 0)}\r\n`;
+    } else if (info.period === 'afternoon') {
+      ics += `DTSTART:${icsDateTime(e.year, e.month, e.day, 15, 30)}\r\n`;
+      ics += `DTEND:${icsDateTime(e.year, e.month, e.day, 20, 30)}\r\n`;
+    } else {
+      ics += `DTSTART;VALUE=DATE:${icsDate(e.year, e.month, e.day)}\r\n`;
+      ics += `DTEND;VALUE=DATE:${icsDate(e.year, e.month, e.day + 1)}\r\n`;
+    }
+    ics += `END:VEVENT\r\n`;
+  }
+  ics += `END:VCALENDAR\r\n`;
+
+  const fileName = scope === 'all'
+    ? `Planning_${surname}_Total.ics`
+    : `Planning_${surname}_${MONTH_NAMES[currentMonth]}_${currentYear}.ics`;
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  mostrarToast(`\u2713 Exportado ${entries.length} eventos`);
+}
+
+// ─────────────────────────────────────────────
+//  EXPORT: PDF (html2canvas + jsPDF)
+// ─────────────────────────────────────────────
+const HSJD_LOGO = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAFcAWYDASIAAhEBAxEB/8QAHAABAAICAwEAAAAAAAAAAAAAAAEHBggCBAUD/8QASxAAAQMDAwIDBAYFCAgFBQAAAQACAwQFEQYSIQcxE0FRFCJhcQgVMoGRoRcjUrHBFiQzQlWSotEmNDU2U2Jy4UN0k/DxJWRzg6L/xAAbAQEAAgMBAQAAAAAAAAAAAAAABQYBAwQHAv/EADYRAAEEAgECBAQEBQQDAQAAAAEAAgMEBRExEiEGE0FRFCIygWFxkaEVFiM0sTNCUtEkNfDB/9oADAMBAAIRAxEAPwDctEREREREREREREREREREREREREREREUH5qR2UHv2UlEUdlKjPCZRYUooymUWVKBRlAsIpREWURERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERAieaIq+6s6zrdKPoxSsY/wAcHO4ZWBfpku/9nj/uhen9Jb+ktfycqZV0xGMrT1Wve3ZXnOezFutddHG7QCtP9Mt3/s8f90J+mW7/ANnj/uhVYikv4LT/AOChv5hv/wDNbDdL9eVuqLjJTVMTGtY3OQFZeFQX0eP9uVH/AE/wV+hUzLwMgsljBoL0TAWZLNRskh2SgRPNFGKbREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREUEnKIpRRlSiInmozynmiKlfpLf0lr+TlTKub6SuS+2fJypheh4H+yb915L4n/9i/7KURFMKvq1Po8f7cqP+n+Cv0Kgvo7/AO3ajP7B/cr8BXnue/u3L1fwv/YNU+aIoB9VDKxqUTKZREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREREUFSociwVgGreplBp28y26ekkkfHjJB9V5P6aLV/YpR96rzraf9PKwfBv7lhBxgK50cLVmga947ledZLxHcr2XxsI0PwV9fpntP9il/Fcf01WnOPYJvxVDY4QY811/y/T9j+q4T4qyHuP0We9V9aUuq3UhpoXxeCDncsCRxz2UKVq1mVoxGzgKEu3JLcxkk5KlERdC5FmXTDVVNpe4SVFRG6QObgBqskdZ7UB/qUp+9UGQFyb5qKs4ivZkL5B3U5Sz1uowRRnsFfTetFpJ/1KX8UPWe0/2KX8VQnnwo88Ln/l+p7H9V1fzXf9x+i2T0j1KoNQ3mK2wUsjHyAkOJ4GAT/BZ8Oy1p6H/7+0fyf/hK2WHYBVXLVWVZ+hnCvGBvS3a3mScqURFFqcRERERERERERERERERERERERERERERERERERERERERERERERERERERERERQ5Sod2RCtZ+t4P8vaz5N/csHWcdbTnXdZz5N/csGPK9KxW/hGfkvGs2B8dJ+aDupGMIQAO6bfipBReiE+zhHclD80TvtZ9NIiIsr5QAk4UEFEWE7eqkcI3ug5PKOLQE9V9a7bWddEedfUfyf/AICtlh5fJa1dDv8Afyi+T/8AAVsq3sFQvEP939l6h4U/sv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';
+
+let pdfLibsLoaded = false;
+function loadPdfLibs() {
+  if (pdfLibsLoaded) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    s.onload = () => { pdfLibsLoaded = true; resolve(); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function addPdfHeader(pdf, surgeonName, subtitle, units) {
+  const pageW = pdf.internal.pageSize.getWidth();
+  // Blue header bar
+  pdf.setFillColor(26, 58, 92);
+  pdf.rect(0, 0, pageW, 22, 'F');
+  // Logo
+  try { pdf.addImage(HSJD_LOGO, 'JPEG', 6, 3, 16, 16); } catch(e) {}
+  // Hospital name
+  pdf.setFontSize(9);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('Hospital San Juan de Dios del Aljarafe', 25, 9);
+  // Servicio
+  pdf.setFontSize(7);
+  pdf.text('Servicio de Cirug\u00eda Ortop\u00e9dica y Traumatolog\u00eda', 25, 14);
+  // Surgeon name right
+  pdf.setFontSize(12);
+  pdf.text(surgeonName, pageW - 15, 10, { align: 'right' });
+  pdf.setFontSize(8);
+  pdf.text(subtitle, pageW - 15, 15, { align: 'right' });
+  if (units) {
+    pdf.setFontSize(7);
+    pdf.text(`Unidad: ${units.join(', ')}`, pageW - 15, 19, { align: 'right' });
+  }
+}
+
+function addPdfFooter(pdf) {
+  const pageW = pdf.internal.pageSize.getWidth();
+  const pageH = pdf.internal.pageSize.getHeight();
+  pdf.setDrawColor(26, 58, 92);
+  pdf.setLineWidth(0.3);
+  pdf.line(10, pageH - 8, pageW - 10, pageH - 8);
+  pdf.setFontSize(7);
+  pdf.setTextColor(120);
+  pdf.text('COT \u2014 Planning Analyzer', 10, pageH - 4);
+  pdf.text(`Exportado: ${new Date().toLocaleDateString('es-ES')}`, pageW - 10, pageH - 4, { align: 'right' });
+}
+
+// PDF color map for activities
+const PDF_COLORS = {
+  diferida: [100,116,139], qui_m: [26,58,92], cons_m: [22,163,74],
+  saliente: [245,158,11], cons_t: [13,148,136], qui_t: [59,130,246],
+  guardia: [220,38,38], localizado: [124,58,237], gestion: [202,138,4],
+  diferida_t: [100,116,139], rucot: [225,29,72]
+};
+
+function pdfDrawDayList(pdf, entries, startY, pageW) {
+  const dayNames = ['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
+  let y = startY;
+  const pageH = pdf.internal.pageSize.getHeight();
+  const mx = 10;
+  const colW = pageW - 20;
+
+  // Group entries by day
+  const byDay = {};
+  for (const e of entries) {
+    const key = e.day;
+    if (!byDay[key]) byDay[key] = [];
+    byDay[key].push(e);
+  }
+  const days = Object.keys(byDay).map(Number).sort((a,b) => a - b);
+
+  // Table header
+  pdf.setFillColor(26, 58, 92);
+  pdf.rect(mx, y, colW, 6, 'F');
+  pdf.setFontSize(7); pdf.setTextColor(255);
+  pdf.text('D\u00eda', mx + 2, y + 4);
+  pdf.text('Ma\u00f1ana', mx + 22, y + 4);
+  pdf.text('Tarde', mx + 80, y + 4);
+  pdf.text('Todo el d\u00eda', mx + 138, y + 4);
+  pdf.text('Compa\u00f1eros', mx + 190, y + 4);
+  y += 6;
+
+  for (const d of days) {
+    const items = byDay[d];
+    if (y > pageH - 14) {
+      addPdfFooter(pdf); pdf.addPage(); y = 10;
+    }
+    const dow = new Date(items[0].year, items[0].month, d).getDay();
+    const isWknd = dow === 0 || dow === 6;
+    const rowH = 5;
+
+    // Zebra + weekend tint
+    if (isWknd) { pdf.setFillColor(245, 245, 250); pdf.rect(mx, y, colW, rowH, 'F'); }
+    else if (d % 2 === 0) { pdf.setFillColor(248, 249, 251); pdf.rect(mx, y, colW, rowH, 'F'); }
+
+    // Day number + name
+    pdf.setFontSize(7); pdf.setTextColor(34);
+    const dayLabel = `${String(d).padStart(2,' ')} ${dayNames[dow]}`;
+    if (isWknd) { pdf.setTextColor(180,50,50); }
+    pdf.text(dayLabel, mx + 2, y + 3.5);
+    pdf.setTextColor(34);
+
+    // Morning
+    const mornings = items.filter(e => ACTIVITIES[e.activity] && ACTIVITIES[e.activity].period === 'morning');
+    let xm = mx + 22;
+    for (const it of mornings) {
+      const info = ACTIVITIES[it.activity];
+      const c = PDF_COLORS[it.activity] || [100,100,100];
+      const tw = pdf.getTextWidth(info.tag) + 4;
+      pdf.setFillColor(c[0], c[1], c[2]); pdf.roundedRect(xm, y + 0.5, tw, 4, 1, 1, 'F');
+      pdf.setFontSize(6); pdf.setTextColor(255); pdf.text(info.tag, xm + 2, y + 3.3);
+      xm += tw + 1;
+    }
+
+    // Afternoon
+    const afternoons = items.filter(e => ACTIVITIES[e.activity] && ACTIVITIES[e.activity].period === 'afternoon');
+    let xa = mx + 80;
+    for (const it of afternoons) {
+      const info = ACTIVITIES[it.activity];
+      const c = PDF_COLORS[it.activity] || [100,100,100];
+      const tw = pdf.getTextWidth(info.tag) + 4;
+      pdf.setFillColor(c[0], c[1], c[2]); pdf.roundedRect(xa, y + 0.5, tw, 4, 1, 1, 'F');
+      pdf.setFontSize(6); pdf.setTextColor(255); pdf.text(info.tag, xa + 2, y + 3.3);
+      xa += tw + 1;
+    }
+
+    // All-day
+    const allday = items.filter(e => ACTIVITIES[e.activity] && ACTIVITIES[e.activity].period === 'allday');
+    let xd = mx + 138;
+    for (const it of allday) {
+      const info = ACTIVITIES[it.activity];
+      const c = PDF_COLORS[it.activity] || [100,100,100];
+      const tw = pdf.getTextWidth(info.tag) + 4;
+      pdf.setFillColor(c[0], c[1], c[2]); pdf.roundedRect(xd, y + 0.5, tw, 4, 1, 1, 'F');
+      pdf.setFontSize(6); pdf.setTextColor(255); pdf.text(info.tag, xd + 2, y + 3.3);
+      xd += tw + 1;
+    }
+
+    // Companions
+    const comps = items.filter(e => e.companions && e.companions.length > 0);
+    if (comps.length > 0) {
+      const compNames = [];
+      for (const it of comps) {
+        for (const cid of it.companions) {
+          const n = SURGEONS[cid]; compNames.push(n ? n.split(' ').pop() : `T${cid}`);
+        }
+      }
+      pdf.setFontSize(6); pdf.setTextColor(100);
+      pdf.text(compNames.join(', '), mx + 190, y + 3.3);
+    }
+
+    y += rowH;
+  }
+  return y;
+}
+
+function pdfDrawStats(pdf, sid, entries, startY, pageW) {
+  let y = startY;
+  const mx = 10;
+  const pageH = pdf.internal.pageSize.getHeight();
+
+  // Summary counts
+  const counts = {};
+  for (const e of entries) {
+    const info = ACTIVITIES[e.activity];
+    if (!info) continue;
+    counts[e.activity] = (counts[e.activity] || 0) + 1;
+  }
+
+  // Section title
+  pdf.setFontSize(9); pdf.setTextColor(26, 58, 92);
+  pdf.text('Resumen de Actividades', mx, y + 4); y += 6;
+
+  // Activity summary table
+  const actKeys = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+  const total = entries.length;
+  const tableW = 90;
+
+  pdf.setFillColor(26, 58, 92); pdf.rect(mx, y, tableW, 5, 'F');
+  pdf.setFontSize(6.5); pdf.setTextColor(255);
+  pdf.text('Actividad', mx + 2, y + 3.5);
+  pdf.text('Turnos', mx + 55, y + 3.5);
+  pdf.text('%', mx + 75, y + 3.5);
+  y += 5;
+
+  for (const key of actKeys) {
+    if (y > pageH - 14) { addPdfFooter(pdf); pdf.addPage(); y = 10; }
+    const info = ACTIVITIES[key]; if (!info) continue;
+    const c = PDF_COLORS[key] || [100,100,100];
+    if (actKeys.indexOf(key) % 2 === 0) { pdf.setFillColor(248, 249, 251); pdf.rect(mx, y, tableW, 4.5, 'F'); }
+    // Color dot
+    pdf.setFillColor(c[0], c[1], c[2]); pdf.circle(mx + 3, y + 2.2, 1.2, 'F');
+    pdf.setFontSize(6.5); pdf.setTextColor(34);
+    pdf.text(info.label, mx + 7, y + 3.2);
+    pdf.text(String(counts[key]), mx + 55, y + 3.2);
+    pdf.text(`${Math.round(counts[key] / total * 100)}%`, mx + 75, y + 3.2);
+    y += 4.5;
+  }
+  // Total row
+  pdf.setFillColor(238, 242, 247); pdf.rect(mx, y, tableW, 5, 'F');
+  pdf.setFontSize(7); pdf.setTextColor(26, 58, 92);
+  pdf.text('TOTAL', mx + 7, y + 3.5);
+  pdf.text(String(total), mx + 55, y + 3.5);
+  y += 7;
+
+  // Turns count by week (same column)
+  const weekEntries = {};
+  for (const e of entries) {
+    const weekNum = Math.ceil(e.day / 7);
+    weekEntries[weekNum] = (weekEntries[weekNum] || 0) + 1;
+  }
+  pdf.setFontSize(9); pdf.setTextColor(26, 58, 92);
+  pdf.text('Contaje Turnos por Semana', mx, y + 4); y += 6;
+  for (const w of Object.keys(weekEntries).sort((a,b) => a - b)) {
+    if (y > pageH - 14) { addPdfFooter(pdf); pdf.addPage(); y = 10; }
+    pdf.setFontSize(6.5); pdf.setTextColor(34);
+    pdf.text(`Semana ${w}`, mx + 2, y + 3);
+    pdf.text(`${weekEntries[w]} turnos`, mx + 30, y + 3);
+    y += 4;
+  }
+  y += 3;
+
+  // Retribution — guardias & localizados
+  const guardiasCount = counts['guardia'] || 0;
+  const localizadosCount = counts['localizado'] || 0;
+  if (guardiasCount > 0 || localizadosCount > 0) {
+    pdf.setFontSize(9); pdf.setTextColor(26, 58, 92);
+    pdf.text('Retribuci\u00f3n Guardias', mx, y + 4); y += 6;
+
+    // Count 17h vs 24h for guardias and localizados
+    let g17 = 0, g24 = 0, l17 = 0, l24 = 0;
+    const gEntries = entries.filter(e => e.activity === 'guardia');
+    const lEntries = entries.filter(e => e.activity === 'localizado');
+    for (const e of gEntries) {
+      const dow = new Date(e.year, e.month, e.day).getDay();
+      if (dow === 0 || dow === 6 || isHoliday(e.year, e.month, e.day) || isInferredHoliday(e.year, e.month, e.day)) g24++; else g17++;
+    }
+    for (const e of lEntries) {
+      const dow = new Date(e.year, e.month, e.day).getDay();
+      if (dow === 0 || dow === 6 || isHoliday(e.year, e.month, e.day) || isInferredHoliday(e.year, e.month, e.day)) l24++; else l17++;
+    }
+
+    pdf.setFillColor(26, 58, 92); pdf.rect(mx, y, tableW, 5, 'F');
+    pdf.setFontSize(6.5); pdf.setTextColor(255);
+    pdf.text('Concepto', mx + 2, y + 3.5);
+    pdf.text('17H', mx + 45, y + 3.5);
+    pdf.text('24H', mx + 60, y + 3.5);
+    pdf.text('Total', mx + 75, y + 3.5);
+    y += 5;
+
+    if (guardiasCount > 0) {
+      pdf.setFontSize(6.5); pdf.setTextColor(34);
+      pdf.text('Guardias', mx + 2, y + 3.2);
+      pdf.text(String(g17), mx + 45, y + 3.2);
+      pdf.text(String(g24), mx + 60, y + 3.2);
+      pdf.text(String(guardiasCount), mx + 75, y + 3.2);
+      y += 4.5;
+    }
+    if (localizadosCount > 0) {
+      pdf.setFontSize(6.5); pdf.setTextColor(34);
+      pdf.text('Localizados', mx + 2, y + 3.2);
+      pdf.text(String(l17), mx + 45, y + 3.2);
+      pdf.text(String(l24), mx + 60, y + 3.2);
+      pdf.text(String(localizadosCount), mx + 75, y + 3.2);
+      y += 4.5;
+    }
+  }
+
+  return y;
+}
+
+async function exportPDF(scope) {
+  const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+  if (isNaN(sid)) return;
+
+  mostrarToast('Generando PDF...');
+
+  try {
+    await loadPdfLibs();
+  } catch (e) {
+    mostrarToast('Error cargando librer\u00edas PDF');
+    return;
+  }
+
+  const surgeonName = SURGEONS[sid] || `T${sid}`;
+  const surname = getSurnameOf(sid);
+  const units = SURGEON_UNITS[sid];
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const pageW = pdf.internal.pageSize.getWidth();
+
+  const monthsToExport = scope === 'all'
+    ? availableMonths
+    : [{ month: currentMonth, year: currentYear }];
+
+  for (let mi = 0; mi < monthsToExport.length; mi++) {
+    const mInfo = monthsToExport[mi];
+    if (mi > 0) pdf.addPage();
+
+    const monthName = MONTH_NAMES[mInfo.month];
+    const subtitle = `${monthName} ${mInfo.year}`;
+    const entries = (parsedData[sid] || []).filter(e => e.month === mInfo.month && e.year === mInfo.year);
+
+    // === PAGE 1: Header + Calendar (visual) ===
+    addPdfHeader(pdf, surgeonName, subtitle, units);
+
+    // Draw calendar grid programmatically
+    const calY = 26;
+    const calMx = 10;
+    const calW = pageW - 20;
+    const cellW = calW / 7;
+    const cellH = 18;
+    const dayLabels = ['L','M','X','J','V','S','D'];
+
+    // Month/Year title
+    pdf.setFontSize(10); pdf.setTextColor(26, 58, 92);
+    pdf.text(`${monthName} ${mInfo.year}`, pageW / 2, calY + 3, { align: 'center' });
+    let cy = calY + 6;
+
+    // Day headers
+    pdf.setFillColor(238, 242, 247);
+    pdf.rect(calMx, cy, calW, 5, 'F');
+    pdf.setFontSize(7); pdf.setTextColor(100);
+    for (let i = 0; i < 7; i++) {
+      pdf.text(dayLabels[i], calMx + i * cellW + cellW / 2, cy + 3.5, { align: 'center' });
+    }
+    cy += 5;
+
+    // Calendar cells
+    const firstDay = new Date(mInfo.year, mInfo.month, 1).getDay();
+    const startCol = firstDay === 0 ? 6 : firstDay - 1;
+    const daysInMonth = new Date(mInfo.year, mInfo.month + 1, 0).getDate();
+
+    // Group entries by day
+    const byDay = {};
+    for (const e of entries) { if (!byDay[e.day]) byDay[e.day] = []; byDay[e.day].push(e); }
+
+    let col = startCol;
+    let rowY = cy;
+
+    // Empty cells before day 1
+    for (let c = 0; c < startCol; c++) {
+      pdf.setDrawColor(230); pdf.rect(calMx + c * cellW, rowY, cellW, cellH);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      if (col === 0 && d > 1) rowY += cellH;
+      const x = calMx + col * cellW;
+
+      // Check if row fits
+      if (rowY + cellH > pdf.internal.pageSize.getHeight() - 12) {
+        addPdfFooter(pdf); pdf.addPage();
+        addPdfHeader(pdf, surgeonName, subtitle + ' (cont.)', units);
+        rowY = 26;
+      }
+
+      const isWknd = col >= 5;
+      const isHol = isHoliday(mInfo.year, mInfo.month, d) || isInferredHoliday(mInfo.year, mInfo.month, d);
+      if (isWknd || isHol) { pdf.setFillColor(252, 248, 248); pdf.rect(x, rowY, cellW, cellH, 'F'); }
+      pdf.setDrawColor(220); pdf.rect(x, rowY, cellW, cellH);
+
+      // Day number
+      pdf.setFontSize(7);
+      pdf.setTextColor(isWknd || isHol ? 180 : 60);
+      pdf.text(String(d), x + 1.5, rowY + 3.5);
+
+      // Activity tags
+      const dayItems = byDay[d] || [];
+      let tagY = rowY + 6;
+      for (const it of dayItems) {
+        const info = ACTIVITIES[it.activity]; if (!info) continue;
+        const c = PDF_COLORS[it.activity] || [100,100,100];
+        const tag = info.tag;
+        pdf.setFontSize(5);
+        const tw = Math.min(pdf.getTextWidth(tag) + 3, cellW - 2);
+        pdf.setFillColor(c[0], c[1], c[2]);
+        pdf.roundedRect(x + 1, tagY, tw, 3.2, 0.6, 0.6, 'F');
+        pdf.setTextColor(255); pdf.text(tag, x + 2.2, tagY + 2.3);
+        tagY += 3.5;
+        if (tagY > rowY + cellH - 1) break;
+      }
+
+      col = (col + 1) % 7;
+    }
+    // Fill remaining cells
+    if (col > 0) { for (let c = col; c < 7; c++) { pdf.setDrawColor(220); pdf.rect(calMx + c * cellW, rowY, cellW, cellH); } }
+
+    addPdfFooter(pdf);
+
+    // === PAGE 2: Day-by-day list ===
+    pdf.addPage();
+    addPdfHeader(pdf, surgeonName, `Listado ${subtitle}`, units);
+
+    let listY = 28;
+    pdf.setFontSize(9); pdf.setTextColor(26, 58, 92);
+    pdf.text(`Listado de Turnos \u2014 ${subtitle}`, 10, listY); listY += 4;
+
+    listY = pdfDrawDayList(pdf, entries, listY, pageW);
+
+    addPdfFooter(pdf);
+
+    // === PAGE 3: Statistics ===
+    pdf.addPage();
+    addPdfHeader(pdf, surgeonName, `Estad\u00edsticas ${subtitle}`, units);
+
+    let statY = 28;
+    statY = pdfDrawStats(pdf, sid, entries, statY, pageW);
+
+    addPdfFooter(pdf);
+  }
+
+  const fileName = scope === 'all'
+    ? `Planning_${surname}_Total.pdf`
+    : `Planning_${surname}_${MONTH_NAMES[currentMonth]}_${currentYear}.pdf`;
+  pdf.save(fileName);
+  mostrarToast('\u2713 PDF exportado');
+}
 </script>
 </body>
 </html>
