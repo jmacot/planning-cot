@@ -203,34 +203,34 @@
       width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
     }
     .cal-header {
-      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.5px; color: var(--text-light); text-align: center;
-      padding: 3px 0;
+      padding: 4px 0;
     }
     .cal-cell {
-      min-height: 46px; border-radius: 6px; display: flex;
+      min-height: 56px; border-radius: 6px; display: flex;
       flex-direction: column; align-items: stretch;
       font-size: 12px; font-weight: 500; position: relative;
       border: 1px solid transparent; transition: all 0.2s; cursor: default;
-      overflow: hidden; padding: 2px; gap: 1px;
+      overflow: hidden; padding: 3px; gap: 2px;
     }
-    .cal-cell.empty { background: transparent; min-height: 36px; align-items: center; justify-content: center; }
+    .cal-cell.empty { background: transparent; min-height: 42px; align-items: center; justify-content: center; }
     .cal-cell.has-activity {
       background: var(--surface2); border-color: var(--border-light);
     }
     .cal-cell.has-activity:hover { border-color: var(--accent); box-shadow: var(--shadow); }
     .cal-cell .day-num {
-      font-weight: 700; font-size: 10px; line-height: 1;
+      font-weight: 700; font-size: 12px; line-height: 1;
       padding: 0 1px; color: var(--text); flex-shrink: 0;
       text-align: center; width: 100%;
     }
     .cal-cell.empty .day-num { color: var(--text-light); text-align: center; }
 
     /* Activity tags inside calendar cells */
-    .cell-acts { display: flex; flex-direction: column; gap: 1px; }
+    .cell-acts { display: flex; flex-direction: column; gap: 2px; flex: 1; justify-content: center; }
     .act-tag {
-      display: block; padding: 1px 2px; border-radius: 3px;
-      font-size: 7.5px; font-weight: 700; color: white;
+      display: block; padding: 2px 4px; border-radius: 3px;
+      font-size: 9px; font-weight: 700; color: white;
       text-align: center; line-height: 1.3;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
@@ -269,6 +269,16 @@
     .sparkbar-fill.p-global { background: #7c3aed; }
     .sparkbar-pct { font-size: 10px; font-weight: 700; min-width: 28px; }
     [data-theme="dark"] .sparkbar { background: var(--border); }
+    .perc-info { cursor: help; color: var(--text-light); font-size: 12px; position: relative; text-align: center; }
+    .perc-info .perc-tip {
+      display: none; position: absolute; right: -8px; bottom: calc(100% + 6px);
+      background: #1a1a1a; color: #f1f5f9; padding: 10px 14px;
+      border-radius: 10px; font-size: 11px; line-height: 1.5;
+      width: 280px; z-index: 50; font-weight: 400;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25); text-align: left;
+      pointer-events: none;
+    }
+    .perc-info:hover .perc-tip, .perc-info:focus .perc-tip { display: block; }
 
     /* Retribution section */
     .retrib-section {
@@ -293,7 +303,7 @@
     .retrib-calc-link:hover { background: var(--accent); color: white; }
 
     .companion-badge {
-      display: block; font-size: 7px; font-weight: 600;
+      display: block; font-size: 8px; font-weight: 600;
       color: var(--text-muted); background: var(--surface);
       border: 1px solid var(--border-light); border-radius: 4px;
       padding: 0 3px; margin-top: 0; line-height: 1.4;
@@ -650,6 +660,10 @@
             <div class="chart-card-title">Percentiles del Cirujano</div>
             <div id="percentiles-content"></div>
           </div>
+          <div class="chart-card dash-wide" id="card-radar">
+            <div class="chart-card-title">Perfil del Cirujano</div>
+            <div style="max-width:450px;margin:0 auto"><canvas id="canvas-radar"></canvas></div>
+          </div>
           <!-- Row 2: Comparativa -->
           <div class="chart-card" id="card-comparativa">
             <div class="chart-card-title" id="comparativa-title">Comparativa Unidad</div>
@@ -719,7 +733,7 @@ const SURGEONS = {
 };
 
 const SURGEON_UNITS = {
-  1:['Rodilla'], 2:['Rodilla'], 3:['Rodilla','Cadera'],
+  1:['Rodilla','Cadera'], 2:['Rodilla'], 3:['Rodilla','Cadera'],
   4:['Rodilla'], 5:['Hombro'], 6:['Hombro'], 7:null,
   8:['Mano'], 9:['Pie'], 10:['Pie'], 11:['Mano'], 12:['Rodilla'],
   13:['Hombro'], 14:['Rodilla'], 15:['Pie'], 16:['Rodilla'],
@@ -790,7 +804,7 @@ let availableMonths = [];
 let summaryMode = 'month'; // 'month' or 'total'
 let currentJornada = 100;  // 100, 80, or 60
 let chartsExpanded = false;
-let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null };
+let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null, radar: null };
 let loadedFileName = '';
 
 // ─────────────────────────────────────────────
@@ -1933,9 +1947,18 @@ function renderPercentilesCard(surgeonId) {
     return Math.round(((below + equal * 0.5) / allVals.length) * 100);
   }
 
-  let html = `<table class="perc-table"><thead><tr><th>M\u00e9trica</th><th style="text-align:center">Valor</th>`;
+  function buildPercTip(label, val, pUnit, pGlobal) {
+    let tip = `Tienes ${val} ${label.toLowerCase()} este mes.`;
+    if (pUnit !== null) {
+      tip += ` Est\u00e1s en el percentil ${pUnit} de tu unidad: el ${pUnit}% de tus compa\u00f1eros de unidad hace menos ${label.toLowerCase()} que t\u00fa (solo el ${100 - pUnit}% hace m\u00e1s).`;
+    }
+    tip += ` En el global, percentil ${pGlobal}: el ${pGlobal}% de todo el servicio hace menos ${label.toLowerCase()} que t\u00fa.`;
+    return tip;
+  }
+
+  let html = `<table class="perc-table"><thead><tr><th>M\u00e9trica</th><th style="text-align:center">Total</th>`;
   if (unit) html += `<th>P. Unidad</th>`;
-  html += `<th>P. Global</th></tr></thead><tbody>`;
+  html += `<th>P. Global</th><th></th></tr></thead><tbody>`;
 
   for (const m of metrics) {
     const val = sCounts[surgeonId]?.[m.key] || 0;
@@ -1944,18 +1967,99 @@ function renderPercentilesCard(surgeonId) {
     const gColor = gPct >= 75 ? '#16a34a' : gPct >= 50 ? '#ca8a04' : gPct >= 25 ? '#f59e0b' : '#dc2626';
 
     let unitHtml = '';
+    let uPct = null;
     if (unit) {
       const unitVals = unitIds.map(id => sCounts[id]?.[m.key] || 0);
-      const uPct = calcPercentile(val, unitVals);
+      uPct = calcPercentile(val, unitVals);
       const uColor = uPct >= 75 ? '#16a34a' : uPct >= 50 ? '#ca8a04' : uPct >= 25 ? '#f59e0b' : '#dc2626';
       unitHtml = `<td><div class="sparkbar-wrap"><div class="sparkbar"><div class="sparkbar-fill p-unit" style="width:${uPct}%;background:${uColor}"></div></div><span class="sparkbar-pct" style="color:${uColor}">P${uPct}</span></div></td>`;
     }
 
-    html += `<tr><td>${m.label}</td><td style="font-weight:700;text-align:center">${val}</td>${unitHtml}<td><div class="sparkbar-wrap"><div class="sparkbar"><div class="sparkbar-fill p-global" style="width:${gPct}%;background:${gColor}"></div></div><span class="sparkbar-pct" style="color:${gColor}">P${gPct}</span></div></td></tr>`;
+    const tipText = buildPercTip(m.label, val, uPct, gPct);
+    html += `<tr><td>${m.label}</td><td style="font-weight:700;text-align:center">${val}</td>${unitHtml}<td><div class="sparkbar-wrap"><div class="sparkbar"><div class="sparkbar-fill p-global" style="width:${gPct}%;background:${gColor}"></div></div><span class="sparkbar-pct" style="color:${gColor}">P${gPct}</span></div></td><td class="perc-info" tabindex="0">\u24d8<span class="perc-tip">${tipText}</span></td></tr>`;
   }
 
   html += '</tbody></table>';
   container.innerHTML = html;
+}
+
+// ── Radar — Perfil del Cirujano ──
+function renderRadarChart(surgeonId) {
+  const ctx = document.getElementById('canvas-radar').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.radar) { chartInstances.radar.destroy(); chartInstances.radar = null; }
+
+  const radarMetrics = [
+    { label: 'Guardias', fn: e => e.activity === 'guardia' },
+    { label: 'Qx Ma\u00f1ana', fn: e => e.activity === 'qui_m' },
+    { label: 'Qx Tarde', fn: e => e.activity === 'qui_t' },
+    { label: 'Consultas M', fn: e => e.activity === 'cons_m' },
+    { label: 'Consultas T', fn: e => e.activity === 'cons_t' },
+    { label: 'Gesti\u00f3n', fn: e => e.activity === 'gestion' },
+    { label: 'Localizados', fn: e => e.activity === 'localizado' },
+    { label: 'Diferida', fn: e => e.activity === 'diferida' || e.activity === 'diferida_t' }
+  ];
+
+  const allIds = Object.keys(parsedData).map(Number);
+  const surgeonName = getSurnameOf(surgeonId);
+
+  // Surgeon values
+  const surgeonVals = radarMetrics.map(m => getMonthEntries(surgeonId).filter(m.fn).length);
+  // Service average
+  const avgVals = radarMetrics.map(m => {
+    const total = allIds.reduce((sum, id) => sum + getMonthEntries(id).filter(m.fn).length, 0);
+    return Math.round((total / allIds.length) * 10) / 10;
+  });
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+  chartInstances.radar = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: radarMetrics.map(m => m.label),
+      datasets: [
+        {
+          label: surgeonName,
+          data: surgeonVals,
+          backgroundColor: 'rgba(26,58,92,0.25)',
+          borderColor: '#1a3a5c',
+          borderWidth: 2,
+          pointBackgroundColor: '#1a3a5c',
+          pointRadius: 3
+        },
+        {
+          label: 'Media servicio',
+          data: avgVals,
+          backgroundColor: isDark ? 'rgba(148,163,184,0.15)' : 'rgba(107,107,107,0.12)',
+          borderColor: isDark ? '#64748b' : '#9ca3af',
+          borderWidth: 1.5,
+          borderDash: [4, 4],
+          pointBackgroundColor: isDark ? '#64748b' : '#9ca3af',
+          pointRadius: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        r: {
+          beginAtZero: true,
+          ticks: { stepSize: 1, color: theme.textColor, font: { size: 9 }, backdropColor: 'transparent' },
+          grid: { color: theme.gridColor },
+          angleLines: { color: theme.gridColor },
+          pointLabels: { color: theme.textColor, font: { size: 10, weight: '500', family: "'Inter',sans-serif" } }
+        }
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: theme.textColor, font: { family: "'Inter',sans-serif", size: 11 }, padding: 12, usePointStyle: true }
+        },
+        tooltip: makeTooltipOpts(theme)
+      }
+    }
+  });
 }
 
 // ── Comparativa Unidad (with toggle: Turnos / Guardias) ──
@@ -2126,12 +2230,12 @@ function renderQxUnitChart(surgeonId) {
 
   chartInstances.qxUnit = new Chart(ctx, {
     type: 'bar',
-    data: { labels, datasets: [{ label: 'Quir\u00f3fanos', data, backgroundColor: colors, borderRadius: 3 }] },
+    data: { labels, datasets: [{ label: 'Quir\u00f3fanos', data, backgroundColor: colors, borderRadius: 4 }] },
     options: {
-      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      responsive: true, maintainAspectRatio: true,
       scales: {
-        x: { beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
-        y: { ticks: { color: theme.textColor, font: { size: 10, weight: '600' } }, grid: { display: false } }
+        y: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 5, font: { size: 10 } }, grid: { color: theme.gridColor } },
+        x: { ticks: { color: theme.textColor, font: { size: 10, weight: '600' } }, grid: { display: false } }
       },
       plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
     }
@@ -2216,12 +2320,12 @@ function renderRankingGestionChart(surgeonId) {
 
   chartInstances.rankGestion = new Chart(ctx, {
     type: 'bar',
-    data: { labels, datasets: [{ label: 'Gesti\u00f3n', data, backgroundColor: colors, borderRadius: 3 }] },
+    data: { labels, datasets: [{ label: 'Gesti\u00f3n', data, backgroundColor: colors, borderRadius: 4 }] },
     options: {
-      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      responsive: true, maintainAspectRatio: true,
       scales: {
-        x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
-        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
+        y: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
+        x: { ticks: { color: theme.textColor, font: { size: 10 }, maxRotation: 45 }, grid: { display: false } }
       },
       plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
     }
@@ -2275,7 +2379,7 @@ function buildComparadorHeader(firstCol) {
         <th rowspan="2">${firstCol}</th>
         <th colspan="4" class="th-group th-group-qx">Quir\u00f3fano</th>
         <th colspan="4" class="th-group th-group-cons">Consultas</th>
-        <th rowspan="2" class="th-group th-group-gest">Gest</th>
+        <th rowspan="2" class="th-group th-group-gest">Gesti\u00f3n</th>
       </tr>
       <tr>
         <th class="th-sub">Ma\u00f1</th><th class="th-sub">Tarde</th>
@@ -2348,6 +2452,7 @@ function renderCharts(surgeonId) {
   requestAnimationFrame(() => {
     renderBubblesChart(surgeonId);
     renderPercentilesCard(surgeonId);
+    renderRadarChart(surgeonId);
     renderUnitComparisonChart(surgeonId);
     renderComparadorChart(surgeonId);
     renderQxUnitChart(surgeonId);
