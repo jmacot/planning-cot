@@ -14,7 +14,10 @@ Herramienta para analizar el planning mensual del servicio de COT, desglosando a
 - Contaje de turnos semanal y mensual
 - 9 categorias: Guardia, Saliente, Localizado, Quirofano M/T, Consulta M/T, Diferida, Gestion
 - Dashboard de graficos: distribucion agregada, comparador por unidad, rankings
-- Percentiles del cirujano respecto a todos y respecto a su unidad (10 metricas)
+- Grafico radar: perfil del cirujano vs media del servicio
+- Grafico Manana vs Tarde: porcentaje de actividad matutina vs vespertina por cirujano
+- Grafico Festivos Trabajados: festivos oficiales y fines de semana trabajados
+- Percentiles del cirujano respecto a todos y respecto a su unidad (10 metricas) con tooltips explicativos
 - Rankings de guardias, localizados, gestion y turnos totales
 - Retribucion: contaje, bruto y neto de guardias y localizados (17h/24h)
 - Enlace directo a Calculadora de Guardias con datos pre-rellenados
