@@ -162,7 +162,8 @@
       color: var(--text-muted); background: var(--surface);
       border: 1.5px solid var(--border);
     }
-    .export-btn-ics:hover, .export-btn-pdf:hover {
+    .export-btn-ics:hover, .export-btn-pdf:hover,
+    .export-btn-ics.active, .export-btn-pdf.active {
       border-color: var(--accent); color: var(--accent); background: var(--accent-light);
     }
     .export-menu {
@@ -2316,7 +2317,7 @@ function renderRadarChart(surgeonId) {
       scales: {
         r: {
           beginAtZero: true,
-          ticks: { stepSize: 1, color: theme.textColor, font: { size: 9 }, backdropColor: 'transparent' },
+          ticks: { display: false },
           grid: { color: theme.gridColor },
           angleLines: { color: theme.gridColor },
           pointLabels: { color: theme.textColor, font: { size: 10, weight: '500', family: "'Inter',sans-serif" } }
@@ -2394,7 +2395,7 @@ function renderRadarTotalChart(surgeonId) {
       scales: {
         r: {
           beginAtZero: true,
-          ticks: { stepSize: 1, color: theme.textColor, font: { size: 9 }, backdropColor: 'transparent' },
+          ticks: { display: false },
           grid: { color: theme.gridColor },
           angleLines: { color: theme.gridColor },
           pointLabels: { color: theme.textColor, font: { size: 10, weight: '500', family: "'Inter',sans-serif" } }
@@ -3019,13 +3020,19 @@ function showExportMenu(type) {
   pendingExportType = type;
   const menu = document.getElementById('export-menu');
   const monthName = MONTH_NAMES[currentMonth];
-  document.getElementById('export-opt-month').textContent = `Solo ${monthName}`;
-  document.getElementById('export-opt-all').textContent = 'Todos los meses';
+  const label = type === 'ics' ? 'Calendario' : 'PDF';
+  document.getElementById('export-opt-month').textContent = `${label}: Solo ${monthName}`;
+  document.getElementById('export-opt-all').textContent = `${label}: Todos los meses`;
   menu.style.display = 'flex';
+  // Highlight active button
+  document.querySelector('.export-btn-ics').classList.toggle('active', type === 'ics');
+  document.querySelector('.export-btn-pdf').classList.toggle('active', type === 'pdf');
 }
 function closeExportMenu() {
   document.getElementById('export-menu').style.display = 'none';
   pendingExportType = null;
+  document.querySelector('.export-btn-ics').classList.remove('active');
+  document.querySelector('.export-btn-pdf').classList.remove('active');
 }
 function doExport(scope) {
   const type = pendingExportType;
