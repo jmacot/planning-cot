@@ -14,16 +14,17 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #f0f2f5; --surface: #ffffff; --surface2: #f8f9fb;
-      --border: #d1d5db; --border-light: #e5e7eb;
+      --bg: #f1f5f9; --surface: #ffffff; --surface2: #e8eef4;
+      --border: #e2e8f0; --border-light: #e5e7eb;
       --accent: #1a3a5c; --accent-light: #eef2f7; --accent-hover: #14304f;
       --text: #222222; --text-muted: #555555; --text-light: #888888;
       --green: #16a34a; --green-light: #dcfce7;
       --amber: #c0540a; --amber-light: #fef3c7;
       --red: #dc2626; --red-light: #fee2e2;
-      --shadow: 0 2px 12px rgba(0,0,0,0.06);
-      --shadow-hover: 0 6px 24px rgba(26,33,51,0.10);
-      --radius: 12px;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+      --radius-sm: 8px; --radius: 16px; --radius-lg: 24px;
 
       --c-diferida: #64748b;
       --c-diferida-light: #f1f5f9;
@@ -50,14 +51,15 @@
     [data-theme="dark"] {
       --bg: #111827; --surface: #1f2937; --surface2: #283244;
       --border: #374151; --border-light: #4b5563;
-      --text: #f1f5f9; --text-muted: #94a3b8; --text-light: #64748b;
-      --accent: #7bafd4; --accent-hover: #93c5fd;
+      --text: #f1f5f9; --text-muted: #a8b8cc; --text-light: #64748b;
+      --accent: #93c5fd; --accent-hover: #bae0ff;
       --accent-light: #1e3a5f;
       --green: #4ade80; --green-light: #14352a;
       --amber: #fbbf24; --amber-light: #3b2a10;
       --red: #f87171; --red-light: #3b1010;
-      --shadow: 0 2px 12px rgba(0,0,0,0.3);
-      --shadow-hover: 0 6px 24px rgba(0,0,0,0.4);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.3);
 
       --c-diferida-light: #334155;
       --c-qui-m-light: #1e3a5f;
@@ -121,6 +123,7 @@
     }
     .upload-zone:hover, .upload-zone.dragover {
       border-color: var(--accent); background: var(--accent-light);
+      transform: translateY(-2px);
     }
     .upload-zone .icon { font-size: 1.5rem; flex-shrink: 0; }
     .upload-zone .title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
@@ -252,6 +255,7 @@
     }
     .cal-nav {
       display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
+      justify-content: center;
     }
     .cal-nav button {
       background: var(--surface2); border: 1.5px solid var(--border);
@@ -283,7 +287,7 @@
       padding: 4px 0;
     }
     .cal-cell {
-      min-height: 56px; border-radius: 6px; display: flex;
+      min-height: 56px; border-radius: var(--radius-sm); display: flex;
       flex-direction: column; align-items: stretch;
       font-size: 12px; font-weight: 500; position: relative;
       border: 1px solid transparent; transition: all 0.2s; cursor: default;
@@ -293,7 +297,7 @@
     .cal-cell.has-activity {
       background: var(--surface2); border-color: var(--border-light);
     }
-    .cal-cell.has-activity:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+    .cal-cell.has-activity:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); transform: translateY(-2px); }
     .cal-cell .day-num {
       font-weight: 700; font-size: 12px; line-height: 1;
       padding: 0 1px; color: var(--text); flex-shrink: 0;
@@ -304,7 +308,7 @@
     /* Activity tags inside calendar cells */
     .cell-acts { display: flex; flex-direction: column; gap: 2px; flex: 1; justify-content: center; }
     .act-tag {
-      display: block; padding: 2px 4px; border-radius: 3px;
+      display: block; padding: 2px 4px; border-radius: 4px;
       font-size: 9px; font-weight: 700; color: white;
       text-align: center; line-height: 1.3;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -334,8 +338,8 @@
 
     /* Percentiles table */
     .perc-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    .perc-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 5px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
-    .perc-table td { padding: 4px 8px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+    .perc-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 8px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+    .perc-table td { padding: 8px 8px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
     .perc-table td:first-child { font-weight: 600; white-space: nowrap; }
     .sparkbar-wrap { display: flex; align-items: center; gap: 6px; }
     .sparkbar { height: 8px; border-radius: 4px; background: var(--border-light); flex: 1; max-width: 80px; overflow: hidden; }
@@ -364,9 +368,9 @@
     }
     .retrib-section h2 { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent); margin-bottom: 8px; text-align: center; }
     .retrib-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    .retrib-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 5px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+    .retrib-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 8px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
     .retrib-table th:not(:first-child) { text-align: center; }
-    .retrib-table td { padding: 5px 8px; border-bottom: 1px solid var(--border-light); text-align: center; font-weight: 500; }
+    .retrib-table td { padding: 8px 8px; border-bottom: 1px solid var(--border-light); text-align: center; font-weight: 500; }
     .retrib-table td:first-child { text-align: left; font-weight: 600; }
     .retrib-table tfoot td { border-top: 2px solid var(--accent); font-weight: 700; color: var(--accent); }
     .retrib-footer { margin-top: 10px; text-align: center; }
@@ -483,20 +487,27 @@
     .turn-total-label { display: flex; align-items: center; gap: 6px; }
 
     /* Toggle buttons (shared: jornada, comparativa, qx-unit) */
-    .toggle-btns { display: flex; gap: 4px; margin-bottom: 8px; align-items: center; }
+    .toggle-btns {
+      display: inline-flex; gap: 2px; margin-bottom: 8px; align-items: center;
+      background: var(--surface2); padding: 3px; border-radius: 10px;
+      border: 1px solid var(--border-light);
+    }
     .toggle-btns .toggle-label {
       font-size: 10px; font-weight: 600; color: var(--text-muted);
-      margin-right: 2px; text-transform: uppercase; letter-spacing: 0.3px;
+      margin-right: 4px; margin-left: 4px; text-transform: uppercase; letter-spacing: 0.3px;
     }
     .toggle-btns button {
-      padding: 3px 10px; border-radius: 6px;
-      border: 1.5px solid var(--border); background: var(--surface);
+      padding: 4px 12px; border-radius: 7px;
+      border: none; background: transparent;
       font-size: 10px; font-weight: 600; cursor: pointer;
       color: var(--text-muted); font-family: 'Inter', Arial, sans-serif;
-      transition: all 0.2s;
+      transition: all 0.25s ease;
     }
-    .toggle-btns button:hover { border-color: var(--accent); color: var(--accent); }
-    .toggle-btns button.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .toggle-btns button:hover { color: var(--text); }
+    .toggle-btns button.active {
+      background: var(--surface); color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
 
     /* Charts / Dashboard section */
     .charts-section {
@@ -532,7 +543,7 @@
     .dash-wide { grid-column: 1 / -1; }
     .chart-card {
       background: var(--surface2); border: 1px solid var(--border-light);
-      border-radius: 10px; padding: 14px;
+      border-radius: var(--radius-sm); padding: 14px;
       display: flex; flex-direction: column; gap: 6px;
     }
     .chart-card-title {
@@ -579,7 +590,7 @@
     .comparador-table th {
       text-align: center; font-size: 9px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.3px;
-      padding: 5px 6px; color: var(--text-muted);
+      padding: 8px 8px; color: var(--text-muted);
       white-space: nowrap;
     }
     .comparador-table th:first-child { text-align: left; }
@@ -595,7 +606,7 @@
       font-size: 8px; padding: 3px 5px;
     }
     .comparador-table td {
-      text-align: center; padding: 5px 6px;
+      text-align: center; padding: 8px 8px;
       border-bottom: 1px solid var(--border-light);
       font-weight: 500; color: var(--text);
     }
@@ -674,6 +685,7 @@
     @media (max-width: 600px) {
       body { padding: 20px 12px; }
       .back-home { padding: 4px 8px; font-size: 10px; top: 6px; left: 6px; }
+      .app-header p { padding: 0 44px; }
       .upload-zone { padding: 12px 14px; max-width: 100%; }
       .welcome-hero { max-width: 100%; margin: 0 auto 16px; }
       .welcome-hero-img { max-width: 100%; }
@@ -700,7 +712,8 @@
       .perc-table td:first-child { font-size: 10px; }
       .sparkbar { max-width: 50px; }
       .sparkbar-pct { font-size: 9px; min-width: 24px; }
-      .perc-info .perc-tip { width: 220px; right: 0; }
+      .perc-info .perc-tip { width: 220px; right: 0; left: auto; }
+      #card-percentiles { overflow: visible; }
 
       /* Ranking Gestión list */
       .rank-gestion-item { padding: 8px 8px; gap: 6px; flex-wrap: wrap; }
@@ -722,7 +735,7 @@
 
   <div class="app-header">
     <h1>Analizador de Planning</h1>
-    <p>Sube el archivo del planning mensual para ver el desglose por cirujano</p>
+    <p id="app-subtitle">Sube el archivo del planning mensual para ver el desglose por cirujano</p>
     <button class="theme-toggle" id="btn-theme" title="Cambiar tema"></button>
   </div>
 
@@ -1117,6 +1130,7 @@ function resetApp() {
   fileInput.value = '';
   document.getElementById('upload-zone').style.display = '';
   document.getElementById('welcome-hero').style.display = '';
+  document.getElementById('app-subtitle').style.display = '';
   document.getElementById('upload-info').style.display = 'none';
   document.getElementById('controls').style.display = 'none';
   document.getElementById('results').classList.remove('visible');
@@ -1589,6 +1603,7 @@ function parseWorksheet(ws) {
 function showUploadSuccess() {
   document.getElementById('upload-zone').style.display = 'none';
   document.getElementById('welcome-hero').style.display = 'none';
+  document.getElementById('app-subtitle').style.display = 'none';
   document.getElementById('upload-info').style.display = 'flex';
   document.getElementById('upload-summary').textContent = loadedFileName;
   document.getElementById('controls').style.display = 'flex';
@@ -2243,12 +2258,21 @@ function renderPercentilesCard(surgeonId) {
     for (const m of metrics) sCounts[id][m.key] = ent.filter(m.fn).length;
   }
 
+  function buildPercPhrase(pct, scope, label) {
+    const lab = label.toLowerCase();
+    if (pct >= 50) {
+      return `En ${scope}, percentil ${pct}: solo el ${100 - pct}% hace m\u00e1s ${lab} que t\u00fa.`;
+    } else {
+      return `En ${scope}, percentil ${pct}: el ${100 - pct}% hace m\u00e1s ${lab} que t\u00fa.`;
+    }
+  }
+
   function buildPercTip(label, val, pUnit, pGlobal) {
     let tip = `Tienes ${val} ${label.toLowerCase()} este mes.`;
     if (pUnit !== null) {
-      tip += ` Est\u00e1s en el percentil ${pUnit} de tu unidad: el ${pUnit}% de tus compa\u00f1eros de unidad hace menos ${label.toLowerCase()} que t\u00fa (solo el ${100 - pUnit}% hace m\u00e1s).`;
+      tip += ' ' + buildPercPhrase(pUnit, 'tu unidad', label);
     }
-    tip += ` En el global, percentil ${pGlobal}: el ${pGlobal}% de todo el servicio hace menos ${label.toLowerCase()} que t\u00fa.`;
+    tip += ' ' + buildPercPhrase(pGlobal, 'el global', label);
     return tip;
   }
 
@@ -2458,6 +2482,20 @@ function renderUnitComparisonChart(surgeonId) {
   const unitSurgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
   const exclude = new Set(['guardia', 'saliente']);
 
+  // Dynamic height: ensure enough room for each bar label
+  const barHeight = 32;
+  const minCanvasHeight = unitSurgeons.length * barHeight + 60;
+  // Wrap canvas in a sized container if not already wrapped
+  let wrapper = canvas.parentElement;
+  if (!wrapper.classList.contains('chart-canvas-wrap')) {
+    wrapper = document.createElement('div');
+    wrapper.classList.add('chart-canvas-wrap');
+    canvas.parentElement.insertBefore(wrapper, canvas);
+    wrapper.appendChild(canvas);
+  }
+  wrapper.style.height = minCanvasHeight + 'px';
+  wrapper.style.position = 'relative';
+
   if (comparativaMode === 'guardias') {
     // Simple bar: guardia count
     const guardCounts = {};
@@ -2473,10 +2511,10 @@ function renderUnitComparisonChart(surgeonId) {
       type: 'bar',
       data: { labels, datasets: [{ label: 'Guardias', data, backgroundColor: colors, borderRadius: 3 }] },
       options: {
-        responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
         scales: {
           x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
-          y: { ticks: { color: theme.textColor, font: { size: 10, weight: '500' } }, grid: { display: false } }
+          y: { ticks: { color: theme.textColor, font: { size: 10, weight: '500' }, autoSkip: false }, grid: { display: false } }
         },
         plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
       }
@@ -2560,10 +2598,10 @@ function renderUnitComparisonChart(surgeonId) {
       data: { labels, datasets },
       plugins: [percentPlugin],
       options: {
-        responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
         scales: {
           x: { stacked: true, beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
-          y: { stacked: true, ticks: { color: theme.textColor, font: { size: 10, weight: '500' } }, grid: { display: false } }
+          y: { stacked: true, ticks: { color: theme.textColor, font: { size: 10, weight: '500' }, autoSkip: false }, grid: { display: false } }
         },
         plugins: {
           legend: { position: 'bottom', labels: { color: theme.textColor, font: { family: "'Inter',sans-serif", size: 11 }, padding: 8, usePointStyle: true } },
