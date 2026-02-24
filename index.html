@@ -11,6 +11,7 @@
   <meta name="theme-color" content="#1a3a5c">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #f0f2f5; --surface: #ffffff; --surface2: #f8f9fb;
@@ -42,6 +43,8 @@
       --c-localizado-light: #f0ebff;
       --c-gestion: #ca8a04;
       --c-gestion-light: #fef9c3;
+      --c-rucot: #e11d48;
+      --c-rucot-light: #ffe4e6;
     }
 
     [data-theme="dark"] {
@@ -62,6 +65,7 @@
       --c-guardia-light: #3b1010;
       --c-localizado-light: #2e1065;
       --c-gestion-light: #3b2a10;
+      --c-rucot-light: #4c1d2e;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -107,21 +111,23 @@
     /* Upload zone */
     .upload-zone {
       background: var(--surface); border: 2px dashed var(--border);
-      border-radius: var(--radius); padding: 40px 24px; text-align: center;
+      border-radius: var(--radius); padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px; text-align: left;
       cursor: pointer; transition: border-color 0.3s, background 0.3s;
-      margin-bottom: 20px;
+      max-width: 480px; margin: 0 auto 20px;
     }
     .upload-zone:hover, .upload-zone.dragover {
       border-color: var(--accent); background: var(--accent-light);
     }
-    .upload-zone .icon { font-size: 2.5rem; margin-bottom: 12px; }
-    .upload-zone .title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-    .upload-zone .subtitle { font-size: 12px; color: var(--text-muted); }
+    .upload-zone .icon { font-size: 1.5rem; flex-shrink: 0; }
+    .upload-zone .title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .upload-zone .subtitle { font-size: 11px; color: var(--text-muted); }
     .upload-zone input[type="file"] { display: none; }
 
     .upload-info {
       background: var(--accent-light); border: 1px solid var(--accent);
-      border-radius: 8px; padding: 10px 16px; margin-bottom: 20px;
+      border-radius: 8px; padding: 10px 16px;
+      max-width: 480px; margin: 0 auto 20px;
       font-size: 13px; display: flex; align-items: center; gap: 8px;
     }
     .upload-info .check { color: var(--green); font-weight: 700; }
@@ -129,7 +135,7 @@
     /* Surgeon selector */
     .controls {
       display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
-      margin-bottom: 24px;
+      margin-bottom: 24px; justify-content: center;
     }
     .controls label {
       font-size: 11px; font-weight: 700; color: var(--text-muted);
@@ -139,7 +145,15 @@
       border: 1.5px solid var(--border); border-radius: 8px;
       padding: 10px 14px; font-size: 14px; font-family: 'Inter', Arial, sans-serif;
       color: var(--text); background: var(--surface);
-      transition: border-color 0.2s, box-shadow 0.2s; flex: 1; min-width: 200px;
+      transition: border-color 0.2s, box-shadow 0.2s; min-width: 200px; max-width: 320px;
+    }
+    .unit-badges { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+    .unit-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 3px 10px; border-radius: 999px;
+      background: var(--accent-light); color: var(--accent);
+      border: 1px solid var(--accent); letter-spacing: 0.3px;
+      text-transform: uppercase;
     }
     .controls select:focus {
       outline: none; border-color: var(--accent);
@@ -153,56 +167,70 @@
     /* Calendar */
     .calendar-section {
       background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px;
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
+      display: flex; gap: 14px; align-items: flex-start;
     }
+    .cal-main { flex: 1; min-width: 0; }
     .calendar-section h2 {
-      font-family: 'Lora', serif; font-size: 1.1rem; color: var(--accent);
-      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+      font-family: 'Lora', serif; font-size: 1rem; color: var(--accent);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
     }
     .cal-nav {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
     }
     .cal-nav button {
       background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 6px; width: 32px; height: 32px; cursor: pointer;
-      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; width: 28px; height: 28px; cursor: pointer;
+      font-size: 12px; display: flex; align-items: center; justify-content: center;
       transition: all 0.2s; color: var(--text);
     }
     .cal-nav button:hover { border-color: var(--accent); color: var(--accent); }
     .cal-nav .month-label {
-      font-weight: 600; font-size: 14px; min-width: 140px; text-align: center;
+      font-weight: 600; font-size: 13px; min-width: 120px; text-align: center;
     }
     .cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+    }
+    .cal-legend-side {
+      width: 125px; flex-shrink: 0; display: flex; flex-direction: column;
+      gap: 4px; padding-top: 58px;
+    }
+    .cal-legend-side .legend-item {
+      font-size: 11px; display: flex; align-items: center; gap: 6px;
+      color: var(--text-muted); white-space: nowrap;
+    }
+    .cal-legend-side .legend-dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
     }
     .cal-header {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.5px; color: var(--text-light); text-align: center;
-      padding: 4px 0;
+      padding: 3px 0;
     }
     .cal-cell {
-      min-height: 54px; border-radius: 8px; display: flex;
+      min-height: 46px; border-radius: 6px; display: flex;
       flex-direction: column; align-items: stretch;
-      font-size: 13px; font-weight: 500; position: relative;
+      font-size: 12px; font-weight: 500; position: relative;
       border: 1px solid transparent; transition: all 0.2s; cursor: default;
-      overflow: hidden; padding: 3px; gap: 2px;
+      overflow: hidden; padding: 2px; gap: 1px;
     }
-    .cal-cell.empty { background: transparent; min-height: 40px; align-items: center; justify-content: center; }
+    .cal-cell.empty { background: transparent; min-height: 36px; align-items: center; justify-content: center; }
     .cal-cell.has-activity {
       background: var(--surface2); border-color: var(--border-light);
     }
     .cal-cell.has-activity:hover { border-color: var(--accent); box-shadow: var(--shadow); }
     .cal-cell .day-num {
-      font-weight: 700; font-size: 11px; line-height: 1;
+      font-weight: 700; font-size: 10px; line-height: 1;
       padding: 0 1px; color: var(--text); flex-shrink: 0;
+      text-align: center; width: 100%;
     }
     .cal-cell.empty .day-num { color: var(--text-light); text-align: center; }
 
     /* Activity tags inside calendar cells */
     .cell-acts { display: flex; flex-direction: column; gap: 1px; }
     .act-tag {
-      display: block; padding: 1px 3px; border-radius: 3px;
-      font-size: 8.5px; font-weight: 700; color: white;
+      display: block; padding: 1px 2px; border-radius: 3px;
+      font-size: 7.5px; font-weight: 700; color: white;
       text-align: center; line-height: 1.3;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
@@ -210,42 +238,91 @@
     .cell-sep {
       height: 0; border-top: 1px dashed var(--border); margin: 1px 0;
     }
+    .cal-cell.festive {
+      background: linear-gradient(135deg, #fef9ef 0%, #fde8e0 100%);
+      justify-content: center; align-items: center;
+    }
+    .cal-cell.festive .cell-acts {
+      align-items: center; flex: 1; justify-content: center;
+    }
+    .cal-cell.festive .day-num { text-align: center; }
+    .act-tag.act-centered { text-align: center; align-self: stretch; }
+    .cal-cell.weekend { justify-content: center; align-items: center; }
+    .cal-cell.weekend .cell-acts { align-items: center; flex: 1; justify-content: center; }
+    .cal-cell.weekend .day-num { text-align: center; }
+    [data-theme="dark"] .cal-cell.festive {
+      background: linear-gradient(135deg, #2a2520 0%, #2d2025 100%);
+    }
+    [data-theme="dark"] .comparador-table tr.highlight { background: var(--accent-light); }
+    [data-theme="dark"] .comparador-table tr.highlight .td-pct { color: #93c5fd; }
+    [data-theme="dark"] .comparador-table tr:hover { background: var(--surface2); }
 
-    /* Legend */
-    .legend {
-      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px;
-      padding-top: 14px; border-top: 1px solid var(--border-light);
+    /* Percentiles table */
+    .perc-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .perc-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 5px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+    .perc-table td { padding: 4px 8px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+    .perc-table td:first-child { font-weight: 600; white-space: nowrap; }
+    .sparkbar-wrap { display: flex; align-items: center; gap: 6px; }
+    .sparkbar { height: 8px; border-radius: 4px; background: var(--border-light); flex: 1; max-width: 80px; overflow: hidden; }
+    .sparkbar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+    .sparkbar-fill.p-unit { background: var(--accent); }
+    .sparkbar-fill.p-global { background: #7c3aed; }
+    .sparkbar-pct { font-size: 10px; font-weight: 700; min-width: 28px; }
+    [data-theme="dark"] .sparkbar { background: var(--border); }
+
+    /* Retribution section */
+    .retrib-section {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
     }
-    .legend-item {
-      display: flex; align-items: center; gap: 4px; font-size: 10px;
-      color: var(--text-muted);
+    .retrib-section h2 { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent); margin-bottom: 8px; }
+    .retrib-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .retrib-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 5px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
+    .retrib-table th:not(:first-child) { text-align: center; }
+    .retrib-table td { padding: 5px 8px; border-bottom: 1px solid var(--border-light); text-align: center; font-weight: 500; }
+    .retrib-table td:first-child { text-align: left; font-weight: 600; }
+    .retrib-table tfoot td { border-top: 2px solid var(--accent); font-weight: 700; color: var(--accent); }
+    .retrib-footer { margin-top: 10px; text-align: center; }
+    .retrib-calc-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; color: var(--accent);
+      text-decoration: none; padding: 6px 14px;
+      border: 1.5px solid var(--accent); border-radius: 8px;
+      transition: all 0.2s;
     }
-    .legend-dot {
-      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    .retrib-calc-link:hover { background: var(--accent); color: white; }
+
+    .companion-badge {
+      display: block; font-size: 7px; font-weight: 600;
+      color: var(--text-muted); background: var(--surface);
+      border: 1px solid var(--border-light); border-radius: 4px;
+      padding: 0 3px; margin-top: 0; line-height: 1.4;
+      text-align: center; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
     }
 
     /* Bottom grid: summary + turns */
     .bottom-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
     }
 
-    /* Summary */
+    /* Summary — compact table */
     .summary-section {
       background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
-      display: flex; flex-direction: column; gap: 10px;
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 4px;
     }
     .summary-section h2 {
-      font-family: 'Lora', serif; font-size: 1.1rem; color: var(--accent);
-      margin-bottom: 2px;
+      font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent);
+      margin-bottom: 0;
     }
     .summary-toggle {
-      display: flex; gap: 4px; margin-bottom: 4px;
+      display: flex; gap: 4px; margin-bottom: 0; align-items: center;
     }
     .summary-toggle button {
-      padding: 5px 14px; border-radius: 6px;
+      padding: 3px 10px; border-radius: 6px;
       border: 1.5px solid var(--border); background: var(--surface);
-      font-size: 12px; font-weight: 600; cursor: pointer;
+      font-size: 11px; font-weight: 600; cursor: pointer;
       transition: all 0.2s; color: var(--text-muted);
       font-family: 'Inter', Arial, sans-serif;
     }
@@ -253,55 +330,180 @@
     .summary-toggle button.active {
       background: var(--accent); color: white; border-color: var(--accent);
     }
-    .summary-card {
-      background: var(--surface2); border: 1px solid var(--border-light);
-      border-radius: 8px; padding: 10px 14px; display: flex;
-      align-items: center; gap: 12px; transition: box-shadow 0.2s;
+    .summary-range {
+      font-size: 11px; color: var(--text-light); font-weight: 500;
     }
-    .summary-card:hover { box-shadow: var(--shadow); }
-    .summary-icon {
-      width: 36px; height: 36px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; flex-shrink: 0;
+    .summary-table {
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: 2px 10px; align-items: center;
     }
-    .summary-content { flex: 1; min-width: 0; }
-    .summary-label {
-      font-size: 11px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px; margin-bottom: 2px;
+    .st-row {
+      display: contents; cursor: default;
     }
-    .summary-days {
-      font-size: 12px; color: var(--text-muted); line-height: 1.4;
+    .st-row:hover .st-label,
+    .st-row:hover .st-count { color: var(--accent); }
+    .st-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .st-label {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.3px; color: var(--text-muted); transition: color 0.2s;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .summary-count {
-      font-size: 20px; font-weight: 700; flex-shrink: 0;
+    .st-count {
+      font-size: 15px; font-weight: 700; text-align: right;
+      transition: color 0.2s;
     }
 
     /* Turns section */
     .turns-section {
       background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
     }
     .turns-section h2 {
-      font-family: 'Lora', serif; font-size: 1.1rem; color: var(--accent);
-      margin-bottom: 14px;
+      font-family: 'Lora', serif; font-size: 1rem; color: var(--accent);
+      margin-bottom: 10px;
     }
     .turn-row {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 8px 0; border-bottom: 1px solid var(--border-light);
-      font-size: 13px;
+      padding: 5px 0; border-bottom: 1px solid var(--border-light);
+      font-size: 12px;
     }
     .turn-row:last-child { border-bottom: none; }
     .turn-week-label { color: var(--text-muted); }
-    .turn-week-range { font-size: 11px; color: var(--text-light); margin-left: 4px; }
+    .turn-week-range { font-size: 10px; color: var(--text-light); margin-left: 4px; }
     .turn-count { font-weight: 700; color: var(--accent); }
     .turn-count-zero { font-weight: 600; color: var(--text-light); }
     .turn-total {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 0 0; margin-top: 4px;
+      padding: 8px 0 0; margin-top: 2px;
       border-top: 2px solid var(--accent);
-      font-size: 15px; font-weight: 700; color: var(--accent);
+      font-size: 13px; font-weight: 700; color: var(--accent);
     }
     .turn-total-label { display: flex; align-items: center; gap: 6px; }
+
+    /* Toggle buttons (shared: jornada, comparativa, qx-unit) */
+    .toggle-btns { display: flex; gap: 4px; margin-bottom: 8px; align-items: center; }
+    .toggle-btns .toggle-label {
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      margin-right: 2px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .toggle-btns button {
+      padding: 3px 10px; border-radius: 6px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      font-size: 10px; font-weight: 600; cursor: pointer;
+      color: var(--text-muted); font-family: 'Inter', Arial, sans-serif;
+      transition: all 0.2s;
+    }
+    .toggle-btns button:hover { border-color: var(--accent); color: var(--accent); }
+    .toggle-btns button.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* Charts / Dashboard section */
+    .charts-section {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden;
+    }
+    .charts-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; cursor: pointer; transition: background 0.2s;
+    }
+    .charts-header:hover { background: var(--surface2); }
+    .charts-header h2 {
+      font-family: 'Lora', serif; font-size: 1rem; color: var(--accent); margin: 0;
+    }
+    .charts-collapse-btn {
+      background: var(--surface2); border: 1.5px solid var(--border);
+      border-radius: 6px; width: 28px; height: 28px; cursor: pointer;
+      font-size: 11px; display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s; color: var(--text-muted);
+    }
+    .charts-collapse-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .charts-collapse-btn.rotated { transform: rotate(180deg); }
+    .charts-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 0 16px;
+    }
+    .charts-body.expanded { max-height: 4500px; padding: 0 16px 16px; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .dash-wide { grid-column: 1 / -1; }
+    .chart-card {
+      background: var(--surface2); border: 1px solid var(--border-light);
+      border-radius: 10px; padding: 14px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .chart-card-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-muted);
+    }
+
+    /* Bubbles chart */
+    .bubbles-container {
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: center; gap: 8px; padding: 12px 0;
+      min-height: 80px; overflow: hidden;
+    }
+    .bubble {
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; color: white; font-weight: 700;
+      font-family: 'Inter', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      transition: transform 0.2s; cursor: default;
+    }
+    .bubble:hover { transform: scale(1.1); }
+    .bubbles-legend {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      gap: 10px; padding-top: 6px; border-top: 1px solid var(--border-light);
+    }
+    .bubbles-legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .bubbles-legend-dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* Comparador table */
+    .comparador-table-wrap { overflow-x: auto; margin-top: 6px; }
+    .comparador-table {
+      width: 100%; border-collapse: collapse; font-size: 11px;
+    }
+    .comparador-table th {
+      text-align: center; font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.3px;
+      padding: 5px 6px; color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .comparador-table th:first-child { text-align: left; }
+    .comparador-table .th-group {
+      font-size: 10px; font-weight: 700; color: white;
+      padding: 4px 6px; border-radius: 4px 4px 0 0;
+    }
+    .comparador-table .th-group-qx { background: var(--accent); }
+    .comparador-table .th-group-cons { background: var(--green); }
+    .comparador-table .th-group-gest { background: var(--c-gestion, #ca8a04); }
+    .comparador-table .th-sub {
+      background: var(--surface2); border-bottom: 2px solid var(--border);
+      font-size: 8px; padding: 3px 5px;
+    }
+    .comparador-table td {
+      text-align: center; padding: 5px 6px;
+      border-bottom: 1px solid var(--border-light);
+      font-weight: 500; color: var(--text);
+    }
+    .comparador-table td:first-child {
+      text-align: left; font-weight: 600; white-space: nowrap;
+    }
+    .comparador-table .td-total {
+      font-weight: 700; border-left: 2px solid var(--border-light);
+    }
+    .comparador-table .td-pct {
+      font-size: 10px; color: var(--text-muted); font-weight: 600;
+      border-right: 2px solid var(--border-light);
+    }
+    .comparador-table tr.highlight td {
+      background: var(--accent-light); font-weight: 700;
+    }
+    .comparador-table tr.highlight .td-pct { font-weight: 700; color: var(--accent); }
+    .comparador-table tbody tr:hover td { background: var(--surface2); }
 
     .app-footer { text-align: center; flex-shrink: 0; padding: 24px 0 8px; }
     .app-footer span { font-size: 0.7rem; color: var(--text-light); letter-spacing: 0.03em; }
@@ -322,11 +524,18 @@
 
     @media (max-width: 768px) {
       .bottom-grid { grid-template-columns: 1fr; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .calendar-section { flex-direction: column; }
+      .cal-legend-side {
+        flex-direction: row; flex-wrap: wrap; width: auto;
+        padding-top: 0; border-top: 1px solid var(--border-light);
+        padding-top: 8px; margin-top: 8px;
+      }
     }
     @media (max-width: 600px) {
       body { padding: 20px 12px; }
       .back-home { padding: 4px 8px; font-size: 10px; top: 6px; left: 6px; }
-      .upload-zone { padding: 28px 16px; }
+      .upload-zone { padding: 12px 14px; max-width: 100%; }
       .cal-grid { gap: 2px; }
       .cal-cell { min-height: 44px; padding: 2px; }
       .cal-cell .day-num { font-size: 10px; }
@@ -369,34 +578,124 @@
     <select id="surgeon-select">
       <option value="">Selecciona un cirujano...</option>
     </select>
+    <div class="unit-badges" id="unit-badges"></div>
   </div>
 
   <!-- Results -->
   <div class="results" id="results">
-    <!-- Calendar: full width -->
+    <!-- Calendar with side legend -->
     <div class="calendar-section">
-      <h2>&#128197; Calendario</h2>
-      <div class="cal-nav">
-        <button id="cal-prev" title="Mes anterior">&larr;</button>
-        <span class="month-label" id="cal-month-label"></span>
-        <button id="cal-next" title="Mes siguiente">&rarr;</button>
+      <div class="cal-main">
+        <h2>&#128197; Calendario</h2>
+        <div class="cal-nav">
+          <button id="cal-prev" title="Mes anterior">&larr;</button>
+          <span class="month-label" id="cal-month-label"></span>
+          <button id="cal-next" title="Mes siguiente">&rarr;</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
       </div>
-      <div class="cal-grid" id="cal-grid"></div>
-      <div class="legend" id="legend"></div>
+      <div class="cal-legend-side" id="legend"></div>
     </div>
     <!-- Bottom: summary + turns -->
     <div class="bottom-grid">
       <div class="summary-section" id="summary-section">
-        <h2>&#128202; Resumen de actividades</h2>
+        <h2>&#128202; Resumen</h2>
         <div class="summary-toggle" id="summary-toggle">
-          <button class="active" data-mode="month">Mes actual</button>
+          <button class="active" data-mode="month">Mes</button>
           <button data-mode="total">Total</button>
         </div>
-        <div id="summary-cards"></div>
+        <div class="summary-range" id="summary-range"></div>
+        <div class="summary-table" id="summary-cards"></div>
       </div>
       <div class="turns-section" id="turns-section">
-        <h2>&#9201; Turnos</h2>
+        <h2>&#9201; Contaje Turnos</h2>
+        <div class="toggle-btns" id="jornada-toggle">
+          <span class="toggle-label">Jornada:</span>
+          <button class="active" data-jornada="100">100%</button>
+          <button data-jornada="80">80%</button>
+          <button data-jornada="60">60%</button>
+        </div>
         <div id="turns-content"></div>
+      </div>
+    </div>
+    <!-- Retribution -->
+    <div class="retrib-section" id="retrib-section">
+      <h2>&#128176; Retribuci&oacute;n Guardias</h2>
+      <div class="toggle-btns" id="retrib-toggle">
+        <button class="active" data-mode="contaje">Contaje</button>
+        <button data-mode="bruto">Bruto</button>
+        <button data-mode="neto">Neto</button>
+      </div>
+      <div id="retrib-content"></div>
+      <div class="retrib-footer">
+        <a id="retrib-calc-link" class="retrib-calc-link" href="https://jmacot.github.io/calculadora-guardias/" target="_blank">&#129518; Abrir Calculadora</a>
+      </div>
+    </div>
+    <!-- Dashboard Stats -->
+    <div class="charts-section" id="charts-section">
+      <div class="charts-header" id="charts-header">
+        <h2>&#128200; Estad&iacute;sticas</h2>
+        <button class="charts-collapse-btn" id="charts-collapse-btn">&#9660;</button>
+      </div>
+      <div class="charts-body" id="charts-body">
+        <div class="dashboard-grid">
+          <!-- Row 1: Individual -->
+          <div class="chart-card dash-wide" id="card-bubbles">
+            <div class="chart-card-title">Distribuci&oacute;n de Actividades</div>
+            <div class="bubbles-container" id="bubbles-container"></div>
+            <div class="bubbles-legend" id="bubbles-legend"></div>
+          </div>
+          <!-- Percentiles -->
+          <div class="chart-card dash-wide" id="card-percentiles">
+            <div class="chart-card-title">Percentiles del Cirujano</div>
+            <div id="percentiles-content"></div>
+          </div>
+          <!-- Row 2: Comparativa -->
+          <div class="chart-card" id="card-comparativa">
+            <div class="chart-card-title" id="comparativa-title">Comparativa Unidad</div>
+            <div class="toggle-btns" id="comparativa-toggle">
+              <button class="active" data-mode="turnos">Turnos</button>
+              <button data-mode="guardias">Guardias</button>
+            </div>
+            <canvas id="canvas-unit-comparison"></canvas>
+          </div>
+          <!-- Comparador table -->
+          <div class="chart-card dash-wide" id="card-comparador">
+            <div class="chart-card-title">Comparador</div>
+            <div class="toggle-btns" id="comparador-toggle">
+              <button class="active" data-mode="cirujano">Por Cirujano</button>
+              <button data-mode="unidad">Por Unidad</button>
+            </div>
+            <div class="comparador-table-wrap" id="comparador-content"></div>
+          </div>
+          <!-- Row 3: Global -->
+          <div class="chart-card" id="card-qx-unidad">
+            <div class="chart-card-title">Quir&oacute;fanos por Unidad</div>
+            <div class="toggle-btns" id="qx-unit-toggle">
+              <button class="active" data-mode="total">Total</button>
+              <button data-mode="manana">Ma&ntilde;ana</button>
+              <button data-mode="tarde">Tarde</button>
+            </div>
+            <canvas id="canvas-qx-unit"></canvas>
+          </div>
+          <div class="chart-card" id="card-ranking-guardias">
+            <div class="chart-card-title">Ranking Guardias</div>
+            <canvas id="canvas-ranking-guardias"></canvas>
+          </div>
+          <div class="chart-card" id="card-ranking-localizados">
+            <div class="chart-card-title">Ranking Localizados</div>
+            <canvas id="canvas-ranking-localizados"></canvas>
+          </div>
+          <!-- Row 4: Global -->
+          <div class="chart-card" id="card-ranking-gestion">
+            <div class="chart-card-title">Ranking Gesti&oacute;n</div>
+            <canvas id="canvas-ranking-gestion"></canvas>
+          </div>
+          <div class="chart-card" id="card-ranking-turnos">
+            <div class="chart-card-title">Ranking Actividad Total</div>
+            <canvas id="canvas-ranking-turnos"></canvas>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -419,16 +718,34 @@ const SURGEONS = {
   24:'Miriam Barcia', 25:'Veronica Delgado', 26:'Jose Maria Perez', 27:'Jaime Diez'
 };
 
+const SURGEON_UNITS = {
+  1:['Rodilla'], 2:['Rodilla'], 3:['Rodilla','Cadera'],
+  4:['Rodilla'], 5:['Hombro'], 6:['Hombro'], 7:null,
+  8:['Mano'], 9:['Pie'], 10:['Pie'], 11:['Mano'], 12:['Rodilla'],
+  13:['Hombro'], 14:['Rodilla'], 15:['Pie'], 16:['Rodilla'],
+  17:['Cadera'], 18:['Rodilla'], 19:['Pie'], 20:['Cadera'],
+  21:['Hombro','Mano'], 23:['Mano'], 24:['Hombro'],
+  25:['Trauma'], 26:['Trauma'], 27:['Pie']
+};
+
+function getSurgeonsByUnit(unit) {
+  return Object.entries(SURGEON_UNITS)
+    .filter(([_, u]) => u && u.includes(unit))
+    .map(([id]) => Number(id));
+}
+
 const ACTIVITIES = {
-  diferida:    { label: 'Diferida/Planta', tag: 'Diferida',   icon: '&#127973;', color: 'var(--c-diferida)',    bg: 'var(--c-diferida-light)',    period: 'morning' },
-  qui_m:       { label: 'Quirofano M',     tag: 'Quirof M',   icon: '&#129657;', color: 'var(--c-qui-m)',       bg: 'var(--c-qui-m-light)',       period: 'morning' },
-  cons_m:      { label: 'Consulta M',      tag: 'Cons M',     icon: '&#128196;', color: 'var(--c-cons-m)',      bg: 'var(--c-cons-m-light)',      period: 'morning' },
-  saliente:    { label: 'Saliente',         tag: 'Saliente',   icon: '&#128164;', color: 'var(--c-saliente)',    bg: 'var(--c-saliente-light)',    period: 'allday',  lightTag: true },
-  cons_t:      { label: 'Consulta T',       tag: 'Cons T',     icon: '&#128203;', color: 'var(--c-cons-t)',      bg: 'var(--c-cons-t-light)',      period: 'afternoon' },
-  qui_t:       { label: 'Quirofano T',      tag: 'Quirof T',   icon: '&#128137;', color: 'var(--c-qui-t)',       bg: 'var(--c-qui-t-light)',       period: 'afternoon' },
-  guardia:     { label: 'Guardia',          tag: 'Guardia',    icon: '&#128680;', color: 'var(--c-guardia)',     bg: 'var(--c-guardia-light)',     period: 'allday'  },
-  localizado:  { label: 'Localizado',       tag: 'Localiz',    icon: '&#128222;', color: 'var(--c-localizado)',  bg: 'var(--c-localizado-light)',  period: 'allday'  },
-  gestion:     { label: 'Gestion',          tag: 'Gestion',    icon: '&#128188;', color: 'var(--c-gestion)',     bg: 'var(--c-gestion-light)',     period: 'allday',  lightTag: true }
+  diferida:    { label: 'Diferida/Planta',   tag: 'Diferida/Planta', mobileTag: 'D/P', icon: '&#127973;', color: 'var(--c-diferida)',    bg: 'var(--c-diferida-light)',    period: 'morning' },
+  qui_m:       { label: 'Quirofano M',       tag: 'Quirof M',        icon: '&#129657;', color: 'var(--c-qui-m)',       bg: 'var(--c-qui-m-light)',       period: 'morning' },
+  cons_m:      { label: 'Consulta M',        tag: 'Cons M',          icon: '&#128196;', color: 'var(--c-cons-m)',      bg: 'var(--c-cons-m-light)',      period: 'morning' },
+  saliente:    { label: 'Saliente',          tag: 'Saliente',        icon: '&#128164;', color: 'var(--c-saliente)',    bg: 'var(--c-saliente-light)',    period: 'allday',  lightTag: true },
+  cons_t:      { label: 'Consulta T',        tag: 'Cons T',          icon: '&#128203;', color: 'var(--c-cons-t)',      bg: 'var(--c-cons-t-light)',      period: 'afternoon' },
+  qui_t:       { label: 'Quirofano T',       tag: 'Quirof T',        icon: '&#128137;', color: 'var(--c-qui-t)',       bg: 'var(--c-qui-t-light)',       period: 'afternoon' },
+  guardia:     { label: 'Guardia',           tag: 'Guardia',         icon: '&#128680;', color: 'var(--c-guardia)',     bg: 'var(--c-guardia-light)',     period: 'allday'  },
+  localizado:  { label: 'Localizado',        tag: 'Localiz',         icon: '&#128222;', color: 'var(--c-localizado)',  bg: 'var(--c-localizado-light)',  period: 'allday'  },
+  gestion:     { label: 'Gestion',           tag: 'Gestion',         icon: '&#128188;', color: 'var(--c-gestion)',     bg: 'var(--c-gestion-light)',     period: 'allday',  lightTag: true },
+  diferida_t:  { label: 'Diferida', tag: 'Diferida', mobileTag: 'Dif', icon: '&#127973;', color: 'var(--c-diferida)',    bg: 'var(--c-diferida-light)',    period: 'afternoon' },
+  rucot:       { label: 'RUCOT',             tag: 'RUCOT',           mobileTag: 'RUC',  icon: '&#128203;', color: 'var(--c-rucot)',       bg: 'var(--c-rucot-light)',       period: 'allday' }
 };
 
 // Row offsets from URG row
@@ -447,12 +764,33 @@ const DAY_NAMES = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'
 const DAY_LABELS_SHORT = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 const MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
+// ─────────────────────────────────────────────
+//  FESTIVOS 2026 — Andalucia + Sevilla
+// ─────────────────────────────────────────────
+const HOLIDAYS_2026 = new Set([
+  '2026-01-01','2026-01-06','2026-02-28',
+  '2026-04-02','2026-04-03','2026-04-22',
+  '2026-05-01','2026-06-04','2026-08-15',
+  '2026-10-12','2026-11-02','2026-12-07',
+  '2026-12-08','2026-12-25'
+]);
+function isHoliday(y, m, d) {
+  return HOLIDAYS_2026.has(`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+}
+function isNonWorkingDay(y, m, d) {
+  const dow = new Date(y, m, d).getDay();
+  return dow === 0 || dow === 6 || isHoliday(y, m, d);
+}
+
 let parsedData = null;   // { surgeonId: [{ date, month, year, dayOfWeek, activity }] }
 let allDates = [];        // [{ day, month, year, dayOfWeek }] sorted
 let currentMonth = null;
 let currentYear = null;
 let availableMonths = [];
 let summaryMode = 'month'; // 'month' or 'total'
+let currentJornada = 100;  // 100, 80, or 60
+let chartsExpanded = false;
+let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null };
 let loadedFileName = '';
 
 // ─────────────────────────────────────────────
@@ -477,6 +815,11 @@ function applyTheme(dark) {
   } else {
     document.documentElement.removeAttribute('data-theme');
     btnTheme.textContent = '\uD83C\uDF19';
+  }
+  // Refresh charts with new theme colors
+  if (chartsExpanded && parsedData) {
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid)) setTimeout(() => renderCharts(sid), 50);
   }
 }
 function getAutoTheme() {
@@ -546,7 +889,7 @@ function processFile(file) {
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const wb = XLSX.read(e.target.result, { type: 'array', cellStyles: true });
       const ws = wb.Sheets[wb.SheetNames[0]];
       parseWorksheet(ws);
       mostrarToast('&#10003; Planning cargado correctamente');
@@ -649,6 +992,34 @@ function getDateForDay(ws, dateRow, dayRange, dayName) {
   return null;
 }
 
+function getCellFgRGB(ws, r, c) {
+  const addr = XLSX.utils.encode_cell({ r: r - 1, c: c - 1 });
+  const cell = ws[addr];
+  if (!cell || !cell.s) return null;
+  const fg = cell.s.fgColor || (cell.s.fill && cell.s.fill.fgColor);
+  if (!fg || !fg.rgb) return null;
+  const rgb = fg.rgb.length > 6 ? fg.rgb.substring(fg.rgb.length - 6) : fg.rgb;
+  return {
+    r: parseInt(rgb.substring(0, 2), 16),
+    g: parseInt(rgb.substring(2, 4), 16),
+    b: parseInt(rgb.substring(4, 6), 16)
+  };
+}
+
+function isCellOrange(ws, r, c) {
+  const col = getCellFgRGB(ws, r, c);
+  if (!col) return false;
+  // Orange: R high (>180), G medium (80-210), B low (<80)
+  return col.r > 180 && col.g > 80 && col.g < 210 && col.b < 80;
+}
+
+function isCellGreen(ws, r, c) {
+  const col = getCellFgRGB(ws, r, c);
+  if (!col) return false;
+  // Green: G dominant (>150), G > R+30, B < 150
+  return col.g > 150 && col.g > col.r + 30 && col.b < 150;
+}
+
 function extractSurgeonIds(ws, row, dayRange) {
   const ids = [];
   for (let c = dayRange.start; c <= dayRange.end; c++) {
@@ -656,13 +1027,99 @@ function extractSurgeonIds(ws, row, dayRange) {
     if (val === null || val === undefined) continue;
     const str = String(val).trim();
     if (str === '' || str.toUpperCase() === 'R') continue;
-    const isGestion = str.includes('*');
+    const isGestion = str.includes('*') || isCellOrange(ws, row, c);
     const num = parseInt(str.replace(/[^0-9]/g, ''), 10);
     if (!isNaN(num) && num >= 1 && num <= 30) {
-      ids.push({ id: num, gestion: isGestion });
+      ids.push({ id: num, gestion: isGestion, col: c });
     }
   }
   return ids;
+}
+
+// Adjust day ranges for quirófano rows: ensures even surgeon count per day
+// Quirófano always has surgeon pairs (main+assistant), so count must be even.
+// Scans right-to-left: if a day has odd count, extends its start by 1 column
+// and shrinks the previous day accordingly.
+function adjustQuiRanges(ws, actRow, dayRanges) {
+  const dayOrder = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
+  const adjusted = {};
+  for (const day of dayOrder) {
+    if (!dayRanges[day]) continue;
+    adjusted[day] = { start: dayRanges[day].start, end: dayRanges[day].end, headerCol: dayRanges[day].headerCol };
+  }
+  // Process right-to-left: extend left if odd count
+  for (let i = dayOrder.length - 1; i >= 0; i--) {
+    const day = dayOrder[i];
+    if (!adjusted[day]) continue;
+    const range = adjusted[day];
+    let count = 0;
+    for (let c = range.start; c <= range.end; c++) {
+      const val = cellVal(ws, actRow, c);
+      if (val !== null && val !== undefined) {
+        const str = String(val).trim();
+        if (str !== '' && str.toUpperCase() !== 'R') count++;
+      }
+    }
+    if (count % 2 === 1 && count > 0 && range.start > 3) {
+      const extraCol = range.start - 1;
+      const val = cellVal(ws, actRow, extraCol);
+      if (val !== null && val !== undefined) {
+        const str = String(val).trim();
+        if (str !== '' && str.toUpperCase() !== 'R') {
+          adjusted[day].start = extraCol;
+          // Shrink previous day to avoid double-counting
+          const prevDay = dayOrder[i - 1];
+          if (prevDay && adjusted[prevDay]) {
+            adjusted[prevDay].end = extraCol - 1;
+          }
+        }
+      }
+    }
+  }
+  return adjusted;
+}
+
+// General gap-based range adjustment for any row type.
+// If a day's range contains a gap of 2+ empty cells followed by data,
+// that data likely belongs to the next day (boundary spillover).
+function adjustDayRangesForRow(ws, row, dayRanges) {
+  const dayOrder = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
+  const adjusted = {};
+  for (const day of dayOrder) {
+    if (!dayRanges[day]) continue;
+    adjusted[day] = { start: dayRanges[day].start, end: dayRanges[day].end, headerCol: dayRanges[day].headerCol };
+  }
+
+  for (let i = 0; i < dayOrder.length - 1; i++) {
+    const currDay = dayOrder[i];
+    const nextDay = dayOrder[i + 1];
+    if (!adjusted[currDay] || !adjusted[nextDay]) continue;
+
+    const range = adjusted[currDay];
+    let gapCount = 0;
+    let foundAnyData = false;
+
+    for (let c = range.start; c <= range.end; c++) {
+      const val = cellVal(ws, row, c);
+      const str = (val !== null && val !== undefined) ? String(val).trim() : '';
+      const hasVal = str !== '' && str.toUpperCase() !== 'R';
+
+      if (hasVal) {
+        if (foundAnyData && gapCount >= 2) {
+          // Data after a 2+ cell gap: belongs to next day
+          adjusted[currDay].end = c - 1;
+          adjusted[nextDay].start = c;
+          break;
+        }
+        foundAnyData = true;
+        gapCount = 0;
+      } else {
+        if (foundAnyData) gapCount++;
+      }
+    }
+  }
+
+  return adjusted;
 }
 
 function parseWorksheet(ws) {
@@ -760,6 +1217,26 @@ function parseWorksheet(ws) {
   }
 
   for (const weekDates of rawWeeks) {
+    // Build weekDayRanges map for range adjustment
+    const weekDayRanges = {};
+    for (const wd of weekDates) {
+      weekDayRanges[wd.dayName] = wd.dayRange;
+    }
+
+    // Pre-compute adjusted ranges for ALL activity rows in this week
+    const weekUrgRow = weekDates[0].urgRow;
+    const adjustedPerActivity = {};
+    for (const [actKey, offset] of Object.entries(ROW_OFFSETS)) {
+      const actRow = weekUrgRow + offset;
+      if (actKey === 'qui_m' || actKey === 'qui_t') {
+        // Quirófano: use even-count principle (pairs must be even)
+        adjustedPerActivity[actKey] = adjustQuiRanges(ws, actRow, weekDayRanges);
+      } else {
+        // All other rows: use gap detection (2+ empty cells = day boundary)
+        adjustedPerActivity[actKey] = adjustDayRangesForRow(ws, actRow, weekDayRanges);
+      }
+    }
+
     for (const wd of weekDates) {
       // Detect month rollover (big drop in date number)
       if (wd.date < prevDate - 5) {
@@ -784,14 +1261,50 @@ function parseWorksheet(ws) {
       // Parse activities for this day
       for (const [actKey, offset] of Object.entries(ROW_OFFSETS)) {
         const actRow = wd.urgRow + offset;
-        const surgeonIds = extractSurgeonIds(ws, actRow, wd.dayRange);
-        for (const { id, gestion } of surgeonIds) {
+        const isQuirofano = (actKey === 'qui_m' || actKey === 'qui_t');
+        const isCons = (actKey === 'cons_m' || actKey === 'cons_t');
+
+        // Use pre-computed adjusted range for this activity
+        let range = wd.dayRange;
+        if (adjustedPerActivity[actKey] && adjustedPerActivity[actKey][wd.dayName]) {
+          range = adjustedPerActivity[actKey][wd.dayName];
+        }
+
+        const surgeonIds = extractSurgeonIds(ws, actRow, range);
+
+        for (let si = 0; si < surgeonIds.length; si++) {
+          const { id, gestion, col } = surgeonIds[si];
           if (!parsedData[id]) parsedData[id] = [];
-          const activity = gestion ? 'gestion' : actKey;
-          parsedData[id].push({
+
+          // Determine activity: gestion > green overrides > default
+          let activity;
+          if (gestion) {
+            activity = 'gestion';
+          } else if (actKey === 'qui_t' && isCellGreen(ws, actRow, col)) {
+            activity = 'diferida_t';
+          } else if (isCons && isCellGreen(ws, actRow, col)) {
+            activity = 'rucot';
+          } else {
+            activity = actKey;
+          }
+
+          const entry = {
             day: wd.date, month: trackMonth, year: trackYear,
             dayOfWeek, activity
-          });
+          };
+
+          // Quirofano pairing: consecutive columns = pairs
+          // Excel layout: [main1, assist1, main2, assist2, ...]
+          if (isQuirofano && (activity === 'qui_m' || activity === 'qui_t')) {
+            const pairIdx = (si % 2 === 0) ? si + 1 : si - 1;
+            if (pairIdx >= 0 && pairIdx < surgeonIds.length) {
+              entry.companions = [surgeonIds[pairIdx].id];
+            } else {
+              entry.companions = [];
+            }
+          }
+
+          parsedData[id].push(entry);
         }
       }
     }
@@ -857,10 +1370,16 @@ function populateSurgeonSelect() {
 // ─────────────────────────────────────────────
 document.getElementById('surgeon-select').addEventListener('change', function() {
   const id = parseInt(this.value, 10);
+  const badgesEl = document.getElementById('unit-badges');
   if (isNaN(id)) {
     document.getElementById('results').classList.remove('visible');
+    badgesEl.innerHTML = '';
     return;
   }
+  const units = SURGEON_UNITS[id];
+  badgesEl.innerHTML = (units && units.length > 0)
+    ? units.map(u => `<span class="unit-badge">${u}</span>`).join('')
+    : '';
   renderResults(id);
 });
 
@@ -883,7 +1402,9 @@ function renderResults(surgeonId) {
   renderCalendar(surgeonId);
   renderSummary(surgeonId);
   renderTurns(surgeonId);
+  renderRetribution(surgeonId);
   renderLegend();
+  if (chartsExpanded) renderCharts(surgeonId);
 }
 
 // ─────────────────────────────────────────────
@@ -911,12 +1432,31 @@ function renderCalendar(surgeonId) {
     e => e.month === currentMonth && e.year === currentYear
   );
 
-  // Group by day
+  const isMobile = window.innerWidth <= 600;
+
+  // Group by day — store objects with activity + companions
   const dayMap = {};
   entries.forEach(e => {
     if (!dayMap[e.day]) dayMap[e.day] = [];
-    if (!dayMap[e.day].includes(e.activity)) dayMap[e.day].push(e.activity);
+    const existing = dayMap[e.day].find(x => x.activity === e.activity);
+    if (!existing) {
+      dayMap[e.day].push({ activity: e.activity, companions: e.companions ? [...e.companions] : [] });
+    } else if (e.companions) {
+      e.companions.forEach(c => {
+        if (!existing.companions.includes(c)) existing.companions.push(c);
+      });
+    }
   });
+
+  // Guardia + diferida: hide diferida, keep only guardia (day acts as festive)
+  for (const day in dayMap) {
+    const items = dayMap[day];
+    const hasGuardia = items.some(x => x.activity === 'guardia');
+    const hasDiferida = items.some(x => x.activity === 'diferida');
+    if (hasGuardia && hasDiferida) {
+      dayMap[day] = items.filter(x => x.activity !== 'diferida');
+    }
+  }
 
   // Build calendar grid
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
@@ -936,46 +1476,62 @@ function renderCalendar(surgeonId) {
 
   // Day cells
   for (let d = 1; d <= daysInMonth; d++) {
-    const acts = dayMap[d] || [];
-    if (acts.length === 0) {
+    const dayItems = dayMap[d] || [];
+    if (dayItems.length === 0) {
       html += `<div class="cal-cell empty"><span class="day-num">${d}</span></div>`;
       continue;
     }
 
+    const actKeys = dayItems.map(x => x.activity);
+
     // Group activities by period
-    const morningActs = acts.filter(a => ACTIVITIES[a]?.period === 'morning');
-    const afternoonActs = acts.filter(a => ACTIVITIES[a]?.period === 'afternoon');
-    const alldayActs = acts.filter(a => ACTIVITIES[a]?.period === 'allday');
+    const morningItems = dayItems.filter(x => ACTIVITIES[x.activity]?.period === 'morning');
+    const afternoonItems = dayItems.filter(x => ACTIVITIES[x.activity]?.period === 'afternoon');
+    const alldayItems = dayItems.filter(x => ACTIVITIES[x.activity]?.period === 'allday');
 
-    const tooltip = acts.map(a => ACTIVITIES[a]?.label || a).join(' + ');
+    const tooltip = actKeys.map(a => ACTIVITIES[a]?.label || a).join(' + ');
 
-    html += `<div class="cal-cell has-activity" title="${tooltip}">`;
+    // Festive detection: official holidays get gradient, weekends just center
+    const jsDay = new Date(currentYear, currentMonth, d).getDay();
+    const isWeekend = (jsDay === 0 || jsDay === 6);
+    const isOfficialHoliday = isHoliday(currentYear, currentMonth, d);
+    const festiveClass = isOfficialHoliday ? ' festive' : (isWeekend ? ' weekend' : '');
+
+    html += `<div class="cal-cell has-activity${festiveClass}" title="${tooltip}">`;
     html += `<span class="day-num">${d}</span>`;
     html += '<div class="cell-acts">';
 
-    // Allday tags
-    for (const a of alldayActs) {
-      const info = ACTIVITIES[a];
+    // Helper to render a tag + optional companion badge
+    function renderTag(item) {
+      const info = ACTIVITIES[item.activity];
+      if (!info) return '';
       const lightClass = info.lightTag ? ' light-bg' : '';
-      html += `<span class="act-tag${lightClass}" style="background:${info.color}">${info.tag}</span>`;
+      const centeredClass = (item.activity === 'guardia' || item.activity === 'saliente') ? ' act-centered' : '';
+      const tagText = (info.mobileTag && isMobile) ? info.mobileTag : info.tag;
+      let tagHtml = `<span class="act-tag${lightClass}${centeredClass}" style="background:${info.color}">${tagText}</span>`;
+      // Companion badge for quirofano
+      if ((item.activity === 'qui_m' || item.activity === 'qui_t') && item.companions.length > 0) {
+        const names = item.companions.map(cid => {
+          const full = SURGEONS[cid];
+          return full ? full.split(' ').pop() : `T${cid}`;
+        });
+        tagHtml += `<span class="companion-badge">\u21B3 ${names.join(', ')}</span>`;
+      }
+      return tagHtml;
     }
 
+    // Allday tags
+    for (const item of alldayItems) { html += renderTag(item); }
     // Morning tags
-    for (const a of morningActs) {
-      const info = ACTIVITIES[a];
-      html += `<span class="act-tag" style="background:${info.color}">${info.tag}</span>`;
-    }
+    for (const item of morningItems) { html += renderTag(item); }
 
     // Separator if both morning/allday AND afternoon
-    if ((morningActs.length > 0 || alldayActs.length > 0) && afternoonActs.length > 0) {
+    if ((morningItems.length > 0 || alldayItems.length > 0) && afternoonItems.length > 0) {
       html += '<span class="cell-sep"></span>';
     }
 
     // Afternoon tags
-    for (const a of afternoonActs) {
-      const info = ACTIVITIES[a];
-      html += `<span class="act-tag" style="background:${info.color}">${info.tag}</span>`;
-    }
+    for (const item of afternoonItems) { html += renderTag(item); }
 
     html += '</div></div>';
   }
@@ -995,22 +1551,37 @@ function renderCalendar(surgeonId) {
 // ─────────────────────────────────────────────
 function renderSummary(surgeonId) {
   const container = document.getElementById('summary-cards');
+  const rangeEl = document.getElementById('summary-range');
   const allEntries = parsedData[surgeonId] || [];
-
-  // Filter based on mode
   const entries = (summaryMode === 'month')
     ? allEntries.filter(e => e.month === currentMonth && e.year === currentYear)
     : allEntries;
 
-  // Group by activity
+  // Range subtitle
+  if (summaryMode === 'month') {
+    rangeEl.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+  } else {
+    if (availableMonths.length > 0) {
+      const first = availableMonths[0];
+      const last = availableMonths[availableMonths.length - 1];
+      if (first.month === last.month && first.year === last.year) {
+        rangeEl.textContent = `${MONTH_NAMES[first.month]} ${first.year}`;
+      } else {
+        const fYear = first.year === last.year ? '' : ` ${first.year}`;
+        rangeEl.textContent = `${MONTH_NAMES[first.month]}${fYear} — ${MONTH_NAMES[last.month]} ${last.year}`;
+      }
+    } else {
+      rangeEl.textContent = '';
+    }
+  }
+
   const grouped = {};
   for (const e of entries) {
     if (!grouped[e.activity]) grouped[e.activity] = [];
     grouped[e.activity].push(e);
   }
 
-  // Order
-  const order = ['guardia', 'saliente', 'localizado', 'qui_m', 'diferida', 'qui_t', 'cons_m', 'cons_t', 'gestion'];
+  const order = ['guardia', 'saliente', 'localizado', 'qui_m', 'diferida', 'qui_t', 'diferida_t', 'cons_m', 'cons_t', 'rucot', 'gestion'];
 
   let html = '';
   for (const actKey of order) {
@@ -1019,38 +1590,30 @@ function renderSummary(surgeonId) {
     const actInfo = ACTIVITIES[actKey];
     if (!actInfo) continue;
 
-    let daysText = '';
+    // Build tooltip with days
+    let tipText = '';
     if (summaryMode === 'month') {
-      // Show just days for current month
       const days = [...new Set(actEntries.map(e => e.day))].sort((a, b) => a - b);
-      daysText = `D\u00edas: ${days.join(', ')}`;
+      tipText = `D\u00edas: ${days.join(', ')}`;
     } else {
-      // Group by month for total view
       const byMonth = {};
       actEntries.forEach(e => {
         const mKey = MONTH_NAMES[e.month];
         if (!byMonth[mKey]) byMonth[mKey] = [];
         byMonth[mKey].push(e.day);
       });
-      for (const [month, days] of Object.entries(byMonth)) {
-        const sorted = [...new Set(days)].sort((a, b) => a - b);
-        daysText += `<strong>${month}:</strong> ${sorted.join(', ')}<br>`;
-      }
+      tipText = Object.entries(byMonth).map(([m, d]) => `${m}: ${[...new Set(d)].sort((a,b)=>a-b).join(', ')}`).join(' | ');
     }
 
-    html += `
-      <div class="summary-card">
-        <div class="summary-icon" style="background:${actInfo.bg}; color:${actInfo.color}">${actInfo.icon}</div>
-        <div class="summary-content">
-          <div class="summary-label" style="color:${actInfo.color}">${actInfo.label}</div>
-          <div class="summary-days">${daysText}</div>
-        </div>
-        <div class="summary-count" style="color:${actInfo.color}">${actEntries.length}</div>
-      </div>`;
+    html += `<div class="st-row" title="${tipText}">
+      <span class="st-dot" style="background:${actInfo.color}"></span>
+      <span class="st-label" style="color:${actInfo.color}">${actInfo.label}</span>
+      <span class="st-count" style="color:${actInfo.color}">${actEntries.length}</span>
+    </div>`;
   }
 
   if (!html) {
-    html = '<div style="text-align:center;padding:30px;color:var(--text-light);font-size:13px;">Sin actividades registradas</div>';
+    html = '<div style="grid-column:1/-1;text-align:center;padding:16px;color:var(--text-light);font-size:12px;">Sin actividades</div>';
   }
 
   container.innerHTML = html;
@@ -1067,16 +1630,14 @@ function renderTurns(surgeonId) {
 
   // Calculate weeks of the month (Mon-Sun)
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  const startOffset = (firstDay === 0) ? 6 : firstDay - 1; // days before first Monday
+  const startOffset = (firstDay === 0) ? 6 : firstDay - 1;
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
   const weeks = [];
-  // First week: day 1 to first Sunday
   let firstWeekEnd = 7 - startOffset;
   if (firstWeekEnd > daysInMonth) firstWeekEnd = daysInMonth;
   weeks.push({ start: 1, end: firstWeekEnd });
 
-  // Subsequent full weeks
   let day = firstWeekEnd + 1;
   while (day <= daysInMonth) {
     const end = Math.min(day + 6, daysInMonth);
@@ -1084,12 +1645,28 @@ function renderTurns(surgeonId) {
     day = end + 1;
   }
 
-  // Count turns per week
+  const jornadaMap = { 100: 5, 80: 4, 60: 3 };
+  const turnsPerFullWeek = jornadaMap[currentJornada] || 5;
+
+  function countWorkdays(startDay, endDay) {
+    let count = 0;
+    for (let d = startDay; d <= endDay; d++) {
+      const jsDay = new Date(currentYear, currentMonth, d).getDay();
+      if (jsDay >= 1 && jsDay <= 5) count++;
+    }
+    return count;
+  }
+
   let totalTurns = 0;
+  let totalExpected = 0;
   let html = '';
+
   weeks.forEach((w, i) => {
     const weekTurns = entries.filter(e => e.day >= w.start && e.day <= w.end).length;
     totalTurns += weekTurns;
+    const workdays = countWorkdays(w.start, w.end);
+    totalExpected += turnsPerFullWeek * workdays / 5;
+
     const countClass = weekTurns > 0 ? 'turn-count' : 'turn-count-zero';
     html += `
       <div class="turn-row">
@@ -1101,14 +1678,103 @@ function renderTurns(surgeonId) {
       </div>`;
   });
 
+  const roundedExpected = Math.round(totalExpected);
+
   html += `
     <div class="turn-total">
       <span class="turn-total-label">Total ${MONTH_NAMES[currentMonth]}</span>
       <span>${totalTurns} turnos</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:12px;color:var(--text-muted);">
+      <span>Esperados (jornada ${currentJornada}%)</span>
+      <span style="font-weight:600;">${roundedExpected} turnos</span>
     </div>`;
 
   container.innerHTML = html;
 }
+
+// ─────────────────────────────────────────────
+//  JORNADA TOGGLE
+// ─────────────────────────────────────────────
+document.querySelectorAll('#jornada-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#jornada-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentJornada = parseInt(this.dataset.jornada, 10);
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid)) {
+      renderTurns(sid);
+      if (chartsExpanded) renderCharts(sid);
+    }
+  });
+});
+
+// ─────────────────────────────────────────────
+//  RETRIBUTION
+// ─────────────────────────────────────────────
+function renderRetribution(surgeonId) {
+  const container = document.getElementById('retrib-content');
+  const entries = (parsedData[surgeonId] || []).filter(
+    e => e.month === currentMonth && e.year === currentYear
+  );
+
+  let g17 = 0, g24 = 0, l17 = 0, l24 = 0;
+  for (const e of entries) {
+    if (e.activity === 'guardia') {
+      if (isNonWorkingDay(e.year, e.month, e.day)) g24++; else g17++;
+    } else if (e.activity === 'localizado') {
+      if (isNonWorkingDay(e.year, e.month, e.day)) l24++; else l17++;
+    }
+  }
+
+  const R = RETRIB_RATES;
+  const brutoG17 = g17 * R.gpf.r17 * R.gpf.h17;
+  const brutoG24 = g24 * R.gpf.r24 * R.gpf.h24;
+  const brutoL17 = l17 * R.loc.m17 * R.loc.e17;
+  const brutoL24 = l24 * R.loc.m24 * R.loc.e24;
+  const totalBruto = brutoG17 + brutoG24 + brutoL17 + brutoL24;
+  const irpf = DEFAULT_IRPF;
+  const totalNeto = totalBruto * (100 - irpf) / 100;
+
+  const fmt = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \u20ac';
+
+  // Update calculator link
+  const calcLink = document.getElementById('retrib-calc-link');
+  calcLink.href = `https://jmacot.github.io/calculadora-guardias/?tab=hsjd&gpf17=${g17}&gpf24=${g24}&hsjd17=${l17}&hsjd24=${l24}`;
+
+  let html = '<table class="retrib-table"><thead><tr><th>Concepto</th><th>17h</th><th>24h</th><th>' + (retribMode === 'contaje' ? 'Total' : 'Subtotal') + '</th></tr></thead><tbody>';
+
+  if (retribMode === 'contaje') {
+    html += `<tr><td>\ud83d\ude91 Guardias</td><td>${g17}</td><td>${g24}</td><td style="font-weight:700">${g17 + g24}</td></tr>`;
+    html += `<tr><td>\ud83d\udcde Localizados</td><td>${l17}</td><td>${l24}</td><td style="font-weight:700">${l17 + l24}</td></tr>`;
+    html += `</tbody><tfoot><tr><td>Total</td><td>${g17 + l17}</td><td>${g24 + l24}</td><td>${g17 + g24 + l17 + l24}</td></tr></tfoot>`;
+  } else if (retribMode === 'bruto') {
+    html += `<tr><td>\ud83d\ude91 Guardias</td><td>${fmt(brutoG17)}</td><td>${fmt(brutoG24)}</td><td style="font-weight:700">${fmt(brutoG17 + brutoG24)}</td></tr>`;
+    html += `<tr><td>\ud83d\udcde Localizados</td><td>${fmt(brutoL17)}</td><td>${fmt(brutoL24)}</td><td style="font-weight:700">${fmt(brutoL17 + brutoL24)}</td></tr>`;
+    html += `</tbody><tfoot><tr><td>Total Bruto</td><td></td><td></td><td>${fmt(totalBruto)}</td></tr></tfoot>`;
+  } else {
+    const netoG17 = brutoG17 * (100 - irpf) / 100;
+    const netoG24 = brutoG24 * (100 - irpf) / 100;
+    const netoL17 = brutoL17 * (100 - irpf) / 100;
+    const netoL24 = brutoL24 * (100 - irpf) / 100;
+    html += `<tr><td>\ud83d\ude91 Guardias</td><td>${fmt(netoG17)}</td><td>${fmt(netoG24)}</td><td style="font-weight:700">${fmt(netoG17 + netoG24)}</td></tr>`;
+    html += `<tr><td>\ud83d\udcde Localizados</td><td>${fmt(netoL17)}</td><td>${fmt(netoL24)}</td><td style="font-weight:700">${fmt(netoL17 + netoL24)}</td></tr>`;
+    html += `</tbody><tfoot><tr><td>Total Neto (IRPF ${irpf}%)</td><td></td><td></td><td>${fmt(totalNeto)}</td></tr></tfoot>`;
+  }
+
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+document.querySelectorAll('#retrib-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#retrib-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    retribMode = this.dataset.mode;
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid)) renderRetribution(sid);
+  });
+});
 
 // ─────────────────────────────────────────────
 //  LEGEND
@@ -1121,6 +1787,631 @@ function renderLegend() {
   }
   legend.innerHTML = html;
 }
+
+// ─────────────────────────────────────────────
+//  CHARTS / DASHBOARD
+// ─────────────────────────────────────────────
+const ACTIVITY_COLORS = {
+  diferida: '#64748b', qui_m: '#1a3a5c', cons_m: '#16a34a',
+  saliente: '#f59e0b', cons_t: '#0d9488', qui_t: '#3b82f6',
+  guardia: '#dc2626', localizado: '#7c3aed', gestion: '#ca8a04',
+  diferida_t: '#94a3b8', rucot: '#e11d48'
+};
+
+let comparativaMode = 'turnos';
+let qxUnitMode = 'total';
+let comparadorMode = 'cirujano';
+let retribMode = 'contaje';
+
+// ── Retribution rates (HSJD) ──
+const RETRIB_RATES = {
+  gpf: { r17: 21.31, h17: 17, r24: 20.01, h24: 24 },
+  loc: { m17: 8.5, e17: 21.31, m24: 12, e24: 20.01 }
+};
+const DEFAULT_IRPF = 15;
+
+function getChartTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    textColor: isDark ? '#94a3b8' : '#555555',
+    gridColor: isDark ? 'rgba(75,85,99,0.3)' : 'rgba(0,0,0,0.06)',
+    surfaceColor: isDark ? '#1f2937' : '#ffffff',
+    borderColor: isDark ? '#374151' : '#e5e7eb',
+    accentColor: isDark ? '#60a5fa' : '#1a3a5c',
+    mutedBarColor: isDark ? 'rgba(148,163,184,0.4)' : 'rgba(26,58,92,0.15)',
+    isDark
+  };
+}
+
+function destroyCharts() {
+  for (const key in chartInstances) {
+    if (chartInstances[key]) { chartInstances[key].destroy(); chartInstances[key] = null; }
+  }
+}
+
+function getSurnameOf(id) {
+  const name = SURGEONS[id] || `T${id}`;
+  return name.split(' ').pop();
+}
+
+function getMonthEntries(surgeonId) {
+  return (parsedData[surgeonId] || []).filter(
+    e => e.month === currentMonth && e.year === currentYear
+  );
+}
+
+function makeTooltipOpts(theme) {
+  return { backgroundColor: theme.surfaceColor, titleColor: theme.textColor, bodyColor: theme.textColor, borderColor: theme.borderColor, borderWidth: 1, cornerRadius: 8 };
+}
+
+// ── Bubbles Chart (HTML-based) ──
+function renderBubblesChart(surgeonId) {
+  const container = document.getElementById('bubbles-container');
+  const legendEl = document.getElementById('bubbles-legend');
+  const entries = getMonthEntries(surgeonId);
+  if (entries.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-light);font-size:12px;text-align:center;padding:20px">Sin datos</div>';
+    legendEl.innerHTML = '';
+    return;
+  }
+  // Aggregate into groups
+  const grpMap = {
+    qui_m:'quirofano', qui_t:'quirofano',
+    cons_m:'consultas', cons_t:'consultas',
+    diferida:'diferida_planta', diferida_t:'diferida_planta',
+    guardia:'guardia', localizado:'localizado',
+    gestion:'gestion', rucot:'rucot', saliente:'saliente'
+  };
+  const grpLabels = {
+    quirofano:'Quir\u00f3fano', consultas:'Consultas', guardia:'Guardia',
+    localizado:'Localizado', gestion:'Gesti\u00f3n',
+    diferida_planta:'Diferida/Planta', rucot:'RUCOT', saliente:'Saliente'
+  };
+  const grpColors = {
+    quirofano:'#1a3a5c', consultas:'#16a34a', guardia:'#dc2626',
+    localizado:'#7c3aed', gestion:'#ca8a04',
+    diferida_planta:'#64748b', rucot:'#e11d48', saliente:'#f59e0b'
+  };
+  const counts = {};
+  entries.forEach(e => {
+    const g = grpMap[e.activity] || e.activity;
+    counts[g] = (counts[g] || 0) + 1;
+  });
+  const total = entries.length;
+  const sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  const maxPct = Math.round(counts[sorted[0]] / total * 100);
+
+  let bubblesHtml = '';
+  let legendHtml = '';
+  for (const grp of sorted) {
+    const pct = Math.round(counts[grp] / total * 100);
+    const color = grpColors[grp] || '#999';
+    const label = grpLabels[grp] || grp;
+    const diam = Math.max(36, Math.round(36 + 74 * Math.sqrt(pct / Math.max(maxPct, 1))));
+    const fontSize = diam < 50 ? 10 : (diam < 70 ? 12 : 14);
+    bubblesHtml += `<div class="bubble" style="width:${diam}px;height:${diam}px;background:${color};font-size:${fontSize}px" title="${label}: ${counts[grp]} (${pct}%)">${pct}%</div>`;
+    legendHtml += `<span class="bubbles-legend-item"><span class="bubbles-legend-dot" style="background:${color}"></span>${label}: ${counts[grp]}</span>`;
+  }
+  container.innerHTML = bubblesHtml;
+  legendEl.innerHTML = legendHtml;
+}
+
+// ── Percentiles Card ──
+function renderPercentilesCard(surgeonId) {
+  const container = document.getElementById('percentiles-content');
+  const units = SURGEON_UNITS[surgeonId];
+  const unit = units ? units[0] : null;
+
+  const metrics = [
+    { key: 'guardia',    label: 'Guardias',         fn: e => e.activity === 'guardia' },
+    { key: 'qui_total',  label: 'Quir\u00f3fanos Total',  fn: e => e.activity === 'qui_m' || e.activity === 'qui_t' },
+    { key: 'qui_m',      label: 'Qx Ma\u00f1ana',         fn: e => e.activity === 'qui_m' },
+    { key: 'qui_t',      label: 'Qx Tarde',          fn: e => e.activity === 'qui_t' },
+    { key: 'cons_m',     label: 'Consultas M',       fn: e => e.activity === 'cons_m' },
+    { key: 'cons_t',     label: 'Consultas T',       fn: e => e.activity === 'cons_t' },
+    { key: 'gestion',    label: 'Gesti\u00f3n',           fn: e => e.activity === 'gestion' },
+    { key: 'localizado', label: 'Localizados',       fn: e => e.activity === 'localizado' },
+    { key: 'diferida',   label: 'Diferida/Planta',   fn: e => e.activity === 'diferida' || e.activity === 'diferida_t' },
+    { key: 'turnos',     label: 'Turnos Totales',    fn: () => true }
+  ];
+
+  const allIds = Object.keys(parsedData).map(Number);
+  const unitIds = unit ? getSurgeonsByUnit(unit).filter(id => parsedData[id]) : [];
+
+  // Calculate counts for all surgeons
+  const sCounts = {};
+  for (const id of allIds) {
+    const ent = getMonthEntries(id);
+    sCounts[id] = {};
+    for (const m of metrics) sCounts[id][m.key] = ent.filter(m.fn).length;
+  }
+
+  function calcPercentile(val, allVals) {
+    if (allVals.length <= 1) return 50;
+    const below = allVals.filter(v => v < val).length;
+    const equal = allVals.filter(v => v === val).length;
+    return Math.round(((below + equal * 0.5) / allVals.length) * 100);
+  }
+
+  let html = `<table class="perc-table"><thead><tr><th>M\u00e9trica</th><th style="text-align:center">Valor</th>`;
+  if (unit) html += `<th>P. Unidad</th>`;
+  html += `<th>P. Global</th></tr></thead><tbody>`;
+
+  for (const m of metrics) {
+    const val = sCounts[surgeonId]?.[m.key] || 0;
+    const globalVals = allIds.map(id => sCounts[id]?.[m.key] || 0);
+    const gPct = calcPercentile(val, globalVals);
+    const gColor = gPct >= 75 ? '#16a34a' : gPct >= 50 ? '#ca8a04' : gPct >= 25 ? '#f59e0b' : '#dc2626';
+
+    let unitHtml = '';
+    if (unit) {
+      const unitVals = unitIds.map(id => sCounts[id]?.[m.key] || 0);
+      const uPct = calcPercentile(val, unitVals);
+      const uColor = uPct >= 75 ? '#16a34a' : uPct >= 50 ? '#ca8a04' : uPct >= 25 ? '#f59e0b' : '#dc2626';
+      unitHtml = `<td><div class="sparkbar-wrap"><div class="sparkbar"><div class="sparkbar-fill p-unit" style="width:${uPct}%;background:${uColor}"></div></div><span class="sparkbar-pct" style="color:${uColor}">P${uPct}</span></div></td>`;
+    }
+
+    html += `<tr><td>${m.label}</td><td style="font-weight:700;text-align:center">${val}</td>${unitHtml}<td><div class="sparkbar-wrap"><div class="sparkbar"><div class="sparkbar-fill p-global" style="width:${gPct}%;background:${gColor}"></div></div><span class="sparkbar-pct" style="color:${gColor}">P${gPct}</span></div></td></tr>`;
+  }
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// ── Comparativa Unidad (with toggle: Turnos / Guardias) ──
+function renderUnitComparisonChart(surgeonId) {
+  const canvas = document.getElementById('canvas-unit-comparison');
+  const ctx = canvas.getContext('2d');
+  const theme = getChartTheme();
+  const units = SURGEON_UNITS[surgeonId];
+  const titleEl = document.getElementById('comparativa-title');
+
+  if (chartInstances.unitComparison) { chartInstances.unitComparison.destroy(); chartInstances.unitComparison = null; }
+
+  if (!units) {
+    canvas.style.display = 'none';
+    titleEl.textContent = 'Comparativa (sin unidad)';
+    return;
+  }
+  canvas.style.display = '';
+  const unit = units[0]; // Use first unit for comparison
+  titleEl.textContent = `Comparativa \u2014 ${unit}`;
+
+  const unitSurgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
+  const exclude = new Set(['guardia', 'saliente']);
+
+  if (comparativaMode === 'guardias') {
+    // Simple bar: guardia count
+    const guardCounts = {};
+    for (const id of unitSurgeons) {
+      guardCounts[id] = getMonthEntries(id).filter(e => e.activity === 'guardia').length;
+    }
+    unitSurgeons.sort((a, b) => guardCounts[b] - guardCounts[a]);
+    const labels = unitSurgeons.map(id => getSurnameOf(id));
+    const data = unitSurgeons.map(id => guardCounts[id]);
+    const colors = unitSurgeons.map(id => id === surgeonId ? theme.accentColor : theme.mutedBarColor);
+
+    chartInstances.unitComparison = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Guardias', data, backgroundColor: colors, borderRadius: 3 }] },
+      options: {
+        responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+        scales: {
+          x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
+          y: { ticks: { color: theme.textColor, font: { size: 10, weight: '500' } }, grid: { display: false } }
+        },
+        plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
+      }
+    });
+  } else {
+    // Stacked bar: grouped activities (qui_m+qui_t → Quirófano, etc.)
+    const groupMap = {
+      qui_m: 'quirofano', qui_t: 'quirofano',
+      cons_m: 'cons_m', cons_t: 'cons_t',
+      diferida: 'diferida', diferida_t: 'diferida_t',
+      localizado: 'localizado', gestion: 'gestion', rucot: 'rucot'
+    };
+    const groupLabels = {
+      quirofano: 'Quirófano', cons_m: 'Consulta M', cons_t: 'Consulta T',
+      diferida: 'Diferida/Planta', diferida_t: 'Diferida/Planta T',
+      localizado: 'Localizado', gestion: 'Gestión', rucot: 'RUCOT'
+    };
+    const groupColors = {
+      quirofano: '#1a3a5c', cons_m: ACTIVITY_COLORS['cons_m'], cons_t: ACTIVITY_COLORS['cons_t'],
+      diferida: ACTIVITY_COLORS['diferida'], diferida_t: ACTIVITY_COLORS['diferida_t'],
+      localizado: ACTIVITY_COLORS['localizado'], gestion: ACTIVITY_COLORS['gestion'], rucot: ACTIVITY_COLORS['rucot']
+    };
+
+    const actCounts = {};
+    const allGroups = new Set();
+    for (const id of unitSurgeons) {
+      actCounts[id] = {};
+      getMonthEntries(id).forEach(e => {
+        if (exclude.has(e.activity)) return;
+        const grp = groupMap[e.activity] || e.activity;
+        actCounts[id][grp] = (actCounts[id][grp] || 0) + 1;
+        allGroups.add(grp);
+      });
+    }
+    unitSurgeons.sort((a, b) => {
+      const ta = Object.values(actCounts[a]).reduce((s,v)=>s+v,0);
+      const tb = Object.values(actCounts[b]).reduce((s,v)=>s+v,0);
+      return tb - ta;
+    });
+    const grpOrder = ['quirofano','cons_m','cons_t','diferida','diferida_t','localizado','gestion','rucot'];
+    const usedGrps = grpOrder.filter(g => allGroups.has(g));
+    const labels = unitSurgeons.map(id => getSurnameOf(id));
+    const datasets = usedGrps.map(grp => ({
+      label: groupLabels[grp] || grp,
+      data: unitSurgeons.map(id => actCounts[id][grp] || 0),
+      backgroundColor: groupColors[grp] || '#999',
+      borderRadius: 2, borderWidth: unitSurgeons.map(id => id === surgeonId ? 2 : 0),
+      borderColor: unitSurgeons.map(id => id === surgeonId ? theme.accentColor : 'transparent')
+    }));
+
+    // Custom plugin to show % on each segment
+    const percentPlugin = {
+      id: 'percentLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx: c2 } = chart;
+        chart.data.datasets.forEach((ds, di) => {
+          const meta = chart.getDatasetMeta(di);
+          meta.data.forEach((bar, i) => {
+            const val = ds.data[i];
+            if (!val) return;
+            const total = chart.data.datasets.reduce((s, d) => s + (d.data[i] || 0), 0);
+            if (!total) return;
+            const pct = Math.round(val / total * 100);
+            if (pct < 10) return;
+            const { x, y, base } = bar.getProps(['x', 'y', 'base']);
+            const cx = (x + base) / 2;
+            c2.save();
+            c2.fillStyle = 'rgba(255,255,255,0.9)';
+            c2.font = 'bold 8px Inter,sans-serif';
+            c2.textAlign = 'center';
+            c2.textBaseline = 'middle';
+            c2.fillText(`${pct}%`, cx, y);
+            c2.restore();
+          });
+        });
+      }
+    };
+
+    chartInstances.unitComparison = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets },
+      plugins: [percentPlugin],
+      options: {
+        responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+        scales: {
+          x: { stacked: true, beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
+          y: { stacked: true, ticks: { color: theme.textColor, font: { size: 10, weight: '500' } }, grid: { display: false } }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { color: theme.textColor, font: { family: "'Inter',sans-serif", size: 11 }, padding: 8, usePointStyle: true } },
+          tooltip: makeTooltipOpts(theme)
+        }
+      }
+    });
+  }
+}
+
+// ── QX por Unidad (global) ──
+function renderQxUnitChart(surgeonId) {
+  const ctx = document.getElementById('canvas-qx-unit').getContext('2d');
+  const theme = getChartTheme();
+  const allUnits = ['Rodilla', 'Cadera', 'Hombro', 'Mano', 'Pie', 'Trauma'];
+  const selectedUnits = SURGEON_UNITS[surgeonId] || [];
+
+  if (chartInstances.qxUnit) chartInstances.qxUnit.destroy();
+
+  const unitCounts = {};
+  for (const unit of allUnits) {
+    let count = 0;
+    const surgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
+    for (const id of surgeons) {
+      count += getMonthEntries(id).filter(e => {
+        if (qxUnitMode === 'manana') return e.activity === 'qui_m';
+        if (qxUnitMode === 'tarde') return e.activity === 'qui_t';
+        return e.activity === 'qui_m' || e.activity === 'qui_t';
+      }).length;
+    }
+    unitCounts[unit] = count;
+  }
+
+  const sorted = allUnits.sort((a, b) => unitCounts[b] - unitCounts[a]);
+  const labels = sorted;
+  const data = sorted.map(u => unitCounts[u]);
+  const colors = sorted.map(u => selectedUnits.includes(u) ? theme.accentColor : theme.mutedBarColor);
+
+  chartInstances.qxUnit = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Quir\u00f3fanos', data, backgroundColor: colors, borderRadius: 3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
+        y: { ticks: { color: theme.textColor, font: { size: 10, weight: '600' } }, grid: { display: false } }
+      },
+      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
+    }
+  });
+}
+
+// ── Ranking Guardias (global) ──
+function renderRankingGuardiasChart(surgeonId) {
+  const ctx = document.getElementById('canvas-ranking-guardias').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.rankGuardias) chartInstances.rankGuardias.destroy();
+
+  const counts = {};
+  for (const id of Object.keys(parsedData).map(Number)) {
+    const g = getMonthEntries(id).filter(e => e.activity === 'guardia').length;
+    if (g > 0) counts[id] = g;
+  }
+  const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
+  const labels = sorted.map(id => getSurnameOf(id));
+  const data = sorted.map(id => counts[id]);
+  const colors = sorted.map(id => id === surgeonId ? '#dc2626' : theme.mutedBarColor);
+
+  chartInstances.rankGuardias = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Guardias', data, backgroundColor: colors, borderRadius: 3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
+        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
+      },
+      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
+    }
+  });
+}
+
+// ── Ranking Localizados (global) ──
+function renderRankingLocalizadosChart(surgeonId) {
+  const ctx = document.getElementById('canvas-ranking-localizados').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.rankLocalizados) chartInstances.rankLocalizados.destroy();
+
+  const counts = {};
+  for (const id of Object.keys(parsedData).map(Number)) {
+    const g = getMonthEntries(id).filter(e => e.activity === 'localizado').length;
+    if (g > 0) counts[id] = g;
+  }
+  const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
+  const labels = sorted.map(id => getSurnameOf(id));
+  const data = sorted.map(id => counts[id]);
+  const colors = sorted.map(id => id === surgeonId ? '#7c3aed' : theme.mutedBarColor);
+
+  chartInstances.rankLocalizados = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Localizados', data, backgroundColor: colors, borderRadius: 3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
+        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
+      },
+      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
+    }
+  });
+}
+
+// ── Ranking Gestión (global) ──
+function renderRankingGestionChart(surgeonId) {
+  const ctx = document.getElementById('canvas-ranking-gestion').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.rankGestion) chartInstances.rankGestion.destroy();
+
+  const counts = {};
+  for (const id of Object.keys(parsedData).map(Number)) {
+    const g = getMonthEntries(id).filter(e => e.activity === 'gestion').length;
+    if (g > 0) counts[id] = g;
+  }
+  const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
+  const labels = sorted.map(id => getSurnameOf(id));
+  const data = sorted.map(id => counts[id]);
+  const colors = sorted.map(id => id === surgeonId ? '#ca8a04' : theme.mutedBarColor);
+
+  chartInstances.rankGestion = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Gesti\u00f3n', data, backgroundColor: colors, borderRadius: 3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
+        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
+      },
+      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
+    }
+  });
+}
+
+// ── Ranking Actividad Total (global) ──
+function renderRankingTurnosChart(surgeonId) {
+  const ctx = document.getElementById('canvas-ranking-turnos').getContext('2d');
+  const theme = getChartTheme();
+  if (chartInstances.rankTurnos) chartInstances.rankTurnos.destroy();
+
+  const counts = {};
+  for (const id of Object.keys(parsedData).map(Number)) {
+    counts[id] = getMonthEntries(id).length;
+  }
+  const sorted = Object.keys(counts).map(Number).filter(id => counts[id] > 0)
+    .sort((a, b) => counts[b] - counts[a]).slice(0, 15);
+  const labels = sorted.map(id => getSurnameOf(id));
+  const data = sorted.map(id => counts[id]);
+  const colors = sorted.map(id => id === surgeonId ? theme.accentColor : theme.mutedBarColor);
+
+  chartInstances.rankTurnos = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Turnos totales', data, backgroundColor: colors, borderRadius: 3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
+        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
+      },
+      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
+    }
+  });
+}
+
+// ── Comparador Table (by Cirujano or Unidad) ──
+function countActivitiesOf(entries) {
+  const qxM = entries.filter(e => e.activity === 'qui_m').length;
+  const qxT = entries.filter(e => e.activity === 'qui_t').length;
+  const consM = entries.filter(e => e.activity === 'cons_m').length;
+  const consT = entries.filter(e => e.activity === 'cons_t').length;
+  const gestion = entries.filter(e => e.activity === 'gestion').length;
+  return { qxM, qxT, qxTotal: qxM + qxT, consM, consT, consTotal: consM + consT, gestion };
+}
+
+function buildComparadorHeader(firstCol) {
+  return `<table class="comparador-table">
+    <thead>
+      <tr>
+        <th rowspan="2">${firstCol}</th>
+        <th colspan="4" class="th-group th-group-qx">Quir\u00f3fano</th>
+        <th colspan="4" class="th-group th-group-cons">Consultas</th>
+        <th rowspan="2" class="th-group th-group-gest">Gest</th>
+      </tr>
+      <tr>
+        <th class="th-sub">Ma\u00f1</th><th class="th-sub">Tarde</th>
+        <th class="th-sub">Total</th><th class="th-sub">%</th>
+        <th class="th-sub">Ma\u00f1</th><th class="th-sub">Tarde</th>
+        <th class="th-sub">Total</th><th class="th-sub">%</th>
+      </tr>
+    </thead><tbody>`;
+}
+
+function buildComparadorRow(label, c, isHighlight, grandQx, grandCons) {
+  const hl = isHighlight ? ' class="highlight"' : '';
+  const qxPct = grandQx > 0 ? Math.round(c.qxTotal / grandQx * 100) : 0;
+  const consPct = grandCons > 0 ? Math.round(c.consTotal / grandCons * 100) : 0;
+  return `<tr${hl}>
+    <td>${label}</td>
+    <td>${c.qxM}</td><td>${c.qxT}</td>
+    <td class="td-total">${c.qxTotal}</td><td class="td-pct">${qxPct}%</td>
+    <td>${c.consM}</td><td>${c.consT}</td>
+    <td class="td-total">${c.consTotal}</td><td class="td-pct">${consPct}%</td>
+    <td>${c.gestion}</td>
+  </tr>`;
+}
+
+function renderComparadorChart(surgeonId) {
+  const container = document.getElementById('comparador-content');
+  const units = SURGEON_UNITS[surgeonId];
+
+  if (comparadorMode === 'cirujano') {
+    const unit = units ? units[0] : null;
+    if (!unit) { container.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:12px;">Sin unidad asignada</div>'; return; }
+    const unitSurgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
+    const rows = unitSurgeons.map(id => {
+      const c = countActivitiesOf(getMonthEntries(id));
+      return { id, name: getSurnameOf(id), ...c };
+    }).sort((a, b) => (b.qxTotal + b.consTotal + b.gestion) - (a.qxTotal + a.consTotal + a.gestion));
+
+    const grandQx = rows.reduce((s, r) => s + r.qxTotal, 0);
+    const grandCons = rows.reduce((s, r) => s + r.consTotal, 0);
+    let html = buildComparadorHeader(unit);
+    for (const r of rows) {
+      html += buildComparadorRow(r.name, r, r.id === surgeonId, grandQx, grandCons);
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  } else {
+    const allUnits = ['Rodilla', 'Cadera', 'Hombro', 'Mano', 'Pie', 'Trauma'];
+    const selectedUnits = units || [];
+    const rows = allUnits.map(u => {
+      const ids = getSurgeonsByUnit(u).filter(id => parsedData[id]);
+      const allEntries = ids.flatMap(id => getMonthEntries(id));
+      const c = countActivitiesOf(allEntries);
+      return { unit: u, ...c, isHighlight: selectedUnits.includes(u) };
+    });
+
+    const grandQx = rows.reduce((s, r) => s + r.qxTotal, 0);
+    const grandCons = rows.reduce((s, r) => s + r.consTotal, 0);
+    let html = buildComparadorHeader('Unidad');
+    for (const r of rows) {
+      html += buildComparadorRow(r.unit, r, r.isHighlight, grandQx, grandCons);
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+}
+
+// ── Master render ──
+function renderCharts(surgeonId) {
+  destroyCharts();
+  requestAnimationFrame(() => {
+    renderBubblesChart(surgeonId);
+    renderPercentilesCard(surgeonId);
+    renderUnitComparisonChart(surgeonId);
+    renderComparadorChart(surgeonId);
+    renderQxUnitChart(surgeonId);
+    renderRankingGuardiasChart(surgeonId);
+    renderRankingLocalizadosChart(surgeonId);
+    renderRankingGestionChart(surgeonId);
+    renderRankingTurnosChart(surgeonId);
+  });
+}
+
+// Charts collapse/expand
+document.getElementById('charts-header').addEventListener('click', () => {
+  chartsExpanded = !chartsExpanded;
+  const body = document.getElementById('charts-body');
+  const btn = document.getElementById('charts-collapse-btn');
+  if (chartsExpanded) {
+    body.classList.add('expanded');
+    btn.classList.add('rotated');
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid)) renderCharts(sid);
+  } else {
+    body.classList.remove('expanded');
+    btn.classList.remove('rotated');
+  }
+});
+
+// Comparativa toggle
+document.querySelectorAll('#comparativa-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#comparativa-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    comparativaMode = this.dataset.mode;
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid) && chartsExpanded) {
+      if (chartInstances.unitComparison) { chartInstances.unitComparison.destroy(); chartInstances.unitComparison = null; }
+      renderUnitComparisonChart(sid);
+    }
+  });
+});
+
+// QX Unit toggle
+document.querySelectorAll('#qx-unit-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#qx-unit-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    qxUnitMode = this.dataset.mode;
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid) && chartsExpanded) {
+      if (chartInstances.qxUnit) { chartInstances.qxUnit.destroy(); chartInstances.qxUnit = null; }
+      renderQxUnitChart(sid);
+    }
+  });
+});
+
+// Comparador toggle
+document.querySelectorAll('#comparador-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#comparador-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    comparadorMode = this.dataset.mode;
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid) && chartsExpanded) renderComparadorChart(sid);
+  });
+});
 </script>
 </body>
 </html>

@@ -7,3 +7,6 @@ Desktop.ini
 .vscode/
 .idea/
 *.log
+*.xlsx
+*.ods
+*.csv
