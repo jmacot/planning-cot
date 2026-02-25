@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#1a3a5c">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <style>
     :root {
       --bg: #f1f5f9; --surface: #ffffff; --surface2: #e8eef4;
@@ -558,6 +558,21 @@
       letter-spacing: 0.5px; color: var(--accent); margin-bottom: 4px;
     }
 
+    /* D3 charts */
+    .d3-chart-wrap { width: 100%; overflow: visible; }
+    .d3-chart-wrap svg { display: block; width: 100%; height: auto; }
+    .d3-tooltip {
+      position: fixed; pointer-events: none;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; font-size: 11px; font-family: 'Inter', sans-serif;
+      box-shadow: var(--shadow); z-index: 9999;
+      opacity: 0; transition: opacity 0.15s;
+      max-width: 220px; line-height: 1.5;
+    }
+    .d3-tooltip.visible { opacity: 1; }
+    .d3-tooltip strong { font-weight: 700; }
+
     /* Bubbles chart */
     .bubbles-container {
       display: flex; flex-wrap: wrap; align-items: center;
@@ -694,6 +709,19 @@
       .cal-cell { min-height: 44px; padding: 2px; }
       .cal-cell .day-num { font-size: 10px; }
       .act-tag { font-size: 7px; padding: 1px 2px; }
+      /* Tap-to-expand: show full companion names */
+      .cal-cell.has-activity { cursor: pointer; transition: all 0.2s ease; position: relative; }
+      .cal-cell.cell-expanded {
+        z-index: 10; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        border-color: var(--accent); min-height: auto;
+      }
+      .cal-cell.cell-expanded .companion-badge {
+        white-space: normal; overflow: visible; text-overflow: unset;
+        font-size: 8px;
+      }
+      .cal-cell.cell-expanded .act-tag {
+        white-space: normal; overflow: visible; text-overflow: unset;
+      }
       .summary-card { padding: 8px 10px; }
       .summary-icon { width: 30px; height: 30px; font-size: 14px; }
       .summary-count { font-size: 17px; }
@@ -857,11 +885,11 @@
             <div class="radar-grid">
               <div class="radar-col">
                 <div class="radar-label">Mes</div>
-                <canvas id="canvas-radar"></canvas>
+                <div id="chart-radar" class="d3-chart-wrap"></div>
               </div>
               <div class="radar-col">
                 <div class="radar-label">Total</div>
-                <canvas id="canvas-radar-total"></canvas>
+                <div id="chart-radar-total" class="d3-chart-wrap"></div>
               </div>
             </div>
           </div>
@@ -872,7 +900,7 @@
               <button class="active" data-mode="turnos">Turnos</button>
               <button data-mode="guardias">Guardias</button>
             </div>
-            <canvas id="canvas-unit-comparison"></canvas>
+            <div id="chart-unit-comparison" class="d3-chart-wrap"></div>
           </div>
           <!-- Comparador table -->
           <div class="chart-card dash-wide" id="card-comparador">
@@ -891,15 +919,15 @@
               <button data-mode="manana">Ma&ntilde;ana</button>
               <button data-mode="tarde">Tarde</button>
             </div>
-            <canvas id="canvas-qx-unit"></canvas>
+            <div id="chart-qx-unit" class="d3-chart-wrap"></div>
           </div>
           <div class="chart-card" id="card-ranking-guardias">
             <div class="chart-card-title">Ranking Guardias</div>
-            <canvas id="canvas-ranking-guardias"></canvas>
+            <div id="chart-ranking-guardias" class="d3-chart-wrap"></div>
           </div>
           <div class="chart-card" id="card-ranking-localizados">
             <div class="chart-card-title">Ranking Localizados</div>
-            <canvas id="canvas-ranking-localizados"></canvas>
+            <div id="chart-ranking-localizados" class="d3-chart-wrap"></div>
           </div>
           <!-- Row 4: Global -->
           <div class="chart-card" id="card-ranking-gestion">
@@ -908,16 +936,16 @@
           </div>
           <div class="chart-card" id="card-ranking-turnos">
             <div class="chart-card-title">Ranking Actividad Total</div>
-            <canvas id="canvas-ranking-turnos"></canvas>
+            <div id="chart-ranking-turnos" class="d3-chart-wrap"></div>
           </div>
           <!-- Row 5: Mañana/Tarde + Festivos -->
           <div class="chart-card" id="card-morning-afternoon">
             <div class="chart-card-title">Ma&ntilde;ana vs Tarde</div>
-            <canvas id="canvas-morning-afternoon"></canvas>
+            <div id="chart-morning-afternoon" class="d3-chart-wrap"></div>
           </div>
           <div class="chart-card" id="card-festivos">
             <div class="chart-card-title">Festivos Trabajados</div>
-            <canvas id="canvas-festivos"></canvas>
+            <div id="chart-festivos" class="d3-chart-wrap"></div>
           </div>
         </div>
       </div>
@@ -926,6 +954,7 @@
 
   <div class="app-footer"><span>COT &mdash; Planning Analyzer v2.0</span></div>
   <div id="toast" class="toast-banner"></div>
+  <div id="d3-tooltip" class="d3-tooltip"></div>
 </div>
 
 <script>
@@ -1040,7 +1069,6 @@ let availableMonths = [];
 let summaryMode = 'month'; // 'month' or 'total'
 let currentJornada = 100;  // 100, 80, or 60
 let chartsExpanded = false;
-let chartInstances = { unitComparison: null, qxUnit: null, rankGuardias: null, rankLocalizados: null, rankGestion: null, rankTurnos: null, radar: null, radarTotal: null, morningAfternoon: null, festivos: null };
 let pendingExportType = null; // 'ics' or 'pdf'
 let loadedFileName = '';
 
@@ -1841,6 +1869,17 @@ function renderCalendar(surgeonId) {
   }
 
   grid.innerHTML = html;
+
+  // Mobile: tap to expand day cells for full companion names
+  if (isMobile) {
+    grid.querySelectorAll('.cal-cell.has-activity').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const wasExpanded = cell.classList.contains('cell-expanded');
+        grid.querySelectorAll('.cell-expanded').forEach(c => c.classList.remove('cell-expanded'));
+        if (!wasExpanded) cell.classList.add('cell-expanded');
+      });
+    });
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -2162,15 +2201,12 @@ function getChartTheme() {
     surfaceColor: isDark ? '#1f2937' : '#ffffff',
     borderColor: isDark ? '#374151' : '#e5e7eb',
     accentColor: isDark ? '#60a5fa' : '#1a3a5c',
-    mutedBarColor: isDark ? 'rgba(148,163,184,0.4)' : 'rgba(26,58,92,0.15)',
     isDark
   };
 }
 
 function destroyCharts() {
-  for (const key in chartInstances) {
-    if (chartInstances[key]) { chartInstances[key].destroy(); chartInstances[key] = null; }
-  }
+  document.querySelectorAll('.d3-chart-wrap').forEach(el => el.innerHTML = '');
 }
 
 function getSurnameOf(id) {
@@ -2191,8 +2227,114 @@ function calcPercentile(val, allVals) {
   return Math.round(((below + equal * 0.5) / allVals.length) * 100);
 }
 
-function makeTooltipOpts(theme) {
-  return { backgroundColor: theme.surfaceColor, titleColor: theme.textColor, bodyColor: theme.textColor, borderColor: theme.borderColor, borderWidth: 1, cornerRadius: 8 };
+// ─────────────────────────────────────────────
+//  D3 UTILITIES
+// ─────────────────────────────────────────────
+const d3Tooltip = { el: null };
+function showD3Tooltip(event, html) {
+  if (!d3Tooltip.el) d3Tooltip.el = d3.select('#d3-tooltip');
+  d3Tooltip.el.html(html)
+    .style('left', (event.clientX + 14) + 'px')
+    .style('top', (event.clientY - 10) + 'px')
+    .classed('visible', true);
+}
+function hideD3Tooltip() {
+  if (d3Tooltip.el) d3Tooltip.el.classed('visible', false);
+}
+
+function createSVG(containerId, width, height) {
+  const container = d3.select('#' + containerId);
+  container.html('');
+  return container.append('svg')
+    .attr('viewBox', `0 0 ${width} ${height}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+}
+
+function addGradient(svg, id, color, horizontal) {
+  const defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
+  const grad = defs.append('linearGradient').attr('id', id)
+    .attr('x1', '0%').attr('y1', '0%')
+    .attr('x2', horizontal ? '100%' : '0%').attr('y2', horizontal ? '0%' : '100%');
+  const c = d3.color(color);
+  grad.append('stop').attr('offset', '0%').attr('stop-color', c.brighter(0.4));
+  grad.append('stop').attr('offset', '100%').attr('stop-color', c.darker(0.15));
+  return `url(#${id})`;
+}
+
+function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, label }) {
+  const margin = { top: 8, right: 50, bottom: 24, left: 80 };
+  const barH = 26, gap = 4;
+  const width = 400;
+  const height = margin.top + margin.bottom + data.length * (barH + gap);
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+
+  const svg = createSVG(containerId, width, height);
+  svg.append('defs');
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([0, d3.max(data, d => d.value) || 1]).nice().range([0, innerW]);
+  const y = d3.scaleBand().domain(data.map(d => d.label)).range([0, innerH]).padding(0.15);
+
+  // Grid lines
+  g.append('g').attr('class', 'grid')
+    .attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(5).tickSize(-innerH).tickFormat(''))
+    .call(g2 => g2.select('.domain').remove())
+    .call(g2 => g2.selectAll('.tick line').attr('stroke', theme.gridColor));
+
+  // X axis
+  g.append('g').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d')))
+    .call(g2 => g2.select('.domain').remove())
+    .call(g2 => g2.selectAll('text').attr('fill', theme.textColor).style('font-size', '10px').style('font-family', "'Inter',sans-serif"));
+
+  // Bars — all bars get gradients; highlighted surgeon uses accent, others use a lighter tint
+  const accentD3 = d3.color(accentColor);
+  const mutedColor = theme.isDark
+    ? d3.color(accentColor).copy({ opacity: 0.35 })
+    : d3.hsl(accentD3).copy({ s: 0.18, l: 0.72 });
+  const bars = g.selectAll('.bar').data(data).enter().append('g');
+
+  bars.each(function(d, i) {
+    const isMe = d.id === surgeonId;
+    const gradId = `grad-${containerId}-${i}`;
+    const fill = addGradient(svg, gradId, isMe ? accentColor : mutedColor.formatHex(), true);
+
+    d3.select(this).append('rect')
+      .attr('x', 0).attr('y', y(d.label))
+      .attr('height', y.bandwidth()).attr('rx', 3)
+      .attr('fill', fill)
+      .attr('width', 0)
+      .on('mouseover', (ev) => showD3Tooltip(ev, `<strong>${SURGEONS[d.id] || d.label}</strong><br>${label}: ${d.value}`))
+      .on('mousemove', (ev) => showD3Tooltip(ev, `<strong>${SURGEONS[d.id] || d.label}</strong><br>${label}: ${d.value}`))
+      .on('mouseout', hideD3Tooltip)
+      .transition().duration(500).delay(i * 35).ease(d3.easeCubicOut)
+      .attr('width', x(d.value));
+  });
+
+  // Value labels
+  bars.append('text')
+    .attr('x', d => x(d.value) + 5)
+    .attr('y', d => y(d.label) + y.bandwidth() / 2)
+    .attr('dy', '0.35em')
+    .attr('fill', theme.textColor).style('font-size', '10px').style('font-weight', '600')
+    .style('font-family', "'Inter',sans-serif")
+    .style('opacity', 0)
+    .text(d => d.value)
+    .transition().duration(400).delay((d, i) => i * 35 + 300)
+    .style('opacity', 1);
+
+  // Y axis labels
+  g.selectAll('.y-label').data(data).enter().append('text')
+    .attr('x', -6).attr('y', d => y(d.label) + y.bandwidth() / 2)
+    .attr('dy', '0.35em').attr('text-anchor', 'end')
+    .attr('fill', d => d.id === surgeonId ? accentColor : theme.textColor)
+    .style('font-size', '10px')
+    .style('font-weight', d => d.id === surgeonId ? '700' : '400')
+    .style('font-family', "'Inter',sans-serif")
+    .text(d => d.label);
 }
 
 // ── Bubbles Chart (HTML-based) ──
@@ -2323,323 +2465,220 @@ function renderPercentilesCard(surgeonId) {
 }
 
 // ── Radar — Perfil del Cirujano ──
-function renderRadarChart(surgeonId) {
-  const ctx = document.getElementById('canvas-radar').getContext('2d');
-  const theme = getChartTheme();
-  if (chartInstances.radar) { chartInstances.radar.destroy(); chartInstances.radar = null; }
+function d3Radar({ containerId, labels, surgeonVals, avgVals, surgeonName, theme }) {
+  const size = 280, cx = size / 2, cy = size / 2 - 10, radius = 100;
+  const n = labels.length;
+  const angleSlice = (2 * Math.PI) / n;
+  const maxVal = Math.max(d3.max(surgeonVals), d3.max(avgVals), 1);
+  const rScale = d3.scaleLinear().domain([0, maxVal]).range([0, radius]);
 
+  const svg = createSVG(containerId, size, size + 40);
+  const g = svg.append('g').attr('transform', `translate(${cx},${cy + 10})`);
+
+  // Concentric rings
+  const levels = 4;
+  for (let i = 1; i <= levels; i++) {
+    g.append('circle').attr('r', radius * i / levels)
+      .attr('fill', 'none').attr('stroke', theme.gridColor).attr('stroke-dasharray', '2,3');
+  }
+
+  // Axis lines + labels
+  labels.forEach((lbl, i) => {
+    const angle = angleSlice * i - Math.PI / 2;
+    const lx = Math.cos(angle) * radius, ly = Math.sin(angle) * radius;
+    g.append('line').attr('x1', 0).attr('y1', 0).attr('x2', lx).attr('y2', ly)
+      .attr('stroke', theme.gridColor).attr('stroke-width', 0.5);
+    const lbx = Math.cos(angle) * (radius + 14), lby = Math.sin(angle) * (radius + 14);
+    g.append('text').attr('x', lbx).attr('y', lby)
+      .attr('text-anchor', 'middle').attr('dy', '0.35em')
+      .attr('fill', theme.textColor).style('font-size', '9px').style('font-weight', '500')
+      .style('font-family', "'Inter',sans-serif").text(lbl);
+  });
+
+  // Path generator
+  const lineFn = d3.lineRadial().angle((d, i) => angleSlice * i).radius(d => rScale(d)).curve(d3.curveCardinalClosed.tension(0.3));
+
+  // Average path
+  const avgColor = theme.isDark ? '#fbbf24' : '#9ca3af';
+  g.append('path').datum(avgVals)
+    .attr('d', lineFn).attr('fill', theme.isDark ? 'rgba(251,191,36,0.12)' : 'rgba(107,107,107,0.08)')
+    .attr('stroke', avgColor).attr('stroke-width', 1.5).attr('stroke-dasharray', '4,4');
+  avgVals.forEach((v, i) => {
+    const angle = angleSlice * i - Math.PI / 2;
+    g.append('circle').attr('cx', Math.cos(angle) * rScale(v)).attr('cy', Math.sin(angle) * rScale(v))
+      .attr('r', 2.5).attr('fill', avgColor)
+      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${labels[i]}</strong><br>Media: ${v}`))
+      .on('mouseout', hideD3Tooltip);
+  });
+
+  // Surgeon path
+  const sColor = theme.accentColor;
+  const sPath = g.append('path').datum(surgeonVals)
+    .attr('fill', theme.isDark ? 'rgba(96,165,250,0.25)' : 'rgba(26,58,92,0.20)')
+    .attr('stroke', sColor).attr('stroke-width', 2.5);
+  // Animate
+  const zeroVals = surgeonVals.map(() => 0);
+  sPath.attr('d', lineFn(zeroVals)).transition().duration(700).ease(d3.easeCubicOut).attr('d', lineFn(surgeonVals));
+
+  surgeonVals.forEach((v, i) => {
+    const angle = angleSlice * i - Math.PI / 2;
+    g.append('circle').attr('cx', Math.cos(angle) * rScale(v)).attr('cy', Math.sin(angle) * rScale(v))
+      .attr('r', 3.5).attr('fill', sColor).attr('stroke', theme.surfaceColor).attr('stroke-width', 1.5)
+      .style('opacity', 0)
+      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${labels[i]}</strong><br>${surgeonName}: ${v}`))
+      .on('mouseout', hideD3Tooltip)
+      .transition().delay(500).duration(300).style('opacity', 1);
+  });
+
+  // Legend
+  const lg = svg.append('g').attr('transform', `translate(${cx - 80},${size + 18})`);
+  [[sColor, surgeonName], [avgColor, 'Media servicio']].forEach(([c, txt], i) => {
+    const gx = i * 100;
+    lg.append('circle').attr('cx', gx).attr('cy', 0).attr('r', 4).attr('fill', c);
+    lg.append('text').attr('x', gx + 8).attr('y', 0).attr('dy', '0.35em')
+      .attr('fill', theme.textColor).style('font-size', '10px').style('font-family', "'Inter',sans-serif").text(txt);
+  });
+}
+
+function renderRadarChart(surgeonId) {
+  const theme = getChartTheme();
   const radarMetrics = [
     { label: 'Guardias', fn: e => e.activity === 'guardia' },
-    { label: 'Qx Ma\u00f1ana', fn: e => e.activity === 'qui_m' },
+    { label: 'Qx Mañana', fn: e => e.activity === 'qui_m' },
     { label: 'Qx Tarde', fn: e => e.activity === 'qui_t' },
     { label: 'Consultas M', fn: e => e.activity === 'cons_m' },
     { label: 'Consultas T', fn: e => e.activity === 'cons_t' },
-    { label: 'Gesti\u00f3n', fn: e => e.activity === 'gestion' },
+    { label: 'Gestión', fn: e => e.activity === 'gestion' },
     { label: 'Localizados', fn: e => e.activity === 'localizado' },
     { label: 'Diferida', fn: e => e.activity === 'diferida' || e.activity === 'diferida_t' }
   ];
-
   const allIds = Object.keys(parsedData).map(Number);
-  const surgeonName = getSurnameOf(surgeonId);
-
-  // Surgeon values
   const surgeonVals = radarMetrics.map(m => getMonthEntries(surgeonId).filter(m.fn).length);
-  // Service average
   const avgVals = radarMetrics.map(m => {
     const total = allIds.reduce((sum, id) => sum + getMonthEntries(id).filter(m.fn).length, 0);
     return Math.round((total / allIds.length) * 10) / 10;
   });
-
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-  chartInstances.radar = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: radarMetrics.map(m => m.label),
-      datasets: [
-        {
-          label: surgeonName,
-          data: surgeonVals,
-          backgroundColor: isDark ? 'rgba(96,165,250,0.30)' : 'rgba(26,58,92,0.25)',
-          borderColor: isDark ? '#60a5fa' : '#1a3a5c',
-          borderWidth: 2,
-          pointBackgroundColor: isDark ? '#60a5fa' : '#1a3a5c',
-          pointRadius: 3
-        },
-        {
-          label: 'Media servicio',
-          data: avgVals,
-          backgroundColor: isDark ? 'rgba(251,191,36,0.15)' : 'rgba(107,107,107,0.12)',
-          borderColor: isDark ? '#fbbf24' : '#9ca3af',
-          borderWidth: 1.5,
-          borderDash: [4, 4],
-          pointBackgroundColor: isDark ? '#fbbf24' : '#9ca3af',
-          pointRadius: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      scales: {
-        r: {
-          beginAtZero: true,
-          ticks: { display: false },
-          grid: { color: theme.gridColor },
-          angleLines: { color: theme.gridColor },
-          pointLabels: { color: theme.textColor, font: { size: 10, weight: '500', family: "'Inter',sans-serif" } }
-        }
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: theme.textColor, font: { family: "'Inter',sans-serif", size: 11 }, padding: 12, usePointStyle: true }
-        },
-        tooltip: makeTooltipOpts(theme)
-      }
-    }
-  });
+  d3Radar({ containerId: 'chart-radar', labels: radarMetrics.map(m => m.label), surgeonVals, avgVals, surgeonName: getSurnameOf(surgeonId), theme });
 }
 
-// ── Radar — Perfil Total ──
 function renderRadarTotalChart(surgeonId) {
-  const ctx = document.getElementById('canvas-radar-total').getContext('2d');
   const theme = getChartTheme();
-  if (chartInstances.radarTotal) { chartInstances.radarTotal.destroy(); chartInstances.radarTotal = null; }
-
   const radarMetrics = [
     { label: 'Guardias', fn: e => e.activity === 'guardia' },
-    { label: 'Qx Ma\u00f1ana', fn: e => e.activity === 'qui_m' },
+    { label: 'Qx Mañana', fn: e => e.activity === 'qui_m' },
     { label: 'Qx Tarde', fn: e => e.activity === 'qui_t' },
     { label: 'Consultas M', fn: e => e.activity === 'cons_m' },
     { label: 'Consultas T', fn: e => e.activity === 'cons_t' },
-    { label: 'Gesti\u00f3n', fn: e => e.activity === 'gestion' },
+    { label: 'Gestión', fn: e => e.activity === 'gestion' },
     { label: 'Localizados', fn: e => e.activity === 'localizado' },
     { label: 'Diferida', fn: e => e.activity === 'diferida' || e.activity === 'diferida_t' }
   ];
-
   const allIds = Object.keys(parsedData).map(Number);
-  const surgeonName = getSurnameOf(surgeonId);
-
-  // ALL entries (not just current month)
   const surgeonVals = radarMetrics.map(m => (parsedData[surgeonId] || []).filter(m.fn).length);
   const avgVals = radarMetrics.map(m => {
     const total = allIds.reduce((sum, id) => sum + (parsedData[id] || []).filter(m.fn).length, 0);
     return Math.round((total / allIds.length) * 10) / 10;
   });
-
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-  chartInstances.radarTotal = new Chart(ctx, {
-    type: 'radar',
-    data: {
-      labels: radarMetrics.map(m => m.label),
-      datasets: [
-        {
-          label: surgeonName,
-          data: surgeonVals,
-          backgroundColor: isDark ? 'rgba(96,165,250,0.30)' : 'rgba(26,58,92,0.25)',
-          borderColor: isDark ? '#60a5fa' : '#1a3a5c',
-          borderWidth: 2,
-          pointBackgroundColor: isDark ? '#60a5fa' : '#1a3a5c',
-          pointRadius: 3
-        },
-        {
-          label: 'Media servicio',
-          data: avgVals,
-          backgroundColor: isDark ? 'rgba(251,191,36,0.15)' : 'rgba(107,107,107,0.12)',
-          borderColor: isDark ? '#fbbf24' : '#9ca3af',
-          borderWidth: 1.5,
-          borderDash: [4, 4],
-          pointBackgroundColor: isDark ? '#fbbf24' : '#9ca3af',
-          pointRadius: 2
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      scales: {
-        r: {
-          beginAtZero: true,
-          ticks: { display: false },
-          grid: { color: theme.gridColor },
-          angleLines: { color: theme.gridColor },
-          pointLabels: { color: theme.textColor, font: { size: 10, weight: '500', family: "'Inter',sans-serif" } }
-        }
-      },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: theme.textColor, font: { family: "'Inter',sans-serif", size: 11 }, padding: 12, usePointStyle: true }
-        },
-        tooltip: makeTooltipOpts(theme)
-      }
-    }
-  });
+  d3Radar({ containerId: 'chart-radar-total', labels: radarMetrics.map(m => m.label), surgeonVals, avgVals, surgeonName: getSurnameOf(surgeonId), theme });
 }
 
 // ── Comparativa Unidad (with toggle: Turnos / Guardias) ──
 function renderUnitComparisonChart(surgeonId) {
-  const canvas = document.getElementById('canvas-unit-comparison');
-  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('chart-unit-comparison');
   const theme = getChartTheme();
   const units = SURGEON_UNITS[surgeonId];
   const titleEl = document.getElementById('comparativa-title');
 
-  if (chartInstances.unitComparison) { chartInstances.unitComparison.destroy(); chartInstances.unitComparison = null; }
-
-  if (!units) {
-    canvas.style.display = 'none';
-    titleEl.textContent = 'Comparativa (sin unidad)';
-    return;
-  }
-  canvas.style.display = '';
-  const unit = units[0]; // Use first unit for comparison
-  titleEl.textContent = `Comparativa \u2014 ${unit}`;
-
+  if (!units) { container.innerHTML = ''; titleEl.textContent = 'Comparativa (sin unidad)'; return; }
+  const unit = units[0];
+  titleEl.textContent = `Comparativa — ${unit}`;
   const unitSurgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
   const exclude = new Set(['guardia', 'saliente']);
 
-  // Dynamic height: ensure enough room for each bar label
-  const barHeight = 32;
-  const minCanvasHeight = unitSurgeons.length * barHeight + 60;
-  // Wrap canvas in a sized container if not already wrapped
-  let wrapper = canvas.parentElement;
-  if (!wrapper.classList.contains('chart-canvas-wrap')) {
-    wrapper = document.createElement('div');
-    wrapper.classList.add('chart-canvas-wrap');
-    canvas.parentElement.insertBefore(wrapper, canvas);
-    wrapper.appendChild(canvas);
-  }
-  wrapper.style.height = minCanvasHeight + 'px';
-  wrapper.style.position = 'relative';
-
   if (comparativaMode === 'guardias') {
-    // Simple bar: guardia count
     const guardCounts = {};
-    for (const id of unitSurgeons) {
-      guardCounts[id] = getMonthEntries(id).filter(e => e.activity === 'guardia').length;
-    }
+    for (const id of unitSurgeons) guardCounts[id] = getMonthEntries(id).filter(e => e.activity === 'guardia').length;
     unitSurgeons.sort((a, b) => guardCounts[b] - guardCounts[a]);
-    const labels = unitSurgeons.map(id => getSurnameOf(id));
-    const data = unitSurgeons.map(id => guardCounts[id]);
-    const colors = unitSurgeons.map(id => id === surgeonId ? theme.accentColor : theme.mutedBarColor);
-
-    chartInstances.unitComparison = new Chart(ctx, {
-      type: 'bar',
-      data: { labels, datasets: [{ label: 'Guardias', data, backgroundColor: colors, borderRadius: 3 }] },
-      options: {
-        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-        scales: {
-          x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
-          y: { ticks: { color: theme.textColor, font: { size: 10, weight: '500' }, autoSkip: false }, grid: { display: false } }
-        },
-        plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
-      }
-    });
+    d3HorizontalBar({ containerId: 'chart-unit-comparison', data: unitSurgeons.map(id => ({ label: getSurnameOf(id), value: guardCounts[id], id })), theme, surgeonId, accentColor: theme.accentColor, label: 'Guardias' });
   } else {
-    // Stacked bar: grouped activities (qui_m+qui_t → Quirófano, etc.)
-    const groupMap = {
-      qui_m: 'quirofano', qui_t: 'quirofano',
-      cons_m: 'cons_m', cons_t: 'cons_t',
-      diferida: 'diferida', diferida_t: 'diferida_t',
-      localizado: 'localizado', gestion: 'gestion', rucot: 'rucot'
-    };
-    const groupLabels = {
-      quirofano: 'Quirófano', cons_m: 'Consulta M', cons_t: 'Consulta T',
-      diferida: 'Diferida/Planta', diferida_t: 'Diferida/Planta T',
-      localizado: 'Localizado', gestion: 'Gestión', rucot: 'RUCOT'
-    };
-    const groupColors = {
-      quirofano: '#1a3a5c', cons_m: ACTIVITY_COLORS['cons_m'], cons_t: ACTIVITY_COLORS['cons_t'],
-      diferida: ACTIVITY_COLORS['diferida'], diferida_t: ACTIVITY_COLORS['diferida_t'],
-      localizado: ACTIVITY_COLORS['localizado'], gestion: ACTIVITY_COLORS['gestion'], rucot: ACTIVITY_COLORS['rucot']
-    };
+    const groupMap = { qui_m:'quirofano', qui_t:'quirofano', cons_m:'cons_m', cons_t:'cons_t', diferida:'diferida', diferida_t:'diferida_t', localizado:'localizado', gestion:'gestion', rucot:'rucot' };
+    const groupLabels = { quirofano:'Quirófano', cons_m:'Consulta M', cons_t:'Consulta T', diferida:'Diferida', diferida_t:'Diferida T', localizado:'Localizado', gestion:'Gestión', rucot:'RUCOT' };
+    const groupColors = { quirofano:'#1a3a5c', cons_m:ACTIVITY_COLORS['cons_m'], cons_t:ACTIVITY_COLORS['cons_t'], diferida:ACTIVITY_COLORS['diferida'], diferida_t:ACTIVITY_COLORS['diferida_t'], localizado:ACTIVITY_COLORS['localizado'], gestion:ACTIVITY_COLORS['gestion'], rucot:ACTIVITY_COLORS['rucot'] };
 
-    const actCounts = {};
-    const allGroups = new Set();
+    const actCounts = {}; const allGroups = new Set();
     for (const id of unitSurgeons) {
       actCounts[id] = {};
-      getMonthEntries(id).forEach(e => {
-        if (exclude.has(e.activity)) return;
-        const grp = groupMap[e.activity] || e.activity;
-        actCounts[id][grp] = (actCounts[id][grp] || 0) + 1;
-        allGroups.add(grp);
-      });
+      getMonthEntries(id).forEach(e => { if (exclude.has(e.activity)) return; const grp = groupMap[e.activity] || e.activity; actCounts[id][grp] = (actCounts[id][grp] || 0) + 1; allGroups.add(grp); });
     }
-    unitSurgeons.sort((a, b) => {
-      const ta = Object.values(actCounts[a]).reduce((s,v)=>s+v,0);
-      const tb = Object.values(actCounts[b]).reduce((s,v)=>s+v,0);
-      return tb - ta;
-    });
+    unitSurgeons.sort((a,b) => { const ta = Object.values(actCounts[a]).reduce((s,v)=>s+v,0); const tb = Object.values(actCounts[b]).reduce((s,v)=>s+v,0); return tb-ta; });
     const grpOrder = ['quirofano','cons_m','cons_t','diferida','diferida_t','localizado','gestion','rucot'];
     const usedGrps = grpOrder.filter(g => allGroups.has(g));
-    const labels = unitSurgeons.map(id => getSurnameOf(id));
-    const datasets = usedGrps.map(grp => ({
-      label: groupLabels[grp] || grp,
-      data: unitSurgeons.map(id => actCounts[id][grp] || 0),
-      backgroundColor: groupColors[grp] || '#999',
-      borderRadius: 2, borderWidth: unitSurgeons.map(id => id === surgeonId ? 2 : 0),
-      borderColor: unitSurgeons.map(id => id === surgeonId ? theme.accentColor : 'transparent')
-    }));
 
-    // Custom plugin to show % on each segment
-    const percentPlugin = {
-      id: 'percentLabels',
-      afterDatasetsDraw(chart) {
-        const { ctx: c2 } = chart;
-        chart.data.datasets.forEach((ds, di) => {
-          const meta = chart.getDatasetMeta(di);
-          meta.data.forEach((bar, i) => {
-            const val = ds.data[i];
-            if (!val) return;
-            const total = chart.data.datasets.reduce((s, d) => s + (d.data[i] || 0), 0);
-            if (!total) return;
-            const pct = Math.round(val / total * 100);
-            if (pct < 10) return;
-            const { x, y, base } = bar.getProps(['x', 'y', 'base']);
-            const cx = (x + base) / 2;
-            c2.save();
-            c2.fillStyle = 'rgba(255,255,255,0.9)';
-            c2.font = 'bold 8px Inter,sans-serif';
-            c2.textAlign = 'center';
-            c2.textBaseline = 'middle';
-            c2.fillText(`${pct}%`, cx, y);
-            c2.restore();
-          });
-        });
-      }
-    };
+    const margin = { top: 8, right: 30, bottom: 50, left: 80 };
+    const barH = 26, gap = 4;
+    const width = 400, height = margin.top + margin.bottom + unitSurgeons.length * (barH + gap);
+    const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
 
-    chartInstances.unitComparison = new Chart(ctx, {
-      type: 'bar',
-      data: { labels, datasets },
-      plugins: [percentPlugin],
-      options: {
-        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-        scales: {
-          x: { stacked: true, beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
-          y: { stacked: true, ticks: { color: theme.textColor, font: { size: 10, weight: '500' }, autoSkip: false }, grid: { display: false } }
-        },
-        plugins: {
-          legend: { position: 'bottom', labels: { color: theme.textColor, font: { family: "'Inter',sans-serif", size: 11 }, padding: 8, usePointStyle: true } },
-          tooltip: makeTooltipOpts(theme)
+    const svg = createSVG('chart-unit-comparison', width, height);
+    svg.append('defs');
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+    const y = d3.scaleBand().domain(unitSurgeons.map(id => getSurnameOf(id))).range([0, innerH]).padding(0.15);
+    const maxTotal = d3.max(unitSurgeons, id => Object.values(actCounts[id]).reduce((s,v)=>s+v,0)) || 1;
+    const x = d3.scaleLinear().domain([0, maxTotal]).nice().range([0, innerW]);
+
+    g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).ticks(5).tickSize(-innerH).tickFormat('')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
+    g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px'); });
+
+    unitSurgeons.forEach((id, idx) => {
+      const name = getSurnameOf(id); let cx = 0; const total = Object.values(actCounts[id]).reduce((s,v)=>s+v,0);
+      usedGrps.forEach((grp, gi) => {
+        const val = actCounts[id][grp] || 0; if (!val) return;
+        const bw = x(val); const isMe = id === surgeonId;
+        const gradId = `grad-comp-${idx}-${gi}`;
+        const fill = addGradient(svg, gradId, groupColors[grp] || '#999', true);
+        g.append('rect').attr('x', x(cx)).attr('y', y(name)).attr('height', y.bandwidth()).attr('rx', 2)
+          .attr('fill', fill).attr('stroke', isMe ? theme.accentColor : 'none').attr('stroke-width', isMe ? 1.5 : 0)
+          .attr('width', 0)
+          .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>${groupLabels[grp]}: ${val} (${Math.round(val/total*100)}%)`))
+          .on('mouseout', hideD3Tooltip)
+          .transition().duration(500).delay(idx * 35).ease(d3.easeCubicOut).attr('width', bw);
+        // % label inside segment
+        const pct = Math.round(val/total*100);
+        if (pct >= 12 && bw > 20) {
+          g.append('text').attr('x', x(cx) + bw/2).attr('y', y(name) + y.bandwidth()/2).attr('dy','0.35em')
+            .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size','8px').style('font-weight','700')
+            .style('font-family',"'Inter',sans-serif").style('opacity',0).text(`${pct}%`)
+            .transition().delay(idx*35+400).duration(200).style('opacity',1);
         }
-      }
+        cx += val;
+      });
+    });
+
+    // Y labels
+    g.selectAll('.y-lbl').data(unitSurgeons).enter().append('text')
+      .attr('x', -6).attr('y', id => y(getSurnameOf(id)) + y.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
+      .attr('fill', id => id === surgeonId ? theme.accentColor : theme.textColor)
+      .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+      .text(id => getSurnameOf(id));
+
+    // Legend
+    const lg = svg.append('g').attr('transform', `translate(${margin.left},${height - 14})`);
+    let lx = 0;
+    usedGrps.forEach(grp => {
+      lg.append('rect').attr('x', lx).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', groupColors[grp]);
+      lg.append('text').attr('x', lx + 14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor)
+        .style('font-size','9px').style('font-family',"'Inter',sans-serif").text(groupLabels[grp]);
+      lx += (groupLabels[grp].length * 6) + 24;
     });
   }
 }
 
 // ── QX por Unidad (global) ──
 function renderQxUnitChart(surgeonId) {
-  const ctx = document.getElementById('canvas-qx-unit').getContext('2d');
   const theme = getChartTheme();
   const allUnits = ['Rodilla', 'Cadera', 'Hombro', 'Mano', 'Pie', 'Trauma'];
   const selectedUnits = SURGEON_UNITS[surgeonId] || [];
-
-  if (chartInstances.qxUnit) chartInstances.qxUnit.destroy();
-
   const unitCounts = {};
   for (const unit of allUnits) {
     let count = 0;
@@ -2653,88 +2692,67 @@ function renderQxUnitChart(surgeonId) {
     }
     unitCounts[unit] = count;
   }
+  const sorted = [...allUnits].sort((a, b) => unitCounts[b] - unitCounts[a]);
+  const margin = { top: 10, right: 10, bottom: 30, left: 35 };
+  const width = 360, height = 220;
+  const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
 
-  const sorted = allUnits.sort((a, b) => unitCounts[b] - unitCounts[a]);
-  const labels = sorted;
-  const data = sorted.map(u => unitCounts[u]);
-  const colors = sorted.map(u => selectedUnits.includes(u) ? theme.accentColor : theme.mutedBarColor);
+  const svg = createSVG('chart-qx-unit', width, height);
+  svg.append('defs');
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-  chartInstances.qxUnit = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Quir\u00f3fanos', data, backgroundColor: colors, borderRadius: 4 }] },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      scales: {
-        y: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 5, font: { size: 10 } }, grid: { color: theme.gridColor } },
-        x: { ticks: { color: theme.textColor, font: { size: 10, weight: '600' } }, grid: { display: false } }
-      },
-      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
-    }
+  const x = d3.scaleBand().domain(sorted).range([0, innerW]).padding(0.25);
+  const maxV = d3.max(sorted, u => unitCounts[u]) || 1;
+  const y = d3.scaleLinear().domain([0, maxV]).nice().range([innerH, 0]);
+
+  // Grid
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-innerW).tickFormat('')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px'); });
+  g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).tickSize(0)).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-weight','600'); });
+
+  const accentQx = d3.color(theme.accentColor);
+  const mutedQx = theme.isDark
+    ? d3.color(theme.accentColor).copy({ opacity: 0.35 })
+    : d3.hsl(accentQx).copy({ s: 0.18, l: 0.72 });
+  sorted.forEach((unit, i) => {
+    const isMe = selectedUnits.includes(unit);
+    const gradId = `grad-qx-${i}`;
+    const fill = addGradient(svg, gradId, isMe ? theme.accentColor : mutedQx.formatHex(), false);
+    g.append('rect').attr('x', x(unit)).attr('y', innerH).attr('width', x.bandwidth()).attr('rx', 4)
+      .attr('fill', fill).attr('height', 0)
+      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${unit}</strong><br>Quirófanos: ${unitCounts[unit]}`))
+      .on('mouseout', hideD3Tooltip)
+      .transition().duration(500).delay(i * 60).ease(d3.easeCubicOut)
+      .attr('y', y(unitCounts[unit])).attr('height', innerH - y(unitCounts[unit]));
+    // Value label
+    g.append('text').attr('x', x(unit) + x.bandwidth()/2).attr('y', y(unitCounts[unit]) - 6)
+      .attr('text-anchor','middle').attr('fill', theme.textColor).style('font-size','10px').style('font-weight','700')
+      .style('font-family',"'Inter',sans-serif").style('opacity',0).text(unitCounts[unit])
+      .transition().delay(i*60+400).duration(200).style('opacity',1);
   });
 }
 
 // ── Ranking Guardias (global) ──
 function renderRankingGuardiasChart(surgeonId) {
-  const ctx = document.getElementById('canvas-ranking-guardias').getContext('2d');
   const theme = getChartTheme();
-  if (chartInstances.rankGuardias) chartInstances.rankGuardias.destroy();
-
   const counts = {};
   for (const id of Object.keys(parsedData).map(Number)) {
     const g = getMonthEntries(id).filter(e => e.activity === 'guardia').length;
     if (g > 0) counts[id] = g;
   }
   const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
-  const labels = sorted.map(id => getSurnameOf(id));
-  const data = sorted.map(id => counts[id]);
-  const colors = sorted.map(id => id === surgeonId ? '#dc2626' : theme.mutedBarColor);
-
-  if (window.innerWidth <= 600) { const h = (sorted.length * 28 + 40) + 'px'; ctx.canvas.parentElement.style.height = h; ctx.canvas.style.height = h; }
-  else { ctx.canvas.parentElement.style.height = ''; ctx.canvas.style.height = ''; }
-  chartInstances.rankGuardias = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Guardias', data, backgroundColor: colors, borderRadius: 3 }] },
-    options: {
-      responsive: true, maintainAspectRatio: window.innerWidth > 600, indexAxis: 'y',
-      scales: {
-        x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
-        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
-      },
-      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
-    }
-  });
+  d3HorizontalBar({ containerId: 'chart-ranking-guardias', data: sorted.map(id => ({ label: getSurnameOf(id), value: counts[id], id })), theme, surgeonId, accentColor: '#dc2626', label: 'Guardias' });
 }
 
-// ── Ranking Localizados (global) ──
 function renderRankingLocalizadosChart(surgeonId) {
-  const ctx = document.getElementById('canvas-ranking-localizados').getContext('2d');
   const theme = getChartTheme();
-  if (chartInstances.rankLocalizados) chartInstances.rankLocalizados.destroy();
-
   const counts = {};
   for (const id of Object.keys(parsedData).map(Number)) {
     const g = getMonthEntries(id).filter(e => e.activity === 'localizado').length;
     if (g > 0) counts[id] = g;
   }
   const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
-  const labels = sorted.map(id => getSurnameOf(id));
-  const data = sorted.map(id => counts[id]);
-  const colors = sorted.map(id => id === surgeonId ? '#7c3aed' : theme.mutedBarColor);
-
-  if (window.innerWidth <= 600) { const h = (sorted.length * 28 + 40) + 'px'; ctx.canvas.parentElement.style.height = h; ctx.canvas.style.height = h; }
-  else { ctx.canvas.parentElement.style.height = ''; ctx.canvas.style.height = ''; }
-  chartInstances.rankLocalizados = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Localizados', data, backgroundColor: colors, borderRadius: 3 }] },
-    options: {
-      responsive: true, maintainAspectRatio: window.innerWidth > 600, indexAxis: 'y',
-      scales: {
-        x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
-        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
-      },
-      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
-    }
-  });
+  d3HorizontalBar({ containerId: 'chart-ranking-localizados', data: sorted.map(id => ({ label: getSurnameOf(id), value: counts[id], id })), theme, surgeonId, accentColor: '#7c3aed', label: 'Localizados' });
 }
 
 // ── Ranking Gestión (global, list with day details) ──
@@ -2777,45 +2795,18 @@ function renderRankingGestionChart(surgeonId) {
 
 // ── Ranking Actividad Total (global) ──
 function renderRankingTurnosChart(surgeonId) {
-  const ctx = document.getElementById('canvas-ranking-turnos').getContext('2d');
   const theme = getChartTheme();
-  if (chartInstances.rankTurnos) chartInstances.rankTurnos.destroy();
-
   const counts = {};
-  for (const id of Object.keys(parsedData).map(Number)) {
-    counts[id] = getMonthEntries(id).length;
-  }
-  const sorted = Object.keys(counts).map(Number).filter(id => counts[id] > 0)
-    .sort((a, b) => counts[b] - counts[a]).slice(0, 15);
-  const labels = sorted.map(id => getSurnameOf(id));
-  const data = sorted.map(id => counts[id]);
-  const colors = sorted.map(id => id === surgeonId ? theme.accentColor : theme.mutedBarColor);
-
-  if (window.innerWidth <= 600) { const h = (sorted.length * 28 + 40) + 'px'; ctx.canvas.parentElement.style.height = h; ctx.canvas.style.height = h; }
-  else { ctx.canvas.parentElement.style.height = ''; ctx.canvas.style.height = ''; }
-  chartInstances.rankTurnos = new Chart(ctx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Turnos totales', data, backgroundColor: colors, borderRadius: 3 }] },
-    options: {
-      responsive: true, maintainAspectRatio: window.innerWidth > 600, indexAxis: 'y',
-      scales: {
-        x: { beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
-        y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
-      },
-      plugins: { legend: { display: false }, tooltip: makeTooltipOpts(theme) }
-    }
-  });
+  for (const id of Object.keys(parsedData).map(Number)) counts[id] = getMonthEntries(id).length;
+  const sorted = Object.keys(counts).map(Number).filter(id => counts[id] > 0).sort((a, b) => counts[b] - counts[a]).slice(0, 15);
+  d3HorizontalBar({ containerId: 'chart-ranking-turnos', data: sorted.map(id => ({ label: getSurnameOf(id), value: counts[id], id })), theme, surgeonId, accentColor: theme.accentColor, label: 'Turnos' });
 }
 
 // ── Mañana vs Tarde chart ──
 function renderMorningAfternoonChart(surgeonId) {
-  const ctx = document.getElementById('canvas-morning-afternoon').getContext('2d');
   const theme = getChartTheme();
-  if (chartInstances.morningAfternoon) { chartInstances.morningAfternoon.destroy(); chartInstances.morningAfternoon = null; }
-
   const morningActs = new Set(['qui_m', 'cons_m', 'diferida']);
   const afternoonActs = new Set(['qui_t', 'cons_t', 'diferida_t']);
-
   const stats = {};
   for (const id of Object.keys(parsedData).map(Number)) {
     const entries = getMonthEntries(id);
@@ -2824,120 +2815,153 @@ function renderMorningAfternoonChart(surgeonId) {
     const total = m + t;
     if (total > 0) stats[id] = { m, t, total };
   }
+  const sorted = Object.keys(stats).map(Number).sort((a, b) => stats[b].total - stats[a].total);
+  if (sorted.length === 0) return;
 
-  const sorted = Object.keys(stats).map(Number)
-    .sort((a, b) => stats[b].total - stats[a].total).slice(0, 15);
-  const labels = sorted.map(id => getSurnameOf(id));
-  const mData = sorted.map(id => Math.round(stats[id].m / stats[id].total * 100));
-  const tData = sorted.map(id => Math.round(stats[id].t / stats[id].total * 100));
+  const margin = { top: 24, right: 30, bottom: 24, left: 80 };
+  const barH = 24, gap = 4;
+  const width = 440, height = margin.top + margin.bottom + sorted.length * (barH + gap);
+  const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
 
-  const mBorderColors = sorted.map(id => id === surgeonId ? '#0369a1' : '#60a5fa');
-  const tBorderColors = sorted.map(id => id === surgeonId ? '#c2410c' : '#fb923c');
+  const svg = createSVG('chart-morning-afternoon', width, height);
+  svg.append('defs');
+  const mColor = theme.isDark ? '#60a5fa' : '#0369a1';
+  const tColor = theme.isDark ? '#fb923c' : '#c2410c';
+  const mMuted = theme.isDark ? 'rgba(96,165,250,0.5)' : 'rgba(96,165,250,0.55)';
+  const tMuted = theme.isDark ? 'rgba(251,146,60,0.4)' : 'rgba(251,146,60,0.45)';
 
-  if (window.innerWidth <= 600) { const h = (sorted.length * 28 + 50) + 'px'; ctx.canvas.parentElement.style.height = h; ctx.canvas.style.height = h; }
-  else { ctx.canvas.parentElement.style.height = ''; ctx.canvas.style.height = ''; }
-  chartInstances.morningAfternoon = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Mañana %', data: mData, backgroundColor: sorted.map(id => id === surgeonId ? 'rgba(3,105,161,0.85)' : 'rgba(96,165,250,0.6)'), borderColor: mBorderColors, borderWidth: 1, borderRadius: 3 },
-        { label: 'Tarde %', data: tData, backgroundColor: sorted.map(id => id === surgeonId ? 'rgba(194,65,12,0.85)' : 'rgba(251,146,60,0.5)'), borderColor: tBorderColors, borderWidth: 1, borderRadius: 3 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: window.innerWidth > 600,
-      indexAxis: 'y',
-      scales: {
-        x: { stacked: true, max: 100, ticks: { color: theme.textColor, font: { size: 10 }, callback: v => v + '%' }, grid: { color: theme.gridColor } },
-        y: { stacked: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
-      },
-      plugins: {
-        legend: { display: true, labels: { color: theme.textColor, font: { size: 10 }, boxWidth: 12 } },
-        tooltip: {
-          ...makeTooltipOpts(theme),
-          callbacks: {
-            label: ctx2 => {
-              const id = sorted[ctx2.dataIndex];
-              const s = stats[id];
-              const abs = ctx2.datasetIndex === 0 ? s.m : s.t;
-              return `${ctx2.dataset.label}: ${ctx2.raw}% (${abs} turnos)`;
-            }
-          }
-        }
-      }
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const x = d3.scaleLinear().domain([0, 100]).range([0, innerW]);
+  const y = d3.scaleBand().domain(sorted.map(id => getSurnameOf(id))).range([0, innerH]).padding(0.15);
+
+  // X axis
+  g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).ticks(5).tickFormat(v => v + '%')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px'); });
+  g.append('g').call(d3.axisBottom(x).ticks(5).tickSize(-innerH).tickFormat('')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
+
+  sorted.forEach((id, i) => {
+    const s = stats[id]; const name = getSurnameOf(id); const isMe = id === surgeonId;
+    const mPct = Math.round(s.m / s.total * 100); const tPct = 100 - mPct;
+
+    // Morning bar
+    const mGrad = addGradient(svg, `grad-m-${i}`, isMe ? mColor : mMuted, true);
+    g.append('rect').attr('x', 0).attr('y', y(name)).attr('height', y.bandwidth()).attr('rx', 2)
+      .attr('fill', mGrad).attr('width', 0)
+      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>Mañana: ${mPct}% (${s.m} turnos)<br>Tarde: ${tPct}% (${s.t} turnos)`))
+      .on('mouseout', hideD3Tooltip)
+      .transition().duration(500).delay(i * 25).ease(d3.easeCubicOut).attr('width', x(mPct));
+
+    // Afternoon bar
+    const tGrad = addGradient(svg, `grad-t-${i}`, isMe ? tColor : tMuted, true);
+    g.append('rect').attr('x', x(mPct)).attr('y', y(name)).attr('height', y.bandwidth()).attr('rx', 2)
+      .attr('fill', tGrad).attr('width', 0)
+      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>Mañana: ${mPct}% (${s.m} turnos)<br>Tarde: ${tPct}% (${s.t} turnos)`))
+      .on('mouseout', hideD3Tooltip)
+      .transition().duration(500).delay(i * 25).ease(d3.easeCubicOut).attr('width', x(tPct));
+
+    // % labels inside bars
+    if (mPct >= 15 && x(mPct) > 28) {
+      g.append('text').attr('x', x(mPct) / 2).attr('y', y(name) + y.bandwidth()/2).attr('dy','0.35em')
+        .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size','9px').style('font-weight','700')
+        .style('font-family',"'Inter',sans-serif").style('opacity',0).text(`${mPct}%`)
+        .transition().delay(i*25+400).duration(200).style('opacity',1);
     }
+    if (tPct >= 15 && x(tPct) > 28) {
+      g.append('text').attr('x', x(mPct) + x(tPct)/2).attr('y', y(name) + y.bandwidth()/2).attr('dy','0.35em')
+        .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size','9px').style('font-weight','700')
+        .style('font-family',"'Inter',sans-serif").style('opacity',0).text(`${tPct}%`)
+        .transition().delay(i*25+400).duration(200).style('opacity',1);
+    }
+  });
+
+  // Y labels
+  g.selectAll('.y-lbl').data(sorted).enter().append('text')
+    .attr('x', -6).attr('y', id => y(getSurnameOf(id)) + y.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
+    .attr('fill', id => id === surgeonId ? mColor : theme.textColor)
+    .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+    .text(id => getSurnameOf(id));
+
+  // Legend
+  const lg = svg.append('g').attr('transform', `translate(${margin.left + innerW/2 - 70},10)`);
+  [[mColor, 'Mañana %'], [tColor, 'Tarde %']].forEach(([c, txt], i) => {
+    lg.append('rect').attr('x', i*80).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', c);
+    lg.append('text').attr('x', i*80+14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Inter',sans-serif").text(txt);
   });
 }
 
 // ── Festivos Trabajados chart ──
 function renderFestivosChart(surgeonId) {
-  const ctx = document.getElementById('canvas-festivos').getContext('2d');
   const theme = getChartTheme();
-  if (chartInstances.festivos) { chartInstances.festivos.destroy(); chartInstances.festivos = null; }
-
   const stats = {};
   for (const id of Object.keys(parsedData).map(Number)) {
-    const entries = getMonthEntries(id);
-    let fiestas = 0, fines = 0;
-    const seen = new Set();
+    const entries = getMonthEntries(id); let fiestas = 0, fines = 0; const seen = new Set();
     for (const e of entries) {
-      const key = `${e.year}-${e.month}-${e.day}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      const key = `${e.year}-${e.month}-${e.day}`; if (seen.has(key)) continue; seen.add(key);
       if (isHoliday(e.year, e.month, e.day) || isInferredHoliday(e.year, e.month, e.day)) fiestas++;
-      else {
-        const dow = new Date(e.year, e.month, e.day).getDay();
-        if (dow === 0 || dow === 6) fines++;
-      }
+      else { const dow = new Date(e.year, e.month, e.day).getDay(); if (dow === 0 || dow === 6) fines++; }
     }
-    const total = fiestas + fines;
-    if (total > 0) stats[id] = { fiestas, fines, total };
+    const total = fiestas + fines; if (total > 0) stats[id] = { fiestas, fines, total };
   }
-
-  const sorted = Object.keys(stats).map(Number)
-    .sort((a, b) => stats[b].total - stats[a].total).slice(0, 15);
-  if (sorted.length === 0) {
-    document.getElementById('card-festivos').style.display = 'none';
-    return;
-  }
+  const sorted = Object.keys(stats).map(Number).sort((a, b) => stats[b].total - stats[a].total).slice(0, 15);
+  if (sorted.length === 0) { document.getElementById('card-festivos').style.display = 'none'; return; }
   document.getElementById('card-festivos').style.display = '';
-  const labels = sorted.map(id => getSurnameOf(id));
-  const fiestasData = sorted.map(id => stats[id].fiestas);
-  const finesData = sorted.map(id => stats[id].fines);
 
-  const fiestasColors = sorted.map(id => id === surgeonId ? 'rgba(220,38,38,0.85)' : 'rgba(220,38,38,0.4)');
-  const finesColors = sorted.map(id => id === surgeonId ? 'rgba(124,58,237,0.85)' : 'rgba(124,58,237,0.4)');
+  // Horizontal grouped bar chart for better surgeon identification
+  const margin = { top: 24, right: 40, bottom: 24, left: 80 };
+  const barH = 10, groupH = barH * 2 + 4, gap = 6;
+  const width = 440, height = margin.top + margin.bottom + sorted.length * (groupH + gap);
+  const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
 
-  chartInstances.festivos = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Festivos', data: fiestasData, backgroundColor: fiestasColors, borderRadius: 3 },
-        { label: 'Fines de semana', data: finesData, backgroundColor: finesColors, borderRadius: 3 }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      scales: {
-        x: { ticks: { color: theme.textColor, font: { size: 10 }, maxRotation: 45 }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 }, stepSize: 1 }, grid: { color: theme.gridColor } }
-      },
-      plugins: {
-        legend: { display: true, labels: { color: theme.textColor, font: { size: 10 }, boxWidth: 12 } },
-        tooltip: {
-          ...makeTooltipOpts(theme),
-          callbacks: {
-            label: ctx2 => {
-              const id = sorted[ctx2.dataIndex];
-              const s = stats[id];
-              return `${ctx2.dataset.label}: ${ctx2.raw} días (total: ${s.total})`;
-            }
-          }
-        }
-      }
-    }
+  const svg = createSVG('chart-festivos', width, height);
+  svg.append('defs');
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const maxV = d3.max(sorted, id => Math.max(stats[id].fiestas, stats[id].fines)) || 1;
+  const x = d3.scaleLinear().domain([0, maxV]).nice().range([0, innerW]);
+  const y = d3.scaleBand().domain(sorted.map(id => getSurnameOf(id))).range([0, innerH]).padding(0.2);
+
+  // Grid
+  g.append('g').call(d3.axisBottom(x).ticks(5).tickSize(-innerH).tickFormat('')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
+  g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px'); });
+
+  const festColor = '#dc2626', fineColor = '#7c3aed';
+
+  sorted.forEach((id, i) => {
+    const s = stats[id]; const name = getSurnameOf(id); const isMe = id === surgeonId;
+    const yPos = y(name); const bw = y.bandwidth();
+
+    // Festivos bar (top half)
+    const fGrad = addGradient(svg, `grad-fest-${i}`, festColor, true);
+    g.append('rect').attr('x', 0).attr('y', yPos).attr('height', bw / 2 - 1).attr('rx', 2)
+      .attr('fill', fGrad).style('opacity', isMe ? 1 : 0.65).attr('width', 0)
+      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>Festivos: ${s.fiestas}<br>Fines semana: ${s.fines}<br>Total: ${s.total}`))
+      .on('mouseout', hideD3Tooltip)
+      .transition().duration(500).delay(i * 35).ease(d3.easeCubicOut).attr('width', x(s.fiestas));
+
+    // Fines bar (bottom half)
+    const wGrad = addGradient(svg, `grad-fine-${i}`, fineColor, true);
+    g.append('rect').attr('x', 0).attr('y', yPos + bw / 2 + 1).attr('height', bw / 2 - 1).attr('rx', 2)
+      .attr('fill', wGrad).style('opacity', isMe ? 1 : 0.65).attr('width', 0)
+      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>Festivos: ${s.fiestas}<br>Fines semana: ${s.fines}<br>Total: ${s.total}`))
+      .on('mouseout', hideD3Tooltip)
+      .transition().duration(500).delay(i * 35 + 60).ease(d3.easeCubicOut).attr('width', x(s.fines));
+
+    // Value labels
+    if (s.fiestas > 0) g.append('text').attr('x', x(s.fiestas)+4).attr('y', yPos + bw/4).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','9px').style('font-weight','600').style('opacity',0).text(s.fiestas).transition().delay(i*35+400).duration(200).style('opacity',1);
+    if (s.fines > 0) g.append('text').attr('x', x(s.fines)+4).attr('y', yPos + bw*3/4).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','9px').style('font-weight','600').style('opacity',0).text(s.fines).transition().delay(i*35+460).duration(200).style('opacity',1);
+  });
+
+  // Y labels
+  g.selectAll('.y-lbl').data(sorted).enter().append('text')
+    .attr('x', -6).attr('y', id => y(getSurnameOf(id)) + y.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
+    .attr('fill', id => id === surgeonId ? festColor : theme.textColor)
+    .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+    .text(id => getSurnameOf(id));
+
+  // Legend
+  const lg = svg.append('g').attr('transform', `translate(${margin.left + innerW/2 - 90},10)`);
+  [[festColor, 'Festivos'], [fineColor, 'Fines de semana']].forEach(([c, txt], i) => {
+    lg.append('rect').attr('x', i*110).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', c);
+    lg.append('text').attr('x', i*110+14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Inter',sans-serif").text(txt);
   });
 }
 
@@ -3071,7 +3095,7 @@ document.querySelectorAll('#comparativa-toggle button').forEach(btn => {
     comparativaMode = this.dataset.mode;
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(sid) && chartsExpanded) {
-      if (chartInstances.unitComparison) { chartInstances.unitComparison.destroy(); chartInstances.unitComparison = null; }
+      document.getElementById('chart-unit-comparison').innerHTML = '';
       renderUnitComparisonChart(sid);
     }
   });
@@ -3085,7 +3109,7 @@ document.querySelectorAll('#qx-unit-toggle button').forEach(btn => {
     qxUnitMode = this.dataset.mode;
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(sid) && chartsExpanded) {
-      if (chartInstances.qxUnit) { chartInstances.qxUnit.destroy(); chartInstances.qxUnit = null; }
+      document.getElementById('chart-qx-unit').innerHTML = '';
       renderQxUnitChart(sid);
     }
   });
