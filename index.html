@@ -2689,11 +2689,13 @@ function renderRankingGuardiasChart(surgeonId) {
   const data = sorted.map(id => counts[id]);
   const colors = sorted.map(id => id === surgeonId ? '#dc2626' : theme.mutedBarColor);
 
+  if (window.innerWidth <= 600) { ctx.canvas.parentElement.style.minHeight = (sorted.length * 28 + 40) + 'px'; ctx.canvas.style.minHeight = (sorted.length * 28 + 40) + 'px'; }
+  else { ctx.canvas.parentElement.style.minHeight = ''; ctx.canvas.style.minHeight = ''; }
   chartInstances.rankGuardias = new Chart(ctx, {
     type: 'bar',
     data: { labels, datasets: [{ label: 'Guardias', data, backgroundColor: colors, borderRadius: 3 }] },
     options: {
-      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
       scales: {
         x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
         y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
@@ -2719,11 +2721,13 @@ function renderRankingLocalizadosChart(surgeonId) {
   const data = sorted.map(id => counts[id]);
   const colors = sorted.map(id => id === surgeonId ? '#7c3aed' : theme.mutedBarColor);
 
+  if (window.innerWidth <= 600) { ctx.canvas.parentElement.style.minHeight = (sorted.length * 28 + 40) + 'px'; ctx.canvas.style.minHeight = (sorted.length * 28 + 40) + 'px'; }
+  else { ctx.canvas.parentElement.style.minHeight = ''; ctx.canvas.style.minHeight = ''; }
   chartInstances.rankLocalizados = new Chart(ctx, {
     type: 'bar',
     data: { labels, datasets: [{ label: 'Localizados', data, backgroundColor: colors, borderRadius: 3 }] },
     options: {
-      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
       scales: {
         x: { beginAtZero: true, ticks: { color: theme.textColor, stepSize: 1, font: { size: 10 } }, grid: { color: theme.gridColor } },
         y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
@@ -2787,11 +2791,13 @@ function renderRankingTurnosChart(surgeonId) {
   const data = sorted.map(id => counts[id]);
   const colors = sorted.map(id => id === surgeonId ? theme.accentColor : theme.mutedBarColor);
 
+  if (window.innerWidth <= 600) { ctx.canvas.parentElement.style.minHeight = (sorted.length * 28 + 40) + 'px'; ctx.canvas.style.minHeight = (sorted.length * 28 + 40) + 'px'; }
+  else { ctx.canvas.parentElement.style.minHeight = ''; ctx.canvas.style.minHeight = ''; }
   chartInstances.rankTurnos = new Chart(ctx, {
     type: 'bar',
     data: { labels, datasets: [{ label: 'Turnos totales', data, backgroundColor: colors, borderRadius: 3 }] },
     options: {
-      responsive: true, maintainAspectRatio: true, indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
       scales: {
         x: { beginAtZero: true, ticks: { color: theme.textColor, font: { size: 10 } }, grid: { color: theme.gridColor } },
         y: { ticks: { color: theme.textColor, font: { size: 10 } }, grid: { display: false } }
@@ -2828,6 +2834,8 @@ function renderMorningAfternoonChart(surgeonId) {
   const mBorderColors = sorted.map(id => id === surgeonId ? '#0369a1' : '#60a5fa');
   const tBorderColors = sorted.map(id => id === surgeonId ? '#c2410c' : '#fb923c');
 
+  if (window.innerWidth <= 600) { ctx.canvas.parentElement.style.minHeight = (sorted.length * 28 + 50) + 'px'; ctx.canvas.style.minHeight = (sorted.length * 28 + 50) + 'px'; }
+  else { ctx.canvas.parentElement.style.minHeight = ''; ctx.canvas.style.minHeight = ''; }
   chartInstances.morningAfternoon = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -2838,7 +2846,7 @@ function renderMorningAfternoonChart(surgeonId) {
       ]
     },
     options: {
-      responsive: true, maintainAspectRatio: true,
+      responsive: true, maintainAspectRatio: false,
       indexAxis: 'y',
       scales: {
         x: { stacked: true, max: 100, ticks: { color: theme.textColor, font: { size: 10 }, callback: v => v + '%' }, grid: { color: theme.gridColor } },
