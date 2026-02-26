@@ -655,20 +655,31 @@
       display: flex; flex-wrap: wrap; gap: 5px;
     }
     .icomp-surgeon-pill {
-      padding: 5px 12px; border-radius: 999px; border: 1.5px solid var(--border);
+      padding: 5px 12px; border-radius: 999px; border: 2px solid var(--border);
       background: var(--surface); color: var(--text-muted);
-      font-size: 11px; font-weight: 600; cursor: pointer;
+      font-size: 11px; font-weight: 700; cursor: pointer;
       transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+      text-transform: uppercase; letter-spacing: 0.3px;
     }
     .icomp-surgeon-pill:hover { border-color: var(--accent); color: var(--accent); }
     .icomp-surgeon-pill.active { border-color: transparent; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
     .icomp-surgeon-pill.disabled { opacity: 0.35; pointer-events: none; }
-    .icomp-metrics { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
+    .icomp-metrics { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 0 4px; border-top: 1px solid var(--border-light); margin-top: 6px; }
     .icomp-metric-label {
       display: inline-flex; align-items: center; gap: 4px;
-      padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border-light);
+      padding: 4px 10px; border-radius: 6px; border: 1.5px dashed var(--border);
       font-size: 10px; font-weight: 600; color: var(--text-muted);
       cursor: pointer; transition: all 0.2s; user-select: none; background: var(--surface);
+    }
+    .icomp-metric-label::before {
+      content: ''; display: inline-block; width: 12px; height: 12px;
+      border-radius: 3px; border: 1.5px solid var(--border);
+      flex-shrink: 0; transition: all 0.2s;
+    }
+    .icomp-metric-label.checked::before {
+      content: '\2713'; background: var(--accent); border-color: var(--accent);
+      color: white; font-size: 9px; font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
     }
     .icomp-metric-label:hover { border-color: var(--accent); }
     .icomp-metric-label input { display: none; }
@@ -3454,7 +3465,7 @@ function buildIcompSelector() {
 function buildIcompMetrics() {
   const container = document.getElementById('icomp-metrics');
   if (!container) return;
-  let html = '';
+  let html = '<span class="icomp-hint" style="width:100%">Métricas a comparar:</span>';
   ICOMP_METRICS.forEach(m => {
     const checked = icompSelectedMetrics.includes(m.key);
     html += `<label class="icomp-metric-label${checked ? ' checked' : ''}">`;
