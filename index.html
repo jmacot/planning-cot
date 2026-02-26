@@ -577,22 +577,24 @@
     /* Bubbles chart */
     .bubbles-container {
       display: flex; flex-wrap: wrap; align-items: center;
-      justify-content: center; gap: 8px; padding: 12px 0 24px 0;
-      min-height: 80px; overflow: visible;
+      justify-content: center; gap: 8px; padding: 12px 0;
+      min-height: 80px; overflow: hidden;
     }
     .bubble {
-      position: relative; border-radius: 50%; display: flex; align-items: center;
+      border-radius: 50%; display: flex; align-items: center;
       justify-content: center; color: white; font-weight: 700;
       font-family: 'Inter', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
       transition: transform 0.2s; cursor: pointer;
     }
+    .bubble.bubble-active { transform: scale(1.12); box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 0 0 5px currentColor; }
     .bubble:hover { transform: scale(1.1); }
-    .bubble-label {
-      position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
-      white-space: nowrap; font-size: 11px; font-weight: 600;
-      color: var(--text); background: var(--surface); padding: 2px 7px;
-      border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.13);
-      pointer-events: none; z-index: 10;
+    .bubble-info {
+      text-align: center; font-size: 13px; font-weight: 600;
+      color: var(--text); padding: 6px 0 2px 0; min-height: 24px;
+    }
+    .bubble-info-dot {
+      display: inline-block; width: 10px; height: 10px;
+      border-radius: 50%; margin-right: 6px; vertical-align: middle;
     }
 
     /* Comparador table */
@@ -937,6 +939,7 @@
           <div class="chart-card dash-wide" id="card-bubbles">
             <div class="chart-card-title">Distribuci&oacute;n de Actividades</div>
             <div class="bubbles-container" id="bubbles-container"></div>
+            <div class="bubble-info" id="bubble-info"></div>
           </div>
           <!-- Percentiles -->
           <div class="chart-card dash-wide" id="card-percentiles">
@@ -2447,9 +2450,11 @@ function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, lab
 // ── Bubbles Chart (HTML-based) ──
 function renderBubblesChart(surgeonId) {
   const container = document.getElementById('bubbles-container');
+  const infoEl = document.getElementById('bubble-info');
   const entries = getMonthEntries(surgeonId);
   if (entries.length === 0) {
     container.innerHTML = '<div style="color:var(--text-light);font-size:12px;text-align:center;padding:20px">Sin datos</div>';
+    infoEl.innerHTML = '';
     return;
   }
   // Aggregate into groups
@@ -2486,21 +2491,21 @@ function renderBubblesChart(surgeonId) {
     const label = grpLabels[grp] || grp;
     const diam = Math.max(36, Math.round(36 + 74 * Math.sqrt(pct / Math.max(maxPct, 1))));
     const fontSize = diam < 50 ? 10 : (diam < 70 ? 12 : 14);
-    bubblesHtml += `<div class="bubble" data-label="${label}: ${counts[grp]}" style="width:${diam}px;height:${diam}px;background:${color};font-size:${fontSize}px" title="${label}: ${counts[grp]} (${pct}%)">${pct}%</div>`;
+    bubblesHtml += `<div class="bubble" data-label="${label}" data-count="${counts[grp]}" data-pct="${pct}" data-color="${color}" style="width:${diam}px;height:${diam}px;background:${color};font-size:${fontSize}px" title="${label}: ${counts[grp]} (${pct}%)">${pct}%</div>`;
   }
   container.innerHTML = bubblesHtml;
-  // Click handler: toggle activity label below bubble
+  infoEl.innerHTML = '';
+  // Click handler: show activity info in fixed area below bubbles
   container.querySelectorAll('.bubble').forEach(b => {
     b.addEventListener('click', () => {
-      const existing = b.querySelector('.bubble-label');
-      // Remove all labels first
-      container.querySelectorAll('.bubble-label').forEach(l => l.remove());
-      // Toggle: if this bubble already had a label, just remove it
-      if (existing) return;
-      const lbl = document.createElement('span');
-      lbl.className = 'bubble-label';
-      lbl.textContent = b.dataset.label;
-      b.appendChild(lbl);
+      const wasActive = b.classList.contains('bubble-active');
+      container.querySelectorAll('.bubble').forEach(x => x.classList.remove('bubble-active'));
+      if (wasActive) {
+        infoEl.innerHTML = '';
+      } else {
+        b.classList.add('bubble-active');
+        infoEl.innerHTML = `<span class="bubble-info-dot" style="background:${b.dataset.color}"></span>${b.dataset.label}: ${b.dataset.count} (${b.dataset.pct}%)`;
+      }
     });
   });
 }
