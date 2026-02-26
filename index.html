@@ -702,6 +702,7 @@
     .td-delta-zero { color: var(--text-light); }
 
     /* Ranking Gestión list */
+    #card-ranking-gestion #ranking-gestion-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
     .rank-gestion-list { display: flex; flex-direction: column; gap: 6px; }
     .rank-gestion-item {
       display: flex; align-items: center; gap: 10px;
@@ -969,6 +970,10 @@
             </div>
             <div id="chart-unit-comparison" class="d3-chart-wrap"></div>
           </div>
+          <div class="chart-card" id="card-ranking-gestion">
+            <div class="chart-card-title">Ranking Gesti&oacute;n</div>
+            <div id="ranking-gestion-content"></div>
+          </div>
           <!-- Comparador table -->
           <div class="chart-card dash-wide" id="card-comparador">
             <div class="chart-card-title">Comparador</div>
@@ -1019,10 +1024,6 @@
             <div id="chart-ranking-localizados" class="d3-chart-wrap"></div>
           </div>
           <!-- Row 4: Global -->
-          <div class="chart-card" id="card-ranking-gestion">
-            <div class="chart-card-title">Ranking Gesti&oacute;n</div>
-            <div id="ranking-gestion-content"></div>
-          </div>
           <div class="chart-card" id="card-ranking-turnos">
             <div class="chart-card-title">Ranking Actividad Total</div>
             <div id="chart-ranking-turnos" class="d3-chart-wrap"></div>
@@ -2897,9 +2898,9 @@ function renderUnitComparisonChart(surgeonId) {
   const units = SURGEON_UNITS[surgeonId];
   const titleEl = document.getElementById('comparativa-title');
 
-  if (!units) { container.innerHTML = ''; titleEl.textContent = 'Comparativa (sin unidad)'; return; }
+  if (!units) { container.innerHTML = ''; titleEl.textContent = 'Unidad (sin asignar)'; return; }
   const unit = units[0];
-  titleEl.textContent = `Comparativa — ${unit}`;
+  titleEl.textContent = `Unidad de ${unit}`;
   const unitSurgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
   const exclude = new Set(['guardia', 'saliente']);
 
@@ -2922,7 +2923,8 @@ function renderUnitComparisonChart(surgeonId) {
     const grpOrder = ['quirofano','cons_m','cons_t','diferida','diferida_t','localizado','gestion','rucot'];
     const usedGrps = grpOrder.filter(g => allGroups.has(g));
 
-    const margin = { top: 8, right: 30, bottom: 50, left: 80 };
+    const legendRows = usedGrps.length > 4 ? 2 : 1;
+    const margin = { top: 8, right: 30, bottom: 20 + legendRows * 18, left: 80 };
     const barH = 26, gap = 4;
     const width = 400, height = margin.top + margin.bottom + unitSurgeons.length * (barH + gap);
     const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
@@ -2970,14 +2972,17 @@ function renderUnitComparisonChart(surgeonId) {
       .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
       .text(id => getSurnameOf(id));
 
-    // Legend
-    const lg = svg.append('g').attr('transform', `translate(${margin.left},${height - 14})`);
-    let lx = 0;
+    // Legend — wraps into rows if many groups
+    const maxLegendW = innerW;
+    const lg = svg.append('g').attr('transform', `translate(${margin.left},${height - legendRows * 18})`);
+    let lx = 0, ly = 0;
     usedGrps.forEach(grp => {
-      lg.append('rect').attr('x', lx).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', groupColors[grp]);
-      lg.append('text').attr('x', lx + 14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor)
+      const itemW = (groupLabels[grp].length * 5.5) + 24;
+      if (lx + itemW > maxLegendW && lx > 0) { lx = 0; ly += 16; }
+      lg.append('rect').attr('x', lx).attr('y', ly - 5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', groupColors[grp]);
+      lg.append('text').attr('x', lx + 14).attr('y', ly).attr('dy','0.35em').attr('fill', theme.textColor)
         .style('font-size','9px').style('font-family',"'Inter',sans-serif").text(groupLabels[grp]);
-      lx += (groupLabels[grp].length * 6) + 24;
+      lx += itemW;
     });
   }
 }
