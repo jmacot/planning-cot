@@ -540,7 +540,7 @@
                   padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       padding: 0 16px;
     }
-    .charts-body.expanded { max-height: 4500px; padding: 0 16px 16px; }
+    .charts-body.expanded { max-height: 5500px; padding: 0 16px 16px; }
     .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .dash-wide { grid-column: 1 / -1; }
     .chart-card {
@@ -642,6 +642,64 @@
     }
     .comparador-table tr.highlight .td-pct { font-weight: 700; color: var(--accent); }
     .comparador-table tbody tr:hover td { background: var(--surface2); }
+
+    /* Interactive Comparator */
+    .icomp-toolbar {
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+    }
+    .icomp-selector {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .icomp-hint {
+      font-size: 10px; color: var(--text-light); font-style: italic;
+    }
+    .icomp-pill-grid {
+      display: flex; flex-wrap: wrap; gap: 5px;
+    }
+    .icomp-surgeon-pill {
+      padding: 5px 12px; border-radius: 999px; border: 1.5px solid var(--border);
+      background: var(--surface); color: var(--text-muted);
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+    }
+    .icomp-surgeon-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .icomp-surgeon-pill.active { border-color: transparent; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .icomp-surgeon-pill.disabled { opacity: 0.35; pointer-events: none; }
+    .icomp-metrics { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0; }
+    .icomp-metric-label {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border-light);
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all 0.2s; user-select: none; background: var(--surface);
+    }
+    .icomp-metric-label:hover { border-color: var(--accent); }
+    .icomp-metric-label input { display: none; }
+    .icomp-metric-label.checked {
+      background: var(--accent-light); border-color: var(--accent); color: var(--accent);
+    }
+    [data-theme="dark"] .icomp-metric-label.checked {
+      background: rgba(96,165,250,0.15); color: var(--accent);
+    }
+    .icomp-delta-table {
+      width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px;
+    }
+    .icomp-delta-table th {
+      text-align: center; font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.3px;
+      padding: 6px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border);
+    }
+    .icomp-delta-table th:first-child { text-align: left; }
+    .icomp-delta-table td {
+      text-align: center; padding: 6px 8px;
+      border-bottom: 1px solid var(--border-light); font-weight: 500; color: var(--text);
+    }
+    .icomp-delta-table td:first-child {
+      text-align: left; font-weight: 600; font-size: 10px;
+      color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .td-delta-pos { color: var(--green); font-weight: 700; }
+    .td-delta-neg { color: var(--red); font-weight: 700; }
+    .td-delta-zero { color: var(--text-light); }
 
     /* Ranking Gestión list */
     .rank-gestion-list { display: flex; flex-direction: column; gap: 6px; }
@@ -754,6 +812,14 @@
       /* Comparador table */
       .comparador-table { font-size: 10px; }
       .comparador-table th, .comparador-table td { padding: 3px 4px; }
+
+      /* Interactive comparator mobile */
+      .icomp-toolbar { gap: 4px; }
+      .icomp-surgeon-pill { font-size: 10px; padding: 4px 9px; }
+      .icomp-metrics { gap: 4px; }
+      .icomp-metric-label { font-size: 9px; padding: 3px 8px; }
+      .icomp-delta-table { font-size: 10px; }
+      .icomp-delta-table th, .icomp-delta-table td { padding: 3px 4px; }
 
       .radar-grid { grid-template-columns: 1fr; }
     }
@@ -912,6 +978,28 @@
             </div>
             <div class="comparador-table-wrap" id="comparador-content"></div>
           </div>
+          <!-- Interactive Comparator -->
+          <div class="chart-card dash-wide" id="card-interactive-comp">
+            <div class="chart-card-title">Comparador Interactivo</div>
+            <div class="icomp-toolbar">
+              <div class="toggle-btns" id="icomp-mode-toggle">
+                <button class="active" data-mode="cirujano">Cirujano</button>
+                <button data-mode="unidad">Unidad</button>
+              </div>
+              <div class="toggle-btns" id="icomp-period-toggle">
+                <button class="active" data-mode="month" id="icomp-period-month">Mes</button>
+                <button data-mode="total" id="icomp-period-total">Total</button>
+              </div>
+              <div class="toggle-btns" id="icomp-viz-toggle">
+                <button class="active" data-viz="slope">Slope</button>
+                <button data-viz="bars">Barras</button>
+              </div>
+            </div>
+            <div id="icomp-selector" class="icomp-selector"></div>
+            <div id="icomp-metrics" class="icomp-metrics"></div>
+            <div id="icomp-chart" class="d3-chart-wrap"></div>
+            <div class="comparador-table-wrap" id="icomp-delta"></div>
+          </div>
           <!-- Row 3: Global -->
           <div class="chart-card" id="card-qx-unidad">
             <div class="chart-card-title">Quir&oacute;fanos por Unidad</div>
@@ -964,7 +1052,7 @@
 // ─────────────────────────────────────────────
 const SURGEONS = {
   1:'Fernando Baquero', 2:'Bea Grijalvo', 3:'Miguel Villa', 4:'Manuel Cintado',
-  5:'Silvia Exposito', 6:'Antonio Ortiz', 7:'Marta del Rio', 8:'Alejandro Linan',
+  5:'Silvia Exposito', 6:'Antonio Ortiz', 7:'Marta del Rio', 8:'Alejandro Li\u00f1an',
   9:'Pepe Contreras', 10:'Jairo Hijazi', 11:'Manuel Centeno', 12:'Javier Martin',
   13:'Laura Hernandez', 14:'Libertad Caceres', 15:'Paco Barrionuevo',
   16:'Lorena Rial', 17:'Guille Estrada', 18:'Sara Gonzalez', 19:'Antonio Soler',
@@ -2187,6 +2275,26 @@ let qxUnitMode = 'total';
 let comparadorMode = 'cirujano';
 let retribMode = 'contaje';
 
+// ── Interactive Comparator state ──
+let icompMode = 'cirujano';
+let icompPeriod = 'month';
+let icompViz = 'slope';
+let icompSelectedSurgeons = [];
+let icompSelectedUnits = [];
+let icompSelectedMetrics = ['guardia','qui_m','qui_t','cons_m','cons_t','gestion','localizado','diferida'];
+const ICOMP_COLORS = ['#1a3a5c', '#16a34a', '#dc2626'];
+const ICOMP_COLORS_DARK = ['#60a5fa', '#4ade80', '#f87171'];
+const ICOMP_METRICS = [
+  { key: 'guardia',    label: 'Guardias',   fn: e => e.activity === 'guardia' },
+  { key: 'qui_m',      label: 'Qx Ma\u00f1ana',  fn: e => e.activity === 'qui_m' },
+  { key: 'qui_t',      label: 'Qx Tarde',   fn: e => e.activity === 'qui_t' },
+  { key: 'cons_m',     label: 'Consultas M', fn: e => e.activity === 'cons_m' },
+  { key: 'cons_t',     label: 'Consultas T', fn: e => e.activity === 'cons_t' },
+  { key: 'gestion',    label: 'Gesti\u00f3n',    fn: e => e.activity === 'gestion' },
+  { key: 'localizado', label: 'Localizados', fn: e => e.activity === 'localizado' },
+  { key: 'diferida',   label: 'Diferida',   fn: e => e.activity === 'diferida' || e.activity === 'diferida_t' }
+];
+
 // ── Retribution rates (HSJD) ──
 const RETRIB_RATES = {
   gpf: { r17: 21.31, h17: 17, r24: 20.01, h24: 24 },
@@ -2208,6 +2316,8 @@ function getChartTheme() {
 
 function destroyCharts() {
   document.querySelectorAll('.d3-chart-wrap').forEach(el => el.innerHTML = '');
+  const deltaEl = document.getElementById('icomp-delta');
+  if (deltaEl) deltaEl.innerHTML = '';
 }
 
 function getSurnameOf(id) {
@@ -2538,6 +2648,203 @@ function d3Radar({ containerId, labels, surgeonVals, avgVals, surgeonName, theme
     lg.append('circle').attr('cx', gx).attr('cy', 0).attr('r', 4).attr('fill', c);
     lg.append('text').attr('x', gx + 8).attr('y', 0).attr('dy', '0.35em')
       .attr('fill', theme.textColor).style('font-size', '10px').style('font-family', "'Inter',sans-serif").text(txt);
+  });
+}
+
+// ── d3SlopeChart: parallel coordinates / slope chart ──
+function d3SlopeChart({ containerId, labels, datasets, theme }) {
+  const n = labels.length;
+  if (n < 2 || datasets.length < 2) return;
+  const margin = { top: 44, right: 24, bottom: 40, left: 24 };
+  const width = Math.max(460, n * 68);
+  const axisH = 200;
+  const height = margin.top + axisH + margin.bottom;
+  const innerW = width - margin.left - margin.right;
+
+  const svg = createSVG(containerId, width, height);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // X positions for each metric axis
+  const xPositions = n === 1 ? [innerW / 2] : labels.map((_, i) => (innerW / (n - 1)) * i);
+
+  // Per-axis Y scale — shared padding so dots don't touch top/bottom
+  const yScales = labels.map((_, i) => {
+    const vals = datasets.map(ds => ds.values[i]);
+    const maxV = Math.max(d3.max(vals) || 0, 1);
+    return d3.scaleLinear().domain([0, maxV * 1.1]).range([axisH, 0]);
+  });
+
+  // Vertical axis lines + labels
+  labels.forEach((lbl, i) => {
+    const x = xPositions[i];
+    // Axis line
+    g.append('line').attr('x1', x).attr('y1', 0).attr('x2', x).attr('y2', axisH)
+      .attr('stroke', theme.gridColor).attr('stroke-width', 1).attr('stroke-dasharray', '3,3');
+
+    // Metric label well above the chart — abbreviate if many axes
+    const shortLbl = n >= 6 ? lbl.replace('Consultas', 'Cons.').replace('Localizados', 'Localiz.') : lbl;
+    g.append('text').attr('x', x).attr('y', -28)
+      .attr('text-anchor', 'middle').attr('fill', theme.textColor)
+      .style('font-size', n >= 7 ? '8px' : '9px').style('font-weight', '700')
+      .style('font-family', "'Inter',sans-serif")
+      .style('text-transform', 'uppercase').style('letter-spacing', '0.3px')
+      .text(shortLbl);
+
+    // Max value small tick under label
+    const maxV = yScales[i].domain()[1];
+    const maxDisplay = Math.round(maxV / 1.1);
+    g.append('text').attr('x', x).attr('y', -16)
+      .attr('text-anchor', 'middle').attr('fill', theme.textColor)
+      .style('font-size', '8px').style('opacity', 0.4)
+      .style('font-family', "'Inter',sans-serif").text('max ' + maxDisplay);
+  });
+
+  // Draw lines + dots for each dataset
+  const lineFn = d3.line().curve(d3.curveMonotoneX);
+
+  datasets.forEach((ds, di) => {
+    const points = ds.values.map((v, i) => [xPositions[i], yScales[i](v)]);
+
+    // Line path with animated stroke drawing
+    const path = g.append('path')
+      .datum(points)
+      .attr('d', lineFn)
+      .attr('fill', 'none')
+      .attr('stroke', ds.color)
+      .attr('stroke-width', 2.5)
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-linejoin', 'round');
+
+    const totalLen = path.node().getTotalLength();
+    path.attr('stroke-dasharray', totalLen)
+      .attr('stroke-dashoffset', totalLen)
+      .transition().duration(800).delay(di * 200).ease(d3.easeCubicOut)
+      .attr('stroke-dashoffset', 0);
+
+    // Dot markers + value labels
+    ds.values.forEach((v, i) => {
+      const cx = xPositions[i], cy = yScales[i](v);
+
+      // Background pill for the value label
+      const labelY = cy - 12;
+      const textG = g.append('g').style('opacity', 0);
+      textG.append('rect')
+        .attr('x', cx - 12).attr('y', labelY - 7)
+        .attr('width', 24).attr('height', 14)
+        .attr('rx', 4).attr('fill', ds.color).attr('opacity', 0.15);
+      textG.append('text')
+        .attr('x', cx).attr('y', labelY)
+        .attr('text-anchor', 'middle').attr('dy', '0.35em')
+        .attr('fill', ds.color)
+        .style('font-size', '9px').style('font-weight', '700')
+        .style('font-family', "'Inter',sans-serif")
+        .text(v);
+      textG.transition().delay(di * 200 + 700).duration(300).style('opacity', 1);
+
+      // Dot
+      g.append('circle')
+        .attr('cx', cx).attr('cy', cy)
+        .attr('r', 5).attr('fill', ds.color)
+        .attr('stroke', theme.surfaceColor).attr('stroke-width', 2)
+        .style('opacity', 0)
+        .on('mouseover', ev => showD3Tooltip(ev,
+          `<strong>${ds.name}</strong><br>${labels[i]}: ${v}`))
+        .on('mouseout', hideD3Tooltip)
+        .transition().delay(di * 200 + 600).duration(300).style('opacity', 1);
+    });
+  });
+
+  // Legend
+  const lgWidth = datasets.length * 110;
+  const lg = svg.append('g').attr('transform', `translate(${(width - lgWidth) / 2},${height - 10})`);
+  datasets.forEach((ds, i) => {
+    const gx = i * 110;
+    lg.append('line').attr('x1', gx).attr('y1', 0).attr('x2', gx + 16).attr('y2', 0)
+      .attr('stroke', ds.color).attr('stroke-width', 2.5).attr('stroke-linecap', 'round');
+    lg.append('circle').attr('cx', gx + 8).attr('cy', 0).attr('r', 3.5).attr('fill', ds.color);
+    lg.append('text').attr('x', gx + 22).attr('y', 0).attr('dy', '0.35em')
+      .attr('fill', theme.textColor).style('font-size', '10px')
+      .style('font-family', "'Inter',sans-serif").text(ds.name);
+  });
+}
+
+// ── d3GroupedHorizontalBar: grouped bars per metric ──
+function d3GroupedHorizontalBar({ containerId, metricLabels, datasets, theme }) {
+  const nGroups = metricLabels.length;
+  const nSeries = datasets.length;
+  const margin = { top: 8, right: 50, bottom: 36, left: 90 };
+  const subBarH = 16, subGap = 2, groupPad = 8;
+  const groupH = nSeries * (subBarH + subGap) + groupPad;
+  const width = 420;
+  const height = margin.top + margin.bottom + nGroups * groupH;
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+
+  const svg = createSVG(containerId, width, height);
+  svg.append('defs');
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const allVals = datasets.flatMap(d => d.values);
+  const x = d3.scaleLinear().domain([0, d3.max(allVals) || 1]).nice().range([0, innerW]);
+  const yGroup = d3.scaleBand().domain(metricLabels).range([0, innerH]).padding(0.15);
+  const yBar = d3.scaleBand().domain(d3.range(nSeries)).range([0, yGroup.bandwidth()]).padding(0.08);
+
+  // Grid lines
+  g.append('g').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(5).tickSize(-innerH).tickFormat(''))
+    .call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
+  g.append('g').attr('transform', `translate(0,${innerH})`)
+    .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d')))
+    .call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size', '10px'); });
+
+  // Bars
+  metricLabels.forEach((metric, mi) => {
+    datasets.forEach((ds, di) => {
+      const val = ds.values[mi];
+      const gradId = `grad-icomp-${mi}-${di}`;
+      const fill = addGradient(svg, gradId, ds.color, true);
+      g.append('rect')
+        .attr('x', 0)
+        .attr('y', yGroup(metric) + yBar(di))
+        .attr('height', yBar.bandwidth())
+        .attr('rx', 3)
+        .attr('fill', fill)
+        .attr('width', 0)
+        .on('mouseover', ev => showD3Tooltip(ev, `<strong>${ds.name}</strong><br>${metric}: ${val}`))
+        .on('mouseout', hideD3Tooltip)
+        .transition().duration(500).delay(mi * 40 + di * 80).ease(d3.easeCubicOut)
+        .attr('width', x(val));
+
+      g.append('text')
+        .attr('x', x(val) + 4)
+        .attr('y', yGroup(metric) + yBar(di) + yBar.bandwidth() / 2)
+        .attr('dy', '0.35em')
+        .attr('fill', theme.textColor).style('font-size', '9px').style('font-weight', '600')
+        .style('font-family', "'Inter',sans-serif").style('opacity', 0)
+        .text(val)
+        .transition().duration(300).delay(mi * 40 + di * 80 + 300).style('opacity', 1);
+    });
+  });
+
+  // Y axis labels
+  g.selectAll('.y-label').data(metricLabels).enter().append('text')
+    .attr('x', -6)
+    .attr('y', m => yGroup(m) + yGroup.bandwidth() / 2)
+    .attr('dy', '0.35em').attr('text-anchor', 'end')
+    .attr('fill', theme.textColor)
+    .style('font-size', '10px').style('font-weight', '600')
+    .style('font-family', "'Inter',sans-serif")
+    .text(m => m);
+
+  // Legend
+  const lg = svg.append('g').attr('transform', `translate(${margin.left},${height - 12})`);
+  let lx = 0;
+  datasets.forEach(ds => {
+    lg.append('circle').attr('cx', lx + 5).attr('cy', 0).attr('r', 4).attr('fill', ds.color);
+    lg.append('text').attr('x', lx + 14).attr('y', 0).attr('dy', '0.35em')
+      .attr('fill', theme.textColor).style('font-size', '10px')
+      .style('font-family', "'Inter',sans-serif").text(ds.name);
+    lx += ds.name.length * 7 + 28;
   });
 }
 
@@ -3052,6 +3359,227 @@ function renderComparadorChart(surgeonId) {
   }
 }
 
+// ── Interactive Comparator ──
+function getIcompEntries(surgeonId) {
+  if (icompPeriod === 'total') return parsedData[surgeonId] || [];
+  return getMonthEntries(surgeonId);
+}
+
+function buildIcompSelector() {
+  const container = document.getElementById('icomp-selector');
+  if (!container) return;
+  const theme = getChartTheme();
+  const colors = theme.isDark ? ICOMP_COLORS_DARK : ICOMP_COLORS;
+
+  if (icompMode === 'cirujano') {
+    if (icompSelectedSurgeons.length === 0) {
+      const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+      if (!isNaN(sid) && parsedData[sid]) icompSelectedSurgeons.push(sid);
+    }
+    const allIds = Object.keys(parsedData).map(Number)
+      .sort((a, b) => (SURGEONS[a] || '').localeCompare(SURGEONS[b] || ''));
+    const atMax = icompSelectedSurgeons.length >= 3;
+    const count = icompSelectedSurgeons.length;
+
+    let html = `<span class="icomp-hint">Pulsa para seleccionar 2-3 cirujanos (${count}/3)</span>`;
+    html += '<div class="icomp-pill-grid">';
+    allIds.forEach(id => {
+      const isActive = icompSelectedSurgeons.includes(id);
+      const idx = icompSelectedSurgeons.indexOf(id);
+      const cls = isActive ? 'active' : (atMax ? 'disabled' : '');
+      const bg = isActive ? `background:${colors[idx]};border-color:${colors[idx]};` : '';
+      html += `<button class="icomp-surgeon-pill ${cls}" data-id="${id}" style="${bg}">${getSurnameOf(id)}</button>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.icomp-surgeon-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id, 10);
+        if (icompSelectedSurgeons.includes(id)) {
+          icompSelectedSurgeons = icompSelectedSurgeons.filter(s => s !== id);
+        } else if (icompSelectedSurgeons.length < 3) {
+          icompSelectedSurgeons.push(id);
+        }
+        buildIcompSelector();
+        renderInteractiveComparator();
+      });
+    });
+  } else {
+    const allUnits = ['Rodilla', 'Cadera', 'Hombro', 'Mano', 'Pie', 'Trauma'];
+    const atMax = icompSelectedUnits.length >= 3;
+    const count = icompSelectedUnits.length;
+
+    let html = `<span class="icomp-hint">Pulsa para seleccionar 2-3 unidades (${count}/3)</span>`;
+    html += '<div class="icomp-pill-grid">';
+    allUnits.forEach(u => {
+      const isActive = icompSelectedUnits.includes(u);
+      const idx = icompSelectedUnits.indexOf(u);
+      const cls = isActive ? 'active' : (atMax ? 'disabled' : '');
+      const bg = isActive ? `background:${colors[idx]};border-color:${colors[idx]};` : '';
+      html += `<button class="icomp-surgeon-pill ${cls}" data-unit="${u}" style="${bg}">${u}</button>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.icomp-surgeon-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const unit = btn.dataset.unit;
+        if (icompSelectedUnits.includes(unit)) {
+          icompSelectedUnits = icompSelectedUnits.filter(u => u !== unit);
+        } else if (icompSelectedUnits.length < 3) {
+          icompSelectedUnits.push(unit);
+        }
+        buildIcompSelector();
+        renderInteractiveComparator();
+      });
+    });
+  }
+}
+
+function buildIcompMetrics() {
+  const container = document.getElementById('icomp-metrics');
+  if (!container) return;
+  let html = '';
+  ICOMP_METRICS.forEach(m => {
+    const checked = icompSelectedMetrics.includes(m.key);
+    html += `<label class="icomp-metric-label${checked ? ' checked' : ''}">`;
+    html += `<input type="checkbox" data-key="${m.key}"${checked ? ' checked' : ''}>`;
+    html += `${m.label}</label>`;
+  });
+  container.innerHTML = html;
+
+  container.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const key = cb.dataset.key;
+      if (cb.checked) {
+        if (!icompSelectedMetrics.includes(key)) icompSelectedMetrics.push(key);
+      } else {
+        icompSelectedMetrics = icompSelectedMetrics.filter(k => k !== key);
+      }
+      cb.parentElement.classList.toggle('checked', cb.checked);
+      renderInteractiveComparator();
+    });
+  });
+}
+
+function buildIcompDeltaTable(metricLabels, datasets, container) {
+  const n = datasets.length;
+  const pairs = [];
+  for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) pairs.push([i, j]);
+
+  let html = '<table class="icomp-delta-table"><thead><tr><th>M\u00e9trica</th>';
+  datasets.forEach(ds => { html += `<th>${ds.name}</th>`; });
+  pairs.forEach(([i, j]) => {
+    html += `<th>\u0394 ${datasets[i].name.substring(0, 4)}-${datasets[j].name.substring(0, 4)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  metricLabels.forEach((label, mi) => {
+    html += `<tr><td>${label}</td>`;
+    datasets.forEach(ds => { html += `<td>${ds.values[mi]}</td>`; });
+    pairs.forEach(([i, j]) => {
+      const diff = datasets[i].values[mi] - datasets[j].values[mi];
+      const cls = diff > 0 ? 'td-delta-pos' : diff < 0 ? 'td-delta-neg' : 'td-delta-zero';
+      const sign = diff > 0 ? '+' : '';
+      html += `<td class="${cls}">${sign}${diff}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderInteractiveComparator() {
+  const chartContainer = document.getElementById('icomp-chart');
+  const deltaContainer = document.getElementById('icomp-delta');
+  if (!chartContainer || !deltaContainer) return;
+  chartContainer.innerHTML = '';
+  deltaContainer.innerHTML = '';
+
+  const theme = getChartTheme();
+  const colors = theme.isDark ? ICOMP_COLORS_DARK : ICOMP_COLORS;
+  const activeMetrics = ICOMP_METRICS.filter(m => icompSelectedMetrics.includes(m.key));
+
+  if (activeMetrics.length === 0) {
+    chartContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:12px;">Selecciona al menos una m\u00e9trica</div>';
+    return;
+  }
+
+  let datasets = [];
+  if (icompMode === 'cirujano') {
+    if (icompSelectedSurgeons.length < 2) {
+      chartContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:12px;">A\u00f1ade al menos 2 cirujanos para comparar</div>';
+      return;
+    }
+    datasets = icompSelectedSurgeons.map((id, i) => {
+      const entries = getIcompEntries(id);
+      return { values: activeMetrics.map(m => entries.filter(m.fn).length), name: getSurnameOf(id), color: colors[i] };
+    });
+  } else {
+    if (icompSelectedUnits.length < 2) {
+      chartContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:12px;">Selecciona al menos 2 unidades para comparar</div>';
+      return;
+    }
+    datasets = icompSelectedUnits.map((unit, i) => {
+      const ids = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
+      const allEntries = ids.flatMap(id => getIcompEntries(id));
+      return { values: activeMetrics.map(m => allEntries.filter(m.fn).length), name: unit, color: colors[i] };
+    });
+  }
+
+  const metricLabels = activeMetrics.map(m => m.label);
+
+  if (icompViz === 'slope') {
+    if (activeMetrics.length < 2) {
+      chartContainer.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:12px;">Selecciona al menos 2 m\u00e9tricas para el slope chart</div>';
+    } else {
+      d3SlopeChart({ containerId: 'icomp-chart', labels: metricLabels, datasets, theme });
+    }
+  } else {
+    d3GroupedHorizontalBar({ containerId: 'icomp-chart', metricLabels, datasets, theme });
+  }
+
+  buildIcompDeltaTable(metricLabels, datasets, deltaContainer);
+}
+
+function updateIcompPeriodLabels() {
+  const btnMonth = document.getElementById('icomp-period-month');
+  const btnTotal = document.getElementById('icomp-period-total');
+  if (!btnMonth || !btnTotal) return;
+  if (currentMonth !== null && currentYear !== null) {
+    btnMonth.textContent = MONTH_NAMES[currentMonth].substring(0, 3) + ' ' + currentYear;
+  } else {
+    btnMonth.textContent = 'Mes';
+  }
+  if (availableMonths.length >= 2) {
+    const first = availableMonths[0];
+    const last = availableMonths[availableMonths.length - 1];
+    const f = MONTH_NAMES[first.month].substring(0, 3);
+    const l = MONTH_NAMES[last.month].substring(0, 3);
+    if (first.year === last.year) {
+      btnTotal.textContent = f + '–' + l + ' ' + last.year;
+    } else {
+      btnTotal.textContent = f + ' ' + first.year + '–' + l + ' ' + last.year;
+    }
+  } else {
+    btnTotal.textContent = 'Total';
+  }
+}
+
+function renderInteractiveComparatorInit(surgeonId) {
+  if (icompMode === 'cirujano' && icompSelectedSurgeons.length === 0) {
+    icompSelectedSurgeons = [surgeonId];
+  }
+  updateIcompPeriodLabels();
+  buildIcompSelector();
+  buildIcompMetrics();
+  if ((icompMode === 'cirujano' && icompSelectedSurgeons.length >= 2) ||
+      (icompMode === 'unidad' && icompSelectedUnits.length >= 2)) {
+    renderInteractiveComparator();
+  }
+}
+
 // ── Master render ──
 function renderCharts(surgeonId) {
   destroyCharts();
@@ -3062,6 +3590,7 @@ function renderCharts(surgeonId) {
     renderRadarTotalChart(surgeonId);
     renderUnitComparisonChart(surgeonId);
     renderComparadorChart(surgeonId);
+    renderInteractiveComparatorInit(surgeonId);
     renderQxUnitChart(surgeonId);
     renderRankingGuardiasChart(surgeonId);
     renderRankingLocalizadosChart(surgeonId);
@@ -3124,6 +3653,37 @@ document.querySelectorAll('#comparador-toggle button').forEach(btn => {
     comparadorMode = this.dataset.mode;
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(sid) && chartsExpanded) renderComparadorChart(sid);
+  });
+});
+
+// Interactive Comparator toggles
+document.querySelectorAll('#icomp-mode-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#icomp-mode-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    icompMode = this.dataset.mode;
+    icompSelectedSurgeons = [];
+    icompSelectedUnits = [];
+    buildIcompSelector();
+    buildIcompMetrics();
+    document.getElementById('icomp-chart').innerHTML = '';
+    document.getElementById('icomp-delta').innerHTML = '';
+  });
+});
+document.querySelectorAll('#icomp-period-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#icomp-period-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    icompPeriod = this.dataset.mode;
+    renderInteractiveComparator();
+  });
+});
+document.querySelectorAll('#icomp-viz-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#icomp-viz-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    icompViz = this.dataset.viz;
+    renderInteractiveComparator();
   });
 });
 
