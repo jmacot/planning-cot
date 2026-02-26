@@ -577,26 +577,22 @@
     /* Bubbles chart */
     .bubbles-container {
       display: flex; flex-wrap: wrap; align-items: center;
-      justify-content: center; gap: 8px; padding: 12px 0;
-      min-height: 80px; overflow: hidden;
+      justify-content: center; gap: 8px; padding: 12px 0 24px 0;
+      min-height: 80px; overflow: visible;
     }
     .bubble {
-      border-radius: 50%; display: flex; align-items: center;
+      position: relative; border-radius: 50%; display: flex; align-items: center;
       justify-content: center; color: white; font-weight: 700;
       font-family: 'Inter', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      transition: transform 0.2s; cursor: default;
+      transition: transform 0.2s; cursor: pointer;
     }
     .bubble:hover { transform: scale(1.1); }
-    .bubbles-legend {
-      display: flex; flex-wrap: wrap; justify-content: center;
-      gap: 10px; padding-top: 6px; border-top: 1px solid var(--border-light);
-    }
-    .bubbles-legend-item {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 12px; color: var(--text-muted);
-    }
-    .bubbles-legend-dot {
-      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    .bubble-label {
+      position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+      white-space: nowrap; font-size: 11px; font-weight: 600;
+      color: var(--text); background: var(--surface); padding: 2px 7px;
+      border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.13);
+      pointer-events: none; z-index: 10;
     }
 
     /* Comparador table */
@@ -941,7 +937,6 @@
           <div class="chart-card dash-wide" id="card-bubbles">
             <div class="chart-card-title">Distribuci&oacute;n de Actividades</div>
             <div class="bubbles-container" id="bubbles-container"></div>
-            <div class="bubbles-legend" id="bubbles-legend"></div>
           </div>
           <!-- Percentiles -->
           <div class="chart-card dash-wide" id="card-percentiles">
@@ -2452,11 +2447,9 @@ function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, lab
 // ── Bubbles Chart (HTML-based) ──
 function renderBubblesChart(surgeonId) {
   const container = document.getElementById('bubbles-container');
-  const legendEl = document.getElementById('bubbles-legend');
   const entries = getMonthEntries(surgeonId);
   if (entries.length === 0) {
     container.innerHTML = '<div style="color:var(--text-light);font-size:12px;text-align:center;padding:20px">Sin datos</div>';
-    legendEl.innerHTML = '';
     return;
   }
   // Aggregate into groups
@@ -2487,18 +2480,29 @@ function renderBubblesChart(surgeonId) {
   const maxPct = Math.round(counts[sorted[0]] / total * 100);
 
   let bubblesHtml = '';
-  let legendHtml = '';
   for (const grp of sorted) {
     const pct = Math.round(counts[grp] / total * 100);
     const color = grpColors[grp] || '#999';
     const label = grpLabels[grp] || grp;
     const diam = Math.max(36, Math.round(36 + 74 * Math.sqrt(pct / Math.max(maxPct, 1))));
     const fontSize = diam < 50 ? 10 : (diam < 70 ? 12 : 14);
-    bubblesHtml += `<div class="bubble" style="width:${diam}px;height:${diam}px;background:${color};font-size:${fontSize}px" title="${label}: ${counts[grp]} (${pct}%)">${pct}%</div>`;
-    legendHtml += `<span class="bubbles-legend-item"><span class="bubbles-legend-dot" style="background:${color}"></span>${label}: ${counts[grp]}</span>`;
+    bubblesHtml += `<div class="bubble" data-label="${label}: ${counts[grp]}" style="width:${diam}px;height:${diam}px;background:${color};font-size:${fontSize}px" title="${label}: ${counts[grp]} (${pct}%)">${pct}%</div>`;
   }
   container.innerHTML = bubblesHtml;
-  legendEl.innerHTML = legendHtml;
+  // Click handler: toggle activity label below bubble
+  container.querySelectorAll('.bubble').forEach(b => {
+    b.addEventListener('click', () => {
+      const existing = b.querySelector('.bubble-label');
+      // Remove all labels first
+      container.querySelectorAll('.bubble-label').forEach(l => l.remove());
+      // Toggle: if this bubble already had a label, just remove it
+      if (existing) return;
+      const lbl = document.createElement('span');
+      lbl.className = 'bubble-label';
+      lbl.textContent = b.dataset.label;
+      b.appendChild(lbl);
+    });
+  });
 }
 
 // ── Percentiles Card ──
