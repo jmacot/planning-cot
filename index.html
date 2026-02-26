@@ -586,8 +586,8 @@
       font-family: 'Inter', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
       transition: transform 0.2s; cursor: pointer;
     }
-    .bubble.bubble-active { transform: scale(1.12); box-shadow: 0 0 0 3px rgba(255,255,255,0.7), 0 0 0 5px currentColor; }
-    .bubble:hover { transform: scale(1.1); }
+    .bubble.bubble-active { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--text); }
+    .bubble:hover { transform: scale(1.08); }
     .bubble-info {
       text-align: center; font-size: 13px; font-weight: 600;
       color: var(--text); padding: 6px 0 2px 0; min-height: 24px;
