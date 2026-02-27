@@ -1,0 +1,97 @@
+# ============================================================
+#  StatiCrypt — Encrypt & Deploy to GitHub Pages
+# ============================================================
+#  INSTRUCCIONES DE USO:
+#
+#  1. Copia este archivo a cada repo de herramienta:
+#     .github/workflows/staticrypt-deploy.yml
+#
+#  2. En cada repo, ve a Settings > Secrets and variables > Actions
+#     y crea estos dos secrets:
+#       - STATICRYPT_PASSWORD  → la contrasena compartida (16+ caracteres)
+#       - STATICRYPT_SALT      → string hex de 32 caracteres (el MISMO en todos los repos)
+#
+#     Para generar el salt una sola vez:
+#       openssl rand -hex 16
+#
+#  3. En cada repo, ve a Settings > Pages y configura:
+#       Source: GitHub Actions
+#
+#  4. Este workflow encripta index.html y lo despliega.
+#     Tu codigo fuente en main queda INTACTO (sin sobreescribir).
+#
+#  IMPORTANTE: Usa el MISMO password y el MISMO salt en todos los repos
+#  para que "Recordarme" funcione entre todas las herramientas.
+# ============================================================
+
+name: Encrypt & Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  encrypt-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install StatiCrypt
+        run: npm install -g staticrypt@3
+
+      - name: Encrypt index.html
+        env:
+          STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
+          STATICRYPT_SALT: ${{ secrets.STATICRYPT_SALT }}
+        run: |
+          staticrypt index.html \
+            -p "$STATICRYPT_PASSWORD" \
+            --short \
+            --salt "$STATICRYPT_SALT" \
+            --remember 30 \
+            -t password_template.html \
+            --template-title "Acceso Protegido — COT" \
+            --template-instructions "Introduce la clave de acceso proporcionada." \
+            --template-button "ACCEDER" \
+            --template-placeholder "Clave de acceso" \
+            --template-remember "Recordar en este dispositivo (30 dias)" \
+            --template-error "Clave incorrecta" \
+            --template-color-primary "#1a3a5c" \
+            --template-color-secondary "#f1f5f9"
+
+      - name: Prepare deployment
+        run: |
+          # Reemplazar original con version encriptada
+          mv encrypted/index.html index.html
+          rm -rf encrypted .staticrypt.json
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
