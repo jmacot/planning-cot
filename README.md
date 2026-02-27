@@ -61,7 +61,7 @@ planning-cot/
 ├── index.html        ← aplicacion principal
 ├── icon.png          ← icono de la app
 ├── .gitignore
-├── LICENSE           ← MIT
+├── LICENSE           ← All Rights Reserved
 └── README.md         ← este archivo
 ```
 
@@ -69,4 +69,4 @@ planning-cot/
 
 ## Licencia
 
-MIT
+All Rights Reserved
