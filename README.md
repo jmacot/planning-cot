@@ -8,7 +8,9 @@ Herramienta para analizar el planning mensual del servicio de COT, desglosando a
 
 ---
 
-## Acceso directo
+## Acceso
+
+> Acceso protegido — requiere autenticacion previa desde el [portal principal](https://jmacot.github.io/).
 
 [Abrir la aplicacion](https://jmacot.github.io/planning-cot/)
 
