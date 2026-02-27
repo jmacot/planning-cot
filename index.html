@@ -3808,41 +3808,6 @@ function loadPdfLibs() {
   });
 }
 
-// ─────────────────────────────────────────────
-//  PDF: Compact single-page layout (landscape A4)
-// ─────────────────────────────────────────────
-
-function addPdfHeaderCompact(pdf, surgeonName, subtitle, units) {
-  const pageW = pdf.internal.pageSize.getWidth();
-  pdf.setFillColor(26, 58, 92);
-  pdf.rect(0, 0, pageW, 16, 'F');
-  try { pdf.addImage(HSJD_LOGO, 'JPEG', 4, 2, 12, 12); } catch(e) {}
-  pdf.setFontSize(7); pdf.setTextColor(255, 255, 255);
-  pdf.text('Hospital San Juan de Dios del Aljarafe', 19, 6);
-  pdf.setFontSize(5.5);
-  pdf.text('Servicio de Cirug\u00eda Ortop\u00e9dica y Traumatolog\u00eda', 19, 10);
-  pdf.setFontSize(10);
-  pdf.text(surgeonName, pageW - 10, 7, { align: 'right' });
-  pdf.setFontSize(7);
-  pdf.text(subtitle, pageW - 10, 12, { align: 'right' });
-  if (units) {
-    pdf.setFontSize(5.5);
-    pdf.text(`Unidad: ${units.join(', ')}`, pageW - 10, 15, { align: 'right' });
-  }
-  return 16;
-}
-
-function addPdfFooter(pdf) {
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  pdf.setDrawColor(26, 58, 92);
-  pdf.setLineWidth(0.3);
-  pdf.line(10, pageH - 8, pageW - 10, pageH - 8);
-  pdf.setFontSize(7); pdf.setTextColor(120);
-  pdf.text('COT \u2014 Planning Analyzer', 10, pageH - 4);
-  pdf.text(`Exportado: ${new Date().toLocaleDateString('es-ES')}`, pageW - 10, pageH - 4, { align: 'right' });
-}
-
 const PDF_COLORS = {
   diferida: [100,116,139], qui_m: [26,58,92], cons_m: [22,163,74],
   saliente: [245,158,11], cons_t: [13,148,136], qui_t: [59,130,246],
@@ -3852,265 +3817,159 @@ const PDF_COLORS = {
 
 const fmtEur = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \u20ac';
 
-// ── Compact Calendar (cells 13mm) ──
-function drawCompactCalendar(pdf, entries, mInfo, pageW) {
-  const calMx = 8;
-  const calW = pageW - 16;
-  const cellW = calW / 7;
-  const cellH = 13;
-  const dayLabels = ['L','M','X','J','V','S','D'];
-  const monthName = MONTH_NAMES[mInfo.month];
-  let y = 18;
+// ─────────────────────────────────────────────
+//  PDF: Landscape Single-Page Functions
+// ─────────────────────────────────────────────
 
-  // Month title
-  pdf.setFontSize(9); pdf.setTextColor(26, 58, 92);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text(`${monthName} ${mInfo.year}`, pageW / 2, y + 3, { align: 'center' });
+function pdfLandscapeHeader(pdf, surgeonName, monthName, year, units) {
+  const pageW = 297;
+  // Dark blue header block
+  pdf.setFillColor(26, 58, 92);
+  pdf.rect(0, 0, pageW, 14, 'F');
+  pdf.setFillColor(35, 78, 122);
+  pdf.rect(0, 14, pageW, 1.5, 'F');
+  // Logo
+  try { pdf.addImage(HSJD_LOGO, 'JPEG', 8, 2, 10, 10); } catch(e) {}
+  // Hospital name
+  pdf.setTextColor(255, 255, 255);
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7);
+  pdf.text('Hospital San Juan de Dios del Aljarafe', 21, 6);
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(5.5);
+  pdf.text('Servicio de Cirug\u00eda Ortop\u00e9dica y Traumatolog\u00eda', 21, 10);
+  // Title centered
+  pdf.setFont('times', 'bold'); pdf.setFontSize(14);
+  pdf.text(`Planning ${monthName} ${year}`, pageW / 2, 9, { align: 'center' });
+  // Surgeon: name + unit on two lines, right-aligned
+  const surname = surgeonName.split(' ').pop();
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11);
+  pdf.text(`Dr. ${surname}`, pageW - 10, 7.5, { align: 'right' });
+  // Full name + unit pill on second line
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6);
+  pdf.setTextColor(200, 210, 225);
+  let infoLine = surgeonName;
+  if (units && units.length) infoLine += '  \u2014  ' + units.join(', ');
+  pdf.text(infoLine, pageW - 10, 12, { align: 'right' });
+}
+
+function pdfLandscapeFooter(pdf) {
+  const pageW = 297, pageH = 210;
+  const y = pageH - 7;
+  pdf.setDrawColor(26, 58, 92); pdf.setLineWidth(0.3);
+  pdf.line(10, y, pageW - 10, y);
+  pdf.setFontSize(6.5); pdf.setTextColor(120);
   pdf.setFont('helvetica', 'normal');
-  y += 5;
+  pdf.text('COT \u2014 Planning Analyzer', 10, y + 3.5);
+  pdf.setFontSize(6);
+  pdf.text('P\u00e1gina 1 de 1', pageW / 2, y + 3.5, { align: 'center' });
+  pdf.text(`Exportado: ${new Date().toLocaleDateString('es-ES')}`, pageW - 10, y + 3.5, { align: 'right' });
+}
+
+function pdfLandscapeCalendar(pdf, entries, mInfo, startY) {
+  // Calendar: left panel, leaves room for guard card on the right
+  const mx = 10, calW = 210, cellW = calW / 7, cellH = 30;
+  const dayLabels = ['Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b', 'Dom'];
+  let y = startY;
 
   // Day headers
-  pdf.setFillColor(238, 242, 247);
-  pdf.rect(calMx, y, calW, 5.5, 'F');
-  pdf.setFontSize(6.5); pdf.setTextColor(100);
+  pdf.setFillColor(26, 58, 92);
+  pdf.rect(mx, y, calW, 7, 'F');
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7.5);
+  pdf.setTextColor(255, 255, 255);
   for (let i = 0; i < 7; i++) {
-    pdf.text(dayLabels[i], calMx + i * cellW + cellW / 2, y + 3.8, { align: 'center' });
+    pdf.text(dayLabels[i], mx + i * cellW + cellW / 2, y + 5, { align: 'center' });
   }
-  y += 5.5;
+  y += 7;
 
   const firstDay = new Date(mInfo.year, mInfo.month, 1).getDay();
   const startCol = firstDay === 0 ? 6 : firstDay - 1;
   const daysInMonth = new Date(mInfo.year, mInfo.month + 1, 0).getDate();
 
+  // Build day map with dedup
   const byDay = {};
-  for (const e of entries) { if (!byDay[e.day]) byDay[e.day] = []; byDay[e.day].push(e); }
+  for (const e of entries) {
+    if (!byDay[e.day]) byDay[e.day] = [];
+    const existing = byDay[e.day].find(x => x.activity === e.activity);
+    if (!existing) {
+      byDay[e.day].push({ activity: e.activity, companions: e.companions ? [...e.companions] : [] });
+    } else if (e.companions) {
+      e.companions.forEach(c => { if (!existing.companions.includes(c)) existing.companions.push(c); });
+    }
+  }
+  // Remove diferida when guardia exists on same day
+  for (const day of Object.keys(byDay)) {
+    const items = byDay[day];
+    if (items.some(x => x.activity === 'guardia') && items.some(x => x.activity === 'diferida')) {
+      byDay[day] = items.filter(x => x.activity !== 'diferida');
+    }
+  }
 
-  let col = startCol;
-  let rowY = y;
-
+  let col = startCol, rowY = y;
   // Empty cells before day 1
   for (let c = 0; c < startCol; c++) {
-    pdf.setDrawColor(220); pdf.rect(calMx + c * cellW, rowY, cellW, cellH);
+    pdf.setFillColor(250, 250, 252); pdf.rect(mx + c * cellW, rowY, cellW, cellH, 'F');
+    pdf.setDrawColor(225); pdf.rect(mx + c * cellW, rowY, cellW, cellH);
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
     if (col === 0 && d > 1) rowY += cellH;
-    const x = calMx + col * cellW;
-
+    const x = mx + col * cellW;
     const isWknd = col >= 5;
     const isHol = isHoliday(mInfo.year, mInfo.month, d) || isInferredHoliday(mInfo.year, mInfo.month, d);
-    if (isWknd || isHol) { pdf.setFillColor(252, 248, 248); pdf.rect(x, rowY, cellW, cellH, 'F'); }
-    pdf.setDrawColor(220); pdf.rect(x, rowY, cellW, cellH);
+    if (isWknd || isHol) { pdf.setFillColor(252, 246, 246); pdf.rect(x, rowY, cellW, cellH, 'F'); }
+    pdf.setDrawColor(225); pdf.rect(x, rowY, cellW, cellH);
 
-    // Day number
-    pdf.setFontSize(7);
-    pdf.setTextColor(isWknd || isHol ? 180 : 60);
-    pdf.text(String(d), x + 1.2, rowY + 3.5);
+    // Day number — top-left
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8);
+    pdf.setTextColor(isWknd || isHol ? 175 : 50);
+    pdf.text(String(d), x + 1.5, rowY + 4);
 
-    // Activity tags (max 3)
+    // Activity pills — full cell width, readable text + companion line below
     const dayItems = byDay[d] || [];
-    let tagY = rowY + 5;
-    let tagCount = 0;
+    const pillW = cellW - 2;
+    let tagY = rowY + 6, tagCount = 0;
     for (const it of dayItems) {
-      if (tagCount >= 3) break;
+      if (tagY + 4 > rowY + cellH - 1) break; // don't overflow cell
       const info = ACTIVITIES[it.activity]; if (!info) continue;
-      const c = PDF_COLORS[it.activity] || [100,100,100];
-      const tag = info.tag;
-      pdf.setFontSize(5.5);
-      const tw = Math.min(pdf.getTextWidth(tag) + 3, cellW - 1.5);
-      pdf.setFillColor(c[0], c[1], c[2]);
-      pdf.roundedRect(x + 0.7, tagY, tw, 3, 0.6, 0.6, 'F');
-      pdf.setTextColor(255); pdf.text(tag, x + 1.8, tagY + 2.2);
-      tagY += 3.2;
+      const clr = PDF_COLORS[it.activity] || [100, 100, 100];
+      const tagText = info.tag;
+
+      // Draw activity pill
+      pdf.setFillColor(clr[0], clr[1], clr[2]);
+      pdf.roundedRect(x + 1, tagY, pillW, 4, 1, 1, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7);
+      pdf.text(tagText, x + 1 + pillW / 2, tagY + 3, { align: 'center' });
+      tagY += 4.2;
+
+      // Companion line below the pill (smaller, muted)
+      if ((it.activity === 'qui_m' || it.activity === 'qui_t') && it.companions && it.companions.length > 0) {
+        const compName = it.companions.map(cid => { const full = SURGEONS[cid]; return full ? full.split(' ').pop() : `T${cid}`; }).join(', ');
+        pdf.setFont('helvetica', 'italic'); pdf.setFontSize(5);
+        pdf.setTextColor(clr[0], clr[1], clr[2]);
+        pdf.text('\u2192 ' + compName, x + 1 + pillW / 2, tagY + 2, { align: 'center' });
+        tagY += 3;
+      } else {
+        tagY += 0.5;
+      }
       tagCount++;
     }
-
     col = (col + 1) % 7;
   }
   // Fill remaining cells
-  if (col > 0) { for (let c = col; c < 7; c++) { pdf.setDrawColor(220); pdf.rect(calMx + c * cellW, rowY, cellW, cellH); } }
-
+  if (col > 0) {
+    for (let c = col; c < 7; c++) {
+      pdf.setFillColor(250, 250, 252); pdf.rect(mx + c * cellW, rowY, cellW, cellH, 'F');
+      pdf.setDrawColor(225); pdf.rect(mx + c * cellW, rowY, cellW, cellH);
+    }
+  }
   return rowY + cellH;
 }
 
-// ── Compact Section Title ──
-function pdfSectionTitleCompact(pdf, text, x, y) {
-  pdf.setFontSize(8); pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(26, 58, 92);
-  pdf.text(text, x, y + 3.5);
-  pdf.setFont('helvetica', 'normal');
-  return y + 6;
-}
+function pdfGuardSummaryCard(pdf, entries, mInfo, calStartY) {
+  // Card sits to the right of the calendar, vertically centered
+  const cX = 225, cW = 62;
 
-// ── Compact Activity Summary ──
-function pdfDrawCompactSummary(pdf, entries, startY, startX, w) {
-  let y = startY;
-  y = pdfSectionTitleCompact(pdf, 'Resumen de Actividades', startX, y);
-
-  const counts = {};
-  for (const e of entries) {
-    const info = ACTIVITIES[e.activity]; if (!info) continue;
-    counts[e.activity] = (counts[e.activity] || 0) + 1;
-  }
-  const actKeys = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  const total = entries.length;
-
-  const rH = 5;
-  const colN = startX + w * 0.68;
-  const colP = startX + w * 0.84;
-
-  // Header
-  pdf.setFillColor(26, 58, 92); pdf.rect(startX, y, w, 5, 'F');
-  pdf.setFontSize(6.5); pdf.setTextColor(255);
-  pdf.text('Actividad', startX + 5, y + 3.5);
-  pdf.text('N', colN, y + 3.5);
-  pdf.text('%', colP, y + 3.5);
-  y += 5;
-
-  for (let i = 0; i < actKeys.length; i++) {
-    const key = actKeys[i];
-    const info = ACTIVITIES[key]; if (!info) continue;
-    const c = PDF_COLORS[key] || [100,100,100];
-    if (i % 2 === 0) { pdf.setFillColor(248, 249, 251); pdf.rect(startX, y, w, rH, 'F'); }
-    pdf.setFillColor(c[0], c[1], c[2]); pdf.circle(startX + 2.5, y + rH / 2, 1.1, 'F');
-    pdf.setFontSize(6.5); pdf.setTextColor(34);
-    pdf.text(info.label, startX + 5, y + 3.5);
-    pdf.text(String(counts[key]), colN, y + 3.5);
-    const pct = total > 0 ? Math.round(counts[key] / total * 100) : 0;
-    pdf.text(`${pct}%`, colP, y + 3.5);
-    y += rH;
-  }
-  // Total row
-  pdf.setFillColor(238, 242, 247); pdf.rect(startX, y, w, 5.5, 'F');
-  pdf.setFontSize(7); pdf.setTextColor(26, 58, 92);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('TOTAL', startX + 5, y + 3.8);
-  pdf.text(String(total), colN, y + 3.8);
-  pdf.setFont('helvetica', 'normal');
-  y += 5.5;
-  return y;
-}
-
-// ── Compact Weekly Turns with Breakdown ──
-function pdfDrawCompactTurns(pdf, sid, entries, startY, startX, w, mInfo) {
-  let y = startY;
-  y = pdfSectionTitleCompact(pdf, 'Contaje Turnos / Semana', startX, y);
-
-  const month = mInfo.month;
-  const year = mInfo.year;
-  const firstDay = new Date(year, month, 1).getDay();
-  const startOffset = (firstDay === 0) ? 6 : firstDay - 1;
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const weeks = [];
-  let firstWeekEnd = 7 - startOffset;
-  if (firstWeekEnd > daysInMonth) firstWeekEnd = daysInMonth;
-  weeks.push({ start: 1, end: firstWeekEnd });
-  let day = firstWeekEnd + 1;
-  while (day <= daysInMonth) {
-    const end = Math.min(day + 6, daysInMonth);
-    weeks.push({ start: day, end: end });
-    day = end + 1;
-  }
-
-  const jornadaMap = { 100: 5, 80: 4, 60: 3 };
-  const turnsPerFullWeek = jornadaMap[currentJornada] || 5;
-
-  function countWorkdays(startDay, endDay) {
-    let count = 0;
-    for (let d = startDay; d <= endDay; d++) {
-      const jsDay = new Date(year, month, d).getDay();
-      if (jsDay >= 1 && jsDay <= 5) count++;
-    }
-    return count;
-  }
-
-  const rH = 5;
-  const c1 = startX + 1.5;
-  const c2 = startX + w * 0.15;
-  const c3 = startX + w * 0.32;
-  const c4 = startX + w * 0.44;
-  const c5 = startX + w * 0.55;
-
-  // Header
-  pdf.setFillColor(26, 58, 92); pdf.rect(startX, y, w, 5, 'F');
-  pdf.setFontSize(6.5); pdf.setTextColor(255);
-  pdf.text('Sem', c1, y + 3.5);
-  pdf.text('Rango', c2, y + 3.5);
-  pdf.text('Real', c3, y + 3.5);
-  pdf.text('Esp.', c4, y + 3.5);
-  pdf.text('Desglose', c5, y + 3.5);
-  y += 5;
-
-  let totalReal = 0, totalExpected = 0;
-  for (let i = 0; i < weeks.length; i++) {
-    const wk = weeks[i];
-    const weekEntries = entries.filter(e => {
-      if (e.day < wk.start || e.day > wk.end) return false;
-      if (e.activity === 'localizado') return false;
-      const dow = new Date(year, month, e.day).getDay();
-      return dow >= 1 && dow <= 5;
-    });
-    const real = weekEntries.length;
-    const workdays = countWorkdays(wk.start, wk.end);
-    const expected = Math.round(turnsPerFullWeek * workdays / 5 * 10) / 10;
-    totalReal += real;
-    totalExpected += expected;
-
-    // Build desglose (activity breakdown)
-    const brkDown = {};
-    for (const e of weekEntries) {
-      const info = ACTIVITIES[e.activity];
-      if (info) brkDown[info.tag] = (brkDown[info.tag] || 0) + 1;
-    }
-    const brkStr = Object.entries(brkDown).map(([t,n]) => `${t}:${n}`).join(' ');
-
-    if (i % 2 === 0) { pdf.setFillColor(248, 249, 251); pdf.rect(startX, y, w, rH, 'F'); }
-    pdf.setFontSize(6.5); pdf.setTextColor(34);
-    pdf.text(`S${i + 1}`, c1, y + 3.5);
-    pdf.text(`${wk.start}-${wk.end}`, c2, y + 3.5);
-    pdf.text(String(real), c3, y + 3.5);
-    pdf.text(String(expected), c4, y + 3.5);
-    pdf.setFontSize(5.5); pdf.setTextColor(80);
-    pdf.text(brkStr, c5, y + 3.5);
-    y += rH;
-  }
-
-  // Total row
-  pdf.setFillColor(238, 242, 247); pdf.rect(startX, y, w, 5.5, 'F');
-  pdf.setFontSize(7); pdf.setTextColor(26, 58, 92);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('TOTAL', c1, y + 3.8);
-  pdf.text(String(totalReal), c3, y + 3.8);
-  const tExp = Math.round(totalExpected * 10) / 10;
-  pdf.text(String(tExp), c4, y + 3.8);
-  pdf.setFont('helvetica', 'normal');
-  y += 5.5;
-
-  // Jornada label
-  pdf.setFontSize(6); pdf.setTextColor(100);
-  pdf.text(`Jornada ${currentJornada}% = ${turnsPerFullWeek} turnos/sem`, startX + 1.5, y + 3);
-  y += 4.5;
-  return y;
-}
-
-// ── Compact Retribucion Guardias ──
-function pdfDrawCompactRetrib(pdf, entries, startY, startX, w) {
-  let y = startY;
-  const counts = {};
-  for (const e of entries) { counts[e.activity] = (counts[e.activity] || 0) + 1; }
-  const guardiasCount = counts['guardia'] || 0;
-  const localizadosCount = counts['localizado'] || 0;
-
-  y = pdfSectionTitleCompact(pdf, 'Retribuci\u00f3n Guardias', startX, y);
-
-  if (guardiasCount === 0 && localizadosCount === 0) {
-    pdf.setFontSize(6.5); pdf.setTextColor(120);
-    pdf.text('Sin guardias ni localizados este mes', startX + 2, y + 3.5);
-    y += 5;
-    return y;
-  }
-
+  // Count guards and localizados
   let g17 = 0, g24 = 0, l17 = 0, l24 = 0;
   for (const e of entries.filter(e => e.activity === 'guardia')) {
     if (isNonWorkingDay(e.year, e.month, e.day)) g24++; else g17++;
@@ -4118,147 +3977,99 @@ function pdfDrawCompactRetrib(pdf, entries, startY, startX, w) {
   for (const e of entries.filter(e => e.activity === 'localizado')) {
     if (isNonWorkingDay(e.year, e.month, e.day)) l24++; else l17++;
   }
+  const gTotal = g17 + g24, lTotal = l17 + l24;
+
+  if (gTotal === 0 && lTotal === 0) return;
 
   const R = RETRIB_RATES;
-  const brutoG17 = g17 * R.gpf.r17 * R.gpf.h17;
-  const brutoG24 = g24 * R.gpf.r24 * R.gpf.h24;
-  const brutoL17 = l17 * R.loc.m17 * R.loc.e17;
-  const brutoL24 = l24 * R.loc.m24 * R.loc.e24;
+  const brutoG = g17 * R.gpf.r17 * R.gpf.h17 + g24 * R.gpf.r24 * R.gpf.h24;
+  const brutoL = l17 * R.loc.m17 * R.loc.e17 + l24 * R.loc.m24 * R.loc.e24;
   const irpfFactor = (100 - DEFAULT_IRPF) / 100;
+  const totalNeto = (brutoG + brutoL) * irpfFactor;
 
-  const rH = 5;
-  const cc1 = startX + 1.5;
-  const cc2 = startX + w * 0.30;
-  const cc3 = startX + w * 0.42;
-  const cc4 = startX + w * 0.56;
-  const cc5 = startX + w * 0.78;
+  // Calculate card height dynamically
+  let rows = 0;
+  if (gTotal > 0) rows++;
+  if (lTotal > 0) rows++;
+  const cH = 10 + rows * 14 + 16; // title + rows + neto box
+  const cY = calStartY + 5; // just below calendar top
 
-  // Header
-  pdf.setFillColor(26, 58, 92); pdf.rect(startX, y, w, 5, 'F');
-  pdf.setFontSize(6.5); pdf.setTextColor(255);
-  pdf.text('Concepto', cc1, y + 3.5);
-  pdf.text('17H', cc2, y + 3.5);
-  pdf.text('24H', cc3, y + 3.5);
-  pdf.text('Bruto', cc4, y + 3.5);
-  pdf.text('Neto', cc5, y + 3.5);
-  y += 5;
+  // Card shadow + background
+  pdf.setFillColor(240, 242, 245);
+  pdf.roundedRect(cX + 0.5, cY + 0.5, cW, cH, 4, 4, 'F');
+  pdf.setFillColor(255, 255, 255);
+  pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'F');
+  pdf.setDrawColor(26, 58, 92); pdf.setLineWidth(0.6);
+  pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'S');
 
-  function drawRow(label, n17, n24, bruto, bgIdx) {
-    if (n17 + n24 === 0) return;
-    if (bgIdx % 2 === 0) { pdf.setFillColor(248, 249, 251); pdf.rect(startX, y, w, rH, 'F'); }
-    pdf.setFontSize(6.5); pdf.setTextColor(34);
-    pdf.text(label, cc1, y + 3.5);
-    pdf.text(String(n17), cc2, y + 3.5);
-    pdf.text(String(n24), cc3, y + 3.5);
-    pdf.text(fmtEur(bruto), cc4, y + 3.5);
-    pdf.text(fmtEur(bruto * irpfFactor), cc5, y + 3.5);
-    y += rH;
+  // Title bar
+  pdf.setFillColor(26, 58, 92);
+  pdf.roundedRect(cX, cY, cW, 9, 4, 4, 'F');
+  pdf.rect(cX, cY + 5, cW, 4, 'F');
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8);
+  pdf.setTextColor(255, 255, 255);
+  pdf.text('Retribuci\u00f3n', cX + cW / 2, cY + 6.5, { align: 'center' });
+
+  let iy = cY + 12;
+
+  // Guard block
+  if (gTotal > 0) {
+    const gC = PDF_COLORS['guardia'];
+    pdf.setFillColor(gC[0], gC[1], gC[2]);
+    pdf.roundedRect(cX + 4, iy, cW - 8, 4, 1, 1, 'F');
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7);
+    pdf.setTextColor(255);
+    pdf.text(`Guardias: ${gTotal}`, cX + cW / 2, iy + 3, { align: 'center' });
+    iy += 5.5;
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7);
+    pdf.setTextColor(80);
+    pdf.text(`${g17} laborable${g17 !== 1 ? 's' : ''}`, cX + 6, iy + 2.5);
+    pdf.text(`${g24} festivo${g24 !== 1 ? 's' : ''}`, cX + cW / 2 + 2, iy + 2.5);
+    iy += 6;
+    pdf.setDrawColor(230); pdf.setLineWidth(0.2);
+    pdf.line(cX + 6, iy, cX + cW - 6, iy);
+    iy += 2;
   }
 
-  let ri = 0;
-  if (guardiasCount > 0) drawRow('Guardias', g17, g24, brutoG17 + brutoG24, ri++);
-  if (localizadosCount > 0) drawRow('Localizados', l17, l24, brutoL17 + brutoL24, ri++);
+  // Localizado block
+  if (lTotal > 0) {
+    const lC = PDF_COLORS['localizado'];
+    pdf.setFillColor(lC[0], lC[1], lC[2]);
+    pdf.roundedRect(cX + 4, iy, cW - 8, 4, 1, 1, 'F');
+    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7);
+    pdf.setTextColor(255);
+    pdf.text(`Localizados: ${lTotal}`, cX + cW / 2, iy + 3, { align: 'center' });
+    iy += 5.5;
+    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7);
+    pdf.setTextColor(80);
+    pdf.text(`${l17} laborable${l17 !== 1 ? 's' : ''}`, cX + 6, iy + 2.5);
+    pdf.text(`${l24} festivo${l24 !== 1 ? 's' : ''}`, cX + cW / 2 + 2, iy + 2.5);
+    iy += 6;
+  }
 
-  // Total row
-  const totalBruto = brutoG17 + brutoG24 + brutoL17 + brutoL24;
-  pdf.setFillColor(238, 242, 247); pdf.rect(startX, y, w, 5.5, 'F');
-  pdf.setFontSize(7); pdf.setTextColor(26, 58, 92);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('TOTAL', cc1, y + 3.8);
-  pdf.text(fmtEur(totalBruto), cc4, y + 3.8);
-  pdf.text(fmtEur(totalBruto * irpfFactor), cc5, y + 3.8);
-  pdf.setFont('helvetica', 'normal');
-  y += 5.5;
-
-  pdf.setFontSize(5.5); pdf.setTextColor(120);
-  pdf.text(`IRPF: ${DEFAULT_IRPF}%`, startX + 1.5, y + 2.5);
-  y += 4;
-  return y;
+  // Neto highlight — big and prominent
+  iy += 1;
+  pdf.setFillColor(220, 252, 231);
+  pdf.roundedRect(cX + 3, iy, cW - 6, 10, 3, 3, 'F');
+  pdf.setDrawColor(22, 163, 74); pdf.setLineWidth(0.4);
+  pdf.roundedRect(cX + 3, iy, cW - 6, 10, 3, 3, 'S');
+  pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10);
+  pdf.setTextColor(22, 163, 74);
+  pdf.text(fmtEur(totalNeto), cX + cW / 2, iy + 5, { align: 'center' });
+  pdf.setFont('helvetica', 'normal'); pdf.setFontSize(5.5);
+  pdf.setTextColor(22, 140, 60);
+  pdf.text('NETO', cX + cW / 2, iy + 8.5, { align: 'center' });
 }
 
-// ── Distribution Bar (full-width) ──
-function pdfDrawDistributionBar(pdf, entries, startY, pageW) {
-  const mx = 8;
-  const barW = pageW - 16;
-  const barH = 8;
-  let y = startY + 2;
-
-  // Title
-  pdf.setFontSize(7); pdf.setFont('helvetica', 'bold');
-  pdf.setTextColor(26, 58, 92);
-  pdf.text('Distribuci\u00f3n de Actividades', mx, y + 3);
-  pdf.setFont('helvetica', 'normal');
-  y += 5;
-
-  const counts = {};
-  for (const e of entries) {
-    const info = ACTIVITIES[e.activity]; if (!info) continue;
-    counts[e.activity] = (counts[e.activity] || 0) + 1;
-  }
-  const total = entries.length;
-  if (total === 0) return y + barH;
-
-  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  let xOff = mx;
-
-  // Draw bar background
-  pdf.setFillColor(230, 230, 235);
-  pdf.roundedRect(mx, y, barW, barH, 1.5, 1.5, 'F');
-
-  for (const [key, cnt] of sorted) {
-    const pct = cnt / total;
-    const segW = pct * barW;
-    if (segW < 0.5) continue;
-    const c = PDF_COLORS[key] || [100,100,100];
-    pdf.setFillColor(c[0], c[1], c[2]);
-    pdf.rect(xOff, y, segW, barH, 'F');
-
-    // Label on segment if wide enough
-    if (segW > 15) {
-      const info = ACTIVITIES[key];
-      const label = info ? info.tag : key;
-      const pctText = `${Math.round(pct * 100)}%`;
-      pdf.setFontSize(5); pdf.setTextColor(255);
-      pdf.text(`${label} ${pctText}`, xOff + segW / 2, y + barH / 2 + 1.2, { align: 'center' });
-    }
-    xOff += segW;
-  }
-
-  // Round corners overlay
-  pdf.setDrawColor(26, 58, 92); pdf.setLineWidth(0.2);
-  pdf.roundedRect(mx, y, barW, barH, 1.5, 1.5, 'S');
-
-  y += barH + 2.5;
-
-  // Legend row
-  let lx = mx;
-  pdf.setFontSize(5.5);
-  for (const [key, cnt] of sorted) {
-    const info = ACTIVITIES[key]; if (!info) continue;
-    const c = PDF_COLORS[key] || [100,100,100];
-    pdf.setFillColor(c[0], c[1], c[2]);
-    pdf.circle(lx + 1.5, y + 1.2, 1, 'F');
-    pdf.setTextColor(60);
-    const txt = `${info.tag} (${cnt})`;
-    pdf.text(txt, lx + 3.5, y + 2);
-    lx += pdf.getTextWidth(txt) + 6;
-    if (lx > pageW - 20) { lx = mx; y += 4; }
-  }
-  y += 4;
-  return y;
-}
-
-// ── Main Export: Single Page PDF ──
+// ── Main Export: Landscape Single-Page PDF ──
 async function exportPDF() {
   const sid = parseInt(document.getElementById('surgeon-select').value, 10);
   if (isNaN(sid)) return;
 
   mostrarToast('Generando PDF...');
 
-  try {
-    await loadPdfLibs();
-  } catch (e) {
-    mostrarToast('Error cargando librer\u00edas PDF');
+  try { await loadPdfLibs(); } catch (e) {
+    mostrarToast('Error cargando librerías PDF');
     return;
   }
 
@@ -4266,39 +4077,24 @@ async function exportPDF() {
   const surname = getSurnameOf(sid);
   const units = SURGEON_UNITS[sid];
   const mInfo = { month: currentMonth, year: currentYear };
-  const monthName = MONTH_NAMES[mInfo.month];
-  const subtitle = `${monthName} ${mInfo.year}`;
+  const monthName = MONTH_NAMES[mInfo.month] || '';
   const entries = (parsedData[sid] || []).filter(e => e.month === mInfo.month && e.year === mInfo.year);
+  if (!entries.length) { mostrarToast('Sin datos para este cirujano'); return; }
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-  const pageW = pdf.internal.pageSize.getWidth();
 
-  // 1. Compact header
-  addPdfHeaderCompact(pdf, surgeonName, subtitle, units);
+  // Header (14mm)
+  pdfLandscapeHeader(pdf, surgeonName, monthName, mInfo.year, units);
 
-  // 2. Compact calendar
-  const calEndY = drawCompactCalendar(pdf, entries, mInfo, pageW);
+  // Calendar (left 210mm)
+  const calEnd = pdfLandscapeCalendar(pdf, entries, mInfo, 17);
 
-  // 3. Three-column stats below calendar
-  const statsY = calEndY + 2;
-  const colLeftX = 8;
-  const colLeftW = 93;
-  const colMidX = 104;
-  const colMidW = 90;
-  const colRightX = 197;
-  const colRightW = 92;
+  // Guard summary card (right side, aligned with calendar top)
+  pdfGuardSummaryCard(pdf, entries, mInfo, 17);
 
-  const yLeft = pdfDrawCompactSummary(pdf, entries, statsY, colLeftX, colLeftW);
-  const yMid = pdfDrawCompactTurns(pdf, sid, entries, statsY, colMidX, colMidW, mInfo);
-  const yRight = pdfDrawCompactRetrib(pdf, entries, statsY, colRightX, colRightW);
-  const maxStatsY = Math.max(yLeft, yMid, yRight);
-
-  // 4. Distribution bar
-  pdfDrawDistributionBar(pdf, entries, maxStatsY, pageW);
-
-  // 5. Footer
-  addPdfFooter(pdf);
+  // Footer
+  pdfLandscapeFooter(pdf);
 
   const fileName = `Planning_${surname}_${monthName}_${mInfo.year}.pdf`;
   pdf.save(fileName);
