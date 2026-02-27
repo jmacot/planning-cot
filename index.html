@@ -574,26 +574,7 @@
     .d3-tooltip.visible { opacity: 1; }
     .d3-tooltip strong { font-weight: 700; }
 
-    /* Bubbles chart */
-    .bubbles-container {
-      display: flex; flex-wrap: wrap; align-items: center;
-      justify-content: center; gap: 8px; padding: 12px 0 24px 0;
-      min-height: 80px; overflow: visible;
-    }
-    .bubble {
-      position: relative; border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; color: white; font-weight: 700;
-      font-family: 'Inter', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      transition: transform 0.2s; cursor: pointer;
-    }
-    .bubble:hover { transform: scale(1.1); }
-    .bubble-label {
-      position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
-      white-space: nowrap; font-size: 11px; font-weight: 600;
-      color: var(--text); background: var(--surface); padding: 2px 7px;
-      border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,0.13);
-      pointer-events: none; z-index: 10;
-    }
+    /* Distribution chart */
 
     /* Comparador table */
     .comparador-table-wrap { overflow-x: auto; margin-top: 6px; }
@@ -936,7 +917,7 @@
           <!-- Row 1: Individual -->
           <div class="chart-card dash-wide" id="card-bubbles">
             <div class="chart-card-title">Distribuci&oacute;n de Actividades</div>
-            <div class="bubbles-container" id="bubbles-container"></div>
+            <div id="dist-chart-container" class="d3-chart-wrap" style="min-height:160px"></div>
           </div>
           <!-- Percentiles -->
           <div class="chart-card dash-wide" id="card-percentiles">
@@ -2444,15 +2425,10 @@ function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, lab
     .text(d => d.label);
 }
 
-// ── Bubbles Chart (HTML-based) ──
-function renderBubblesChart(surgeonId) {
-  const container = document.getElementById('bubbles-container');
+// ── Distribution Chart Data ──
+function getDistributionData(surgeonId) {
   const entries = getMonthEntries(surgeonId);
-  if (entries.length === 0) {
-    container.innerHTML = '<div style="color:var(--text-light);font-size:12px;text-align:center;padding:20px">Sin datos</div>';
-    return;
-  }
-  // Aggregate into groups
+  if (!entries.length) return null;
   const grpMap = {
     qui_m:'quirofano', qui_t:'quirofano',
     cons_m:'consultas', cons_t:'consultas',
@@ -2471,38 +2447,158 @@ function renderBubblesChart(surgeonId) {
     diferida_planta:'#64748b', rucot:'#e11d48', saliente:'#f59e0b'
   };
   const counts = {};
-  entries.forEach(e => {
-    const g = grpMap[e.activity] || e.activity;
-    counts[g] = (counts[g] || 0) + 1;
-  });
+  entries.forEach(e => { const g = grpMap[e.activity] || e.activity; counts[g] = (counts[g] || 0) + 1; });
   const total = entries.length;
   const sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  const maxPct = Math.round(counts[sorted[0]] / total * 100);
+  const data = sorted.map(g => ({
+    key: g, label: grpLabels[g] || g, color: grpColors[g] || '#999',
+    count: counts[g], pct: counts[g] / total * 100
+  }));
+  return { data, total };
+}
 
-  let bubblesHtml = '';
-  for (const grp of sorted) {
-    const pct = Math.round(counts[grp] / total * 100);
-    const color = grpColors[grp] || '#999';
-    const label = grpLabels[grp] || grp;
-    const diam = Math.max(36, Math.round(36 + 74 * Math.sqrt(pct / Math.max(maxPct, 1))));
-    const fontSize = diam < 50 ? 10 : (diam < 70 ? 12 : 14);
-    bubblesHtml += `<div class="bubble" data-label="${label}: ${counts[grp]}" style="width:${diam}px;height:${diam}px;background:${color};font-size:${fontSize}px" title="${label}: ${counts[grp]} (${pct}%)">${pct}%</div>`;
-  }
-  container.innerHTML = bubblesHtml;
-  // Click handler: toggle activity label below bubble
-  container.querySelectorAll('.bubble').forEach(b => {
-    b.addEventListener('click', () => {
-      const existing = b.querySelector('.bubble-label');
-      // Remove all labels first
-      container.querySelectorAll('.bubble-label').forEach(l => l.remove());
-      // Toggle: if this bubble already had a label, just remove it
-      if (existing) return;
-      const lbl = document.createElement('span');
-      lbl.className = 'bubble-label';
-      lbl.textContent = b.dataset.label;
-      b.appendChild(lbl);
-    });
+function renderDistributionChart(surgeonId) {
+  const container = document.getElementById('dist-chart-container');
+  const info = getDistributionData(surgeonId);
+  if (!info) { container.innerHTML = '<div style="color:var(--text-light);font-size:12px;text-align:center;padding:20px">Sin datos</div>'; return; }
+  renderTreemapChart(container, info);
+}
+
+// ── Treemap Chart ──
+function renderTreemapChart(container, info) {
+  const { data, total } = info;
+  const theme = getChartTheme();
+  const W = 440, H = 200;
+
+  container.innerHTML = '';
+  const svg = d3.select(container).append('svg')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+  const root = d3.hierarchy({ children: data.map(d => ({ ...d, value: d.count })) })
+    .sum(d => d.value);
+
+  d3.treemap().size([W - 8, H - 8]).padding(3).round(true)(root);
+
+  const cell = svg.selectAll('g.tm-cell')
+    .data(root.leaves()).enter().append('g')
+    .attr('transform', d => `translate(${d.x0 + 4},${d.y0 + 4})`);
+
+  cell.append('rect')
+    .attr('width', d => d.x1 - d.x0).attr('height', d => d.y1 - d.y0)
+    .attr('rx', 6).attr('ry', 6)
+    .attr('fill', d => d.data.color)
+    .attr('opacity', 0)
+    .on('mouseover', function(event, d) {
+      showD3Tooltip(event, `<strong>${d.data.label}</strong><br>${d.data.count} turnos (${Math.round(d.data.pct)}%)`);
+      d3.select(this).attr('opacity', 1).attr('stroke', '#fff').attr('stroke-width', 2);
+    })
+    .on('mouseout', function() {
+      hideD3Tooltip();
+      d3.select(this).attr('opacity', 0.88).attr('stroke', 'none');
+    })
+    .transition().duration(500).ease(d3.easeCubicOut)
+    .attr('opacity', 0.88);
+
+  // Labels inside rectangles
+  cell.each(function(d) {
+    const w = d.x1 - d.x0, h = d.y1 - d.y0;
+    const g = d3.select(this);
+    if (w > 40 && h > 28) {
+      g.append('text')
+        .attr('x', w / 2).attr('y', h / 2 - 4)
+        .attr('text-anchor', 'middle').attr('fill', '#fff')
+        .attr('font-size', w > 80 ? '12px' : '10px').attr('font-weight', '700')
+        .attr('font-family', "'Inter',sans-serif")
+        .text(d.data.label)
+        .attr('opacity', 0).transition().delay(400).duration(300).attr('opacity', 1);
+      g.append('text')
+        .attr('x', w / 2).attr('y', h / 2 + 12)
+        .attr('text-anchor', 'middle').attr('fill', 'rgba(255,255,255,0.75)')
+        .attr('font-size', '11px').attr('font-weight', '600')
+        .attr('font-family', "'Inter',sans-serif")
+        .text(`${Math.round(d.data.pct)}%`)
+        .attr('opacity', 0).transition().delay(450).duration(300).attr('opacity', 1);
+    } else if (w > 25 && h > 18) {
+      g.append('text')
+        .attr('x', w / 2).attr('y', h / 2 + 4)
+        .attr('text-anchor', 'middle').attr('fill', '#fff')
+        .attr('font-size', '9px').attr('font-weight', '700')
+        .attr('font-family', "'Inter',sans-serif")
+        .text(`${Math.round(d.data.pct)}%`)
+        .attr('opacity', 0).transition().delay(400).duration(300).attr('opacity', 1);
+    }
   });
+}
+
+// ── Donut Chart ──
+function renderDonutChart(container, info) {
+  const { data, total } = info;
+  const theme = getChartTheme();
+  const W = 440, H = 200;
+  const radius = 80, innerRadius = 48;
+  const cx = 120, cy = H / 2;
+  const legendX = 230;
+
+  container.innerHTML = '';
+  const svg = d3.select(container).append('svg')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+  const pie = d3.pie().value(d => d.count).sort(null).padAngle(0.02);
+  const arc = d3.arc().innerRadius(innerRadius).outerRadius(radius).cornerRadius(4);
+  const arcHover = d3.arc().innerRadius(innerRadius - 2).outerRadius(radius + 6).cornerRadius(4);
+
+  const arcs = svg.append('g').attr('transform', `translate(${cx},${cy})`)
+    .selectAll('path').data(pie(data)).enter().append('path')
+    .attr('fill', d => d.data.color)
+    .attr('opacity', 0.88)
+    .attr('cursor', 'pointer')
+    .on('mouseover', function(event, d) {
+      showD3Tooltip(event, `<strong>${d.data.label}</strong><br>${d.data.count} turnos (${Math.round(d.data.pct)}%)`);
+      d3.select(this).transition().duration(150).attr('d', arcHover).attr('opacity', 1);
+    })
+    .on('mouseout', function(event, d) {
+      hideD3Tooltip();
+      d3.select(this).transition().duration(150).attr('d', arc).attr('opacity', 0.88);
+    });
+
+  // Animate arcs from 0
+  arcs.transition().duration(700).ease(d3.easeCubicOut)
+    .attrTween('d', function(d) {
+      const i = d3.interpolate({ startAngle: d.startAngle, endAngle: d.startAngle }, d);
+      return t => arc(i(t));
+    });
+
+  // Center text
+  svg.append('text')
+    .attr('x', cx).attr('y', cy - 6)
+    .attr('text-anchor', 'middle').attr('fill', theme.textColor)
+    .attr('font-size', '22px').attr('font-weight', '700')
+    .attr('font-family', "'Inter',sans-serif")
+    .text(total);
+  svg.append('text')
+    .attr('x', cx).attr('y', cy + 12)
+    .attr('text-anchor', 'middle').attr('fill', theme.textColor)
+    .attr('font-size', '10px').attr('font-weight', '400').attr('opacity', 0.6)
+    .attr('font-family', "'Inter',sans-serif")
+    .text('turnos');
+
+  // Legend on the right
+  const lg = svg.selectAll('g.donut-leg')
+    .data(data).enter().append('g')
+    .attr('transform', (d, i) => `translate(${legendX}, ${18 + i * 22})`);
+
+  lg.append('rect').attr('width', 12).attr('height', 12).attr('rx', 3)
+    .attr('fill', d => d.color).attr('opacity', 0.88);
+  lg.append('text').attr('x', 18).attr('y', 10)
+    .attr('fill', theme.textColor).attr('font-size', '11px').attr('font-family', "'Inter',sans-serif")
+    .text(d => `${d.label}`);
+  lg.append('text').attr('x', 18).attr('y', 10)
+    .attr('fill', theme.textColor).attr('font-size', '11px').attr('font-weight', '700')
+    .attr('font-family', "'Inter',sans-serif")
+    .attr('text-anchor', 'end').attr('dx', 190)
+    .text(d => `${d.count} (${Math.round(d.pct)}%)`);
 }
 
 // ── Percentiles Card ──
@@ -3132,7 +3228,7 @@ function renderMorningAfternoonChart(surgeonId) {
     const total = m + t;
     if (total > 0) stats[id] = { m, t, total };
   }
-  const sorted = Object.keys(stats).map(Number).sort((a, b) => stats[b].total - stats[a].total);
+  const sorted = Object.keys(stats).map(Number).sort((a, b) => a - b);
   if (sorted.length === 0) return;
 
   const margin = { top: 24, right: 30, bottom: 24, left: 80 };
@@ -3593,7 +3689,7 @@ function renderInteractiveComparatorInit(surgeonId) {
 function renderCharts(surgeonId) {
   destroyCharts();
   requestAnimationFrame(() => {
-    renderBubblesChart(surgeonId);
+    renderDistributionChart(surgeonId);
     renderPercentilesCard(surgeonId);
     renderRadarChart(surgeonId);
     renderRadarTotalChart(surgeonId);
