@@ -100,21 +100,48 @@
     }
     .back-home:hover { border-color: var(--accent); color: var(--accent); }
 
-    .app-header { text-align: center; margin-bottom: 28px; position: relative; }
+    .app-header {
+      text-align: center; margin-bottom: 28px; position: relative;
+      background: linear-gradient(135deg, #0f2240 0%, #1a3a5c 50%, #234e77 100%);
+      color: white; padding: 40px 32px 32px;
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: 0 8px 32px rgba(15,34,64,0.25);
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .app-header::before {
+      content: ''; position: absolute; top: -80px; right: -30px;
+      width: 250px; height: 250px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%);
+      filter: blur(40px);
+    }
+    .app-header::after {
+      content: ''; position: absolute; bottom: -60px; left: 15%;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
+      filter: blur(40px);
+    }
     .app-header h1 {
-      font-family: 'Lora', serif; color: var(--accent);
+      font-family: 'Lora', serif; color: white; position: relative;
       font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 700;
     }
-    .app-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .app-header p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; position: relative; }
+    [data-theme="dark"] .app-header {
+      background: linear-gradient(135deg, #0a1628 0%, #111827 50%, #1a2744 100%);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .theme-toggle {
-      position: absolute; top: 0.3rem; right: 0.3rem;
-      background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 50%; width: 42px; height: 42px; font-size: 1.3rem;
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
-      box-shadow: var(--shadow); transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s, background 0.2s; z-index: 1;
     }
-    .theme-toggle:hover { border-color: var(--accent); box-shadow: var(--shadow-hover); }
+    .theme-toggle:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.12); }
 
     /* Upload zone */
     .upload-zone {
@@ -739,7 +766,10 @@
     @media (max-width: 600px) {
       body { padding: 20px 12px; }
       .back-home { padding: 4px 8px; font-size: 10px; top: 6px; left: 6px; }
+      .app-header { padding: 32px 20px 24px; border-radius: var(--radius); }
+      .app-header::before, .app-header::after { display: none; }
       .app-header p { padding: 0 44px; }
+      .theme-toggle { width: 36px; height: 36px; font-size: 1.1rem; top: 8px; right: 8px; }
       .upload-zone { padding: 12px 14px; max-width: 100%; }
       .welcome-hero { max-width: 100%; margin: 0 auto 16px; }
       .welcome-hero-img { max-width: 100%; }
