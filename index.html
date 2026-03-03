@@ -977,6 +977,14 @@
             </div>
             <div id="chart-unit-comparison" class="d3-chart-wrap"></div>
           </div>
+          <div class="chart-card" id="card-ayudantias">
+            <div class="chart-card-title">Ayudant&iacute;as</div>
+            <div class="toggle-btns" id="ayudantias-toggle">
+              <button class="active" data-mode="month" id="ayudantias-period-month">Mes</button>
+              <button data-mode="total" id="ayudantias-period-total">Total</button>
+            </div>
+            <div id="chart-ayudantias" class="d3-chart-wrap"></div>
+          </div>
           <div class="chart-card" id="card-ranking-gestion">
             <div class="chart-card-title">Ranking Gesti&oacute;n</div>
             <div id="ranking-gestion-content"></div>
@@ -2281,6 +2289,7 @@ const ACTIVITY_COLORS = {
 let comparativaMode = 'turnos';
 let qxUnitMode = 'total';
 let comparadorMode = 'cirujano';
+let ayudantiasPeriod = 'month';
 let retribMode = 'contaje';
 
 // ── Interactive Comparator state ──
@@ -3176,6 +3185,66 @@ function renderQxUnitChart(surgeonId) {
   });
 }
 
+// ── Ayudantías (companion count per surgeon) ──
+function renderAyudantiasChart(surgeonId) {
+  const theme = getChartTheme();
+  const entries = ayudantiasPeriod === 'total'
+    ? (parsedData[surgeonId] || [])
+    : getMonthEntries(surgeonId);
+
+  // Count companions from quirófano entries
+  const companionCounts = {};
+  for (const e of entries) {
+    if ((e.activity === 'qui_m' || e.activity === 'qui_t') && e.companions && e.companions.length > 0) {
+      for (const cid of e.companions) {
+        companionCounts[cid] = (companionCounts[cid] || 0) + 1;
+      }
+    }
+  }
+
+  const sorted = Object.keys(companionCounts).map(Number)
+    .sort((a, b) => companionCounts[b] - companionCounts[a]);
+
+  if (sorted.length === 0) {
+    document.getElementById('chart-ayudantias').innerHTML =
+      '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:12px;">Sin ayudantías registradas</div>';
+    return;
+  }
+
+  d3HorizontalBar({
+    containerId: 'chart-ayudantias',
+    data: sorted.map(id => ({ label: getSurnameOf(id), value: companionCounts[id], id })),
+    theme,
+    surgeonId: -1,
+    accentColor: '#0ea5e9',
+    label: 'Ayudantías'
+  });
+}
+
+function updateAyudantiasPeriodLabels() {
+  const btnMonth = document.getElementById('ayudantias-period-month');
+  const btnTotal = document.getElementById('ayudantias-period-total');
+  if (!btnMonth || !btnTotal) return;
+  if (currentMonth !== null && currentYear !== null) {
+    btnMonth.textContent = MONTH_NAMES[currentMonth].substring(0, 3) + ' ' + currentYear;
+  } else {
+    btnMonth.textContent = 'Mes';
+  }
+  if (availableMonths.length >= 2) {
+    const first = availableMonths[0];
+    const last = availableMonths[availableMonths.length - 1];
+    const f = MONTH_NAMES[first.month].substring(0, 3);
+    const l = MONTH_NAMES[last.month].substring(0, 3);
+    if (first.year === last.year) {
+      btnTotal.textContent = f + '–' + l + ' ' + last.year;
+    } else {
+      btnTotal.textContent = f + ' ' + first.year + '–' + l + ' ' + last.year;
+    }
+  } else {
+    btnTotal.textContent = 'Total';
+  }
+}
+
 // ── Ranking Guardias (global) ──
 function renderRankingGuardiasChart(surgeonId) {
   const theme = getChartTheme();
@@ -3725,6 +3794,8 @@ function renderCharts(surgeonId) {
     renderRadarChart(surgeonId);
     renderRadarTotalChart(surgeonId);
     renderUnitComparisonChart(surgeonId);
+    renderAyudantiasChart(surgeonId);
+    updateAyudantiasPeriodLabels();
     renderComparadorChart(surgeonId);
     renderInteractiveComparatorInit(surgeonId);
     renderQxUnitChart(surgeonId);
@@ -3763,6 +3834,20 @@ document.querySelectorAll('#comparativa-toggle button').forEach(btn => {
     if (!isNaN(sid) && chartsExpanded) {
       document.getElementById('chart-unit-comparison').innerHTML = '';
       renderUnitComparisonChart(sid);
+    }
+  });
+});
+
+// Ayudantías period toggle
+document.querySelectorAll('#ayudantias-toggle button').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#ayudantias-toggle button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    ayudantiasPeriod = this.dataset.mode;
+    const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+    if (!isNaN(sid) && chartsExpanded) {
+      document.getElementById('chart-ayudantias').innerHTML = '';
+      renderAyudantiasChart(sid);
     }
   });
 });
