@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <script>(function(){var a=localStorage.getItem('cot_auth');if(!a||(Date.now()-parseInt(a))>86400000){localStorage.removeItem('cot_auth');window.location.replace('https://jmacot.github.io/');}})();</script>
+  <script>(function(){if(location.hostname==='localhost'||location.hostname==='127.0.0.1')return;var a=localStorage.getItem('cot_auth');if(!a||(Date.now()-parseInt(a))>86400000){localStorage.removeItem('cot_auth');window.location.replace('https://jmacot.github.io/');}})();</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Planning COT</title>
@@ -349,10 +349,10 @@
     }
     .cal-cell.festive {
       background: linear-gradient(135deg, #fef9ef 0%, #fde8e0 100%);
-      justify-content: center; align-items: center;
+      justify-content: center; align-items: stretch;
     }
     .cal-cell.festive .cell-acts {
-      align-items: center; flex: 1; justify-content: center;
+      align-items: stretch; flex: 1; justify-content: center;
     }
     .cal-cell.festive .day-num { text-align: center; }
     .act-tag.act-centered { text-align: center; align-self: stretch; }
@@ -656,7 +656,9 @@
       display: flex; flex-direction: column; gap: 6px;
     }
     .icomp-hint {
-      font-size: 10px; color: var(--text-light); font-style: italic;
+      font-size: 12px; color: var(--accent); font-weight: 600; font-style: normal;
+      background: var(--accent-light); padding: 6px 14px; border-radius: 8px;
+      display: inline-block;
     }
     .icomp-pill-grid {
       display: flex; flex-wrap: wrap; gap: 5px;
@@ -836,7 +838,7 @@
 </head>
 <body>
 <div class="app-container">
-  <a class="back-home" href="https://jmacot.github.io/" title="Volver al inicio">&larr; Inicio</a>
+  <a class="back-home" id="back-home-link" href="https://jmacot.github.io/" title="Volver al inicio">&larr; Inicio</a>
 
   <div class="app-header">
     <h1>Analizador de Planning</h1>
@@ -973,7 +975,7 @@
             <div class="chart-card-title" id="comparativa-title">Comparativa Unidad</div>
             <div class="toggle-btns" id="comparativa-toggle">
               <button class="active" data-mode="turnos">Turnos</button>
-              <button data-mode="guardias">Guardias</button>
+              <button data-mode="guardias">Guardias y Localizados</button>
             </div>
             <div id="chart-unit-comparison" class="d3-chart-wrap"></div>
           </div>
@@ -1237,6 +1239,17 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   }
 });
 initTheme();
+
+// ─────────────────────────────────────────────
+//  LOCALHOST: deshabilitar enlaces externos
+// ─────────────────────────────────────────────
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  document.querySelectorAll('a[href^="https://jmacot.github.io"]').forEach(a => {
+    a.removeAttribute('href');
+    a.style.opacity = '0.4';
+    a.style.pointerEvents = 'none';
+  });
+}
 
 // ─────────────────────────────────────────────
 //  FILE UPLOAD
@@ -2228,7 +2241,10 @@ function renderRetribution(surgeonId) {
 
   // Update calculator link
   const calcLink = document.getElementById('retrib-calc-link');
-  calcLink.href = `https://jmacot.github.io/calculadora-guardias/?tab=hsjd&gpf17=${g17}&gpf24=${g24}&hsjd17=${l17}&hsjd24=${l24}`;
+  const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+  if (!isLocal) {
+    calcLink.href = `https://jmacot.github.io/calculadora-guardias/?tab=hsjd&gpf17=${g17}&gpf24=${g24}&hsjd17=${l17}&hsjd24=${l24}`;
+  }
 
   let html = '<table class="retrib-table"><thead><tr><th>Concepto</th><th>17h</th><th>24h</th><th>' + (retribMode === 'contaje' ? 'Total' : 'Subtotal') + '</th></tr></thead><tbody>';
 
@@ -3046,17 +3062,78 @@ function renderUnitComparisonChart(surgeonId) {
   const unit = units[0];
   titleEl.textContent = `Unidad de ${unit}`;
   const unitSurgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
-  const exclude = new Set(['guardia', 'saliente']);
+  const exclude = new Set(['guardia', 'saliente', 'localizado']);
 
   if (comparativaMode === 'guardias') {
-    const guardCounts = {};
-    for (const id of unitSurgeons) guardCounts[id] = getMonthEntries(id).filter(e => e.activity === 'guardia').length;
-    unitSurgeons.sort((a, b) => guardCounts[b] - guardCounts[a]);
-    d3HorizontalBar({ containerId: 'chart-unit-comparison', data: unitSurgeons.map(id => ({ label: getSurnameOf(id), value: guardCounts[id], id })), theme, surgeonId, accentColor: theme.accentColor, label: 'Guardias' });
+    // Stacked: Guardias + Localizados
+    const glGroups = ['guardia', 'localizado'];
+    const glLabels = { guardia: 'Guardias', localizado: 'Localizados' };
+    const glColors = { guardia: '#dc2626', localizado: '#7c3aed' };
+    const glCounts = {};
+    for (const id of unitSurgeons) {
+      glCounts[id] = { guardia: 0, localizado: 0 };
+      getMonthEntries(id).forEach(e => { if (e.activity === 'guardia' || e.activity === 'localizado') glCounts[id][e.activity]++; });
+    }
+    unitSurgeons.sort((a, b) => (glCounts[b].guardia + glCounts[b].localizado) - (glCounts[a].guardia + glCounts[a].localizado));
+    const usedGL = glGroups.filter(g => unitSurgeons.some(id => glCounts[id][g] > 0));
+
+    const margin = { top: 8, right: 30, bottom: 48, left: 80 };
+    const barH = 26, gap = 4;
+    const width = 800, height = margin.top + margin.bottom + unitSurgeons.length * (barH + gap);
+    const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
+
+    const svg = createSVG('chart-unit-comparison', width, height);
+    svg.append('defs');
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+    const yScale = d3.scaleBand().domain(unitSurgeons.map(id => getSurnameOf(id))).range([0, innerH]).padding(0.15);
+    const maxTotal = d3.max(unitSurgeons, id => glCounts[id].guardia + glCounts[id].localizado) || 1;
+    const xScale = d3.scaleLinear().domain([0, maxTotal]).nice().range([0, innerW]);
+
+    g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(xScale).ticks(5).tickSize(-innerH).tickFormat('')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
+    g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px'); });
+
+    unitSurgeons.forEach((id, idx) => {
+      const name = getSurnameOf(id); let cx = 0; const total = glCounts[id].guardia + glCounts[id].localizado;
+      usedGL.forEach((grp, gi) => {
+        const val = glCounts[id][grp] || 0; if (!val) return;
+        const bw = xScale(val); const isMe = id === surgeonId;
+        const gradId = `grad-gl-${idx}-${gi}`;
+        const fill = addGradient(svg, gradId, glColors[grp], true);
+        g.append('rect').attr('x', xScale(cx)).attr('y', yScale(name)).attr('height', yScale.bandwidth()).attr('rx', 2)
+          .attr('fill', fill).attr('stroke', isMe ? theme.accentColor : 'none').attr('stroke-width', isMe ? 1.5 : 0)
+          .attr('width', 0)
+          .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>${glLabels[grp]}: ${val}`))
+          .on('mouseout', hideD3Tooltip)
+          .transition().duration(500).delay(idx * 35).ease(d3.easeCubicOut).attr('width', bw);
+        if (bw > 18) {
+          g.append('text').attr('x', xScale(cx) + bw/2).attr('y', yScale(name) + yScale.bandwidth()/2).attr('dy','0.35em')
+            .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size', bw > 32 ? '12px' : '10px').style('font-weight','700')
+            .style('font-family',"'Inter',sans-serif").style('opacity',0).text(val)
+            .transition().delay(idx*35+400).duration(200).style('opacity',1);
+        }
+        cx += val;
+      });
+    });
+
+    g.selectAll('.y-lbl').data(unitSurgeons).enter().append('text')
+      .attr('x', -6).attr('y', id => yScale(getSurnameOf(id)) + yScale.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
+      .attr('fill', id => id === surgeonId ? theme.accentColor : theme.textColor)
+      .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+      .text(id => getSurnameOf(id));
+
+    const lg = svg.append('g').attr('transform', `translate(${margin.left},${height - 18})`);
+    let lx = 0;
+    usedGL.forEach(grp => {
+      lg.append('rect').attr('x', lx).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', glColors[grp]);
+      lg.append('text').attr('x', lx + 14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor)
+        .style('font-size','9px').style('font-family',"'Inter',sans-serif").text(glLabels[grp]);
+      lx += (glLabels[grp].length * 5.5) + 24;
+    });
   } else {
-    const groupMap = { qui_m:'quirofano', qui_t:'quirofano', cons_m:'cons_m', cons_t:'cons_t', diferida:'diferida', diferida_t:'diferida_t', localizado:'localizado', gestion:'gestion', rucot:'rucot' };
-    const groupLabels = { quirofano:'Quirófano', cons_m:'Consulta M', cons_t:'Consulta T', diferida:'Diferida', diferida_t:'Diferida T', localizado:'Localizado', gestion:'Gestión', rucot:'RUCOT' };
-    const groupColors = { quirofano:'#1a3a5c', cons_m:ACTIVITY_COLORS['cons_m'], cons_t:ACTIVITY_COLORS['cons_t'], diferida:ACTIVITY_COLORS['diferida'], diferida_t:ACTIVITY_COLORS['diferida_t'], localizado:ACTIVITY_COLORS['localizado'], gestion:ACTIVITY_COLORS['gestion'], rucot:ACTIVITY_COLORS['rucot'] };
+    const groupMap = { qui_m:'quirofano', qui_t:'quirofano', cons_m:'cons_m', cons_t:'cons_t', diferida:'diferida', diferida_t:'diferida_t', gestion:'gestion', rucot:'rucot' };
+    const groupLabels = { quirofano:'Quirófano', cons_m:'Consulta M', cons_t:'Consulta T', diferida:'Diferida', diferida_t:'Diferida T', gestion:'Gestión', rucot:'RUCOT' };
+    const groupColors = { quirofano:'#1a3a5c', cons_m:ACTIVITY_COLORS['cons_m'], cons_t:ACTIVITY_COLORS['cons_t'], diferida:ACTIVITY_COLORS['diferida'], diferida_t:ACTIVITY_COLORS['diferida_t'], gestion:ACTIVITY_COLORS['gestion'], rucot:ACTIVITY_COLORS['rucot'] };
 
     const actCounts = {}; const allGroups = new Set();
     for (const id of unitSurgeons) {
@@ -3064,11 +3141,11 @@ function renderUnitComparisonChart(surgeonId) {
       getMonthEntries(id).forEach(e => { if (exclude.has(e.activity)) return; const grp = groupMap[e.activity] || e.activity; actCounts[id][grp] = (actCounts[id][grp] || 0) + 1; allGroups.add(grp); });
     }
     unitSurgeons.sort((a,b) => { const ta = Object.values(actCounts[a]).reduce((s,v)=>s+v,0); const tb = Object.values(actCounts[b]).reduce((s,v)=>s+v,0); return tb-ta; });
-    const grpOrder = ['quirofano','cons_m','cons_t','diferida','diferida_t','localizado','gestion','rucot'];
+    const grpOrder = ['quirofano','cons_m','cons_t','diferida','diferida_t','gestion','rucot'];
     const usedGrps = grpOrder.filter(g => allGroups.has(g));
 
     const legendRows = usedGrps.length > 4 ? 2 : 1;
-    const margin = { top: 8, right: 30, bottom: 20 + legendRows * 18, left: 80 };
+    const margin = { top: 8, right: 30, bottom: 32 + legendRows * 18, left: 80 };
     const barH = 26, gap = 4;
     const width = 800, height = margin.top + margin.bottom + unitSurgeons.length * (barH + gap);
     const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
