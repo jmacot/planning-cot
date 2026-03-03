@@ -1,6 +1,6 @@
 # Analizador de Planning COT
 
-Herramienta para analizar el planning mensual del servicio de COT, desglosando actividades, estadisticas y retribucion por cirujano.
+Visualiza el planning mensual del servicio. Consulta tu calendario, compara la carga de guardias entre compañeros y revisa la retribucion estimada.
 
 ![HTML5](https://img.shields.io/badge/HTML5-single--file-E34F26?logo=html5&logoColor=white)
 ![D3.js](https://img.shields.io/badge/D3.js-v7-f9a03c?logo=d3dotjs&logoColor=white)
