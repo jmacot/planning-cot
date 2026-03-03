@@ -976,6 +976,37 @@
       text-align: center; padding: 24px; color: var(--text-muted);
       font-size: 13px; font-style: italic;
     }
+    .diff-month-removed {
+      text-align: center; padding: 28px 20px; color: var(--amber);
+      font-size: 13px; line-height: 1.6;
+      background: var(--amber-light); border-radius: var(--radius-sm);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .diff-month-added {
+      text-align: center; padding: 28px 20px; color: var(--green);
+      font-size: 13px; line-height: 1.6;
+      background: var(--green-light); border-radius: var(--radius-sm);
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .diff-month-sub {
+      display: block; font-size: 11px; opacity: 0.7; font-weight: 400;
+    }
+    .diff-months-banner {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .diff-month-pill {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .diff-month-pill.pill-removed {
+      background: var(--amber-light); color: var(--amber);
+      border: 1px solid var(--amber);
+    }
+    .diff-month-pill.pill-added {
+      background: var(--green-light); color: var(--green);
+      border: 1px solid var(--green);
+    }
     /* Global diff: day-grouped rows */
     .diff-global-desc {
       font-size: 12px; color: var(--text); line-height: 1.7; padding: 4px 0;
@@ -1385,6 +1416,7 @@ let loadedFileName = '';
 let parsedDataV2 = null;      // V2 comparison data (same structure as parsedData)
 let v1RefStart = null;        // { month, year } reference for V2 month alignment
 let loadedFileNameV2 = '';
+let availableMonthsV2 = [];
 
 // ─────────────────────────────────────────────
 //  TOAST
@@ -1482,6 +1514,7 @@ function resetApp() {
   parsedDataV2 = null;
   v1RefStart = null;
   loadedFileNameV2 = '';
+  availableMonthsV2 = [];
   allDates = [];
   summaryMode = 'month';
   fileInput.value = '';
@@ -1505,6 +1538,7 @@ function processFile(file) {
   // Clear V2 state when loading new V1
   parsedDataV2 = null;
   loadedFileNameV2 = '';
+  availableMonthsV2 = [];
   document.getElementById('file-input-v2').value = '';
   document.getElementById('v2-toggle').style.display = 'none';
   document.getElementById('vs-label').style.display = 'none';
@@ -1540,6 +1574,7 @@ function processFileV2(file) {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const result = parseWorksheetPure(ws, v1RefStart);
       parsedDataV2 = result.data;
+      availableMonthsV2 = result.months;
       showV2Loaded();
       const sel = document.getElementById('surgeon-select');
       if (sel.value) renderDiff(sel.value);
@@ -1562,11 +1597,14 @@ function showV2Loaded() {
 function removeV2() {
   parsedDataV2 = null;
   loadedFileNameV2 = '';
+  availableMonthsV2 = [];
   document.getElementById('file-input-v2').value = '';
   document.getElementById('v2-toggle').style.display = 'none';
   document.getElementById('vs-label').style.display = 'none';
   document.getElementById('btn-load-v2').style.display = '';
   document.getElementById('diff-section').style.display = 'none';
+  const banner = document.getElementById('diff-months-banner');
+  if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
 }
 
 // ─────────────────────────────────────────────
@@ -2074,14 +2112,36 @@ document.getElementById('cal-prev').addEventListener('click', () => navigateMont
 document.getElementById('cal-next').addEventListener('click', () => navigateMonth(1));
 
 function navigateMonth(dir) {
-  const idx = availableMonths.findIndex(m => m.month === currentMonth && m.year === currentYear);
+  const months = getNavigableMonths();
+  const idx = months.findIndex(m => m.month === currentMonth && m.year === currentYear);
   const newIdx = idx + dir;
-  if (newIdx >= 0 && newIdx < availableMonths.length) {
-    currentMonth = availableMonths[newIdx].month;
-    currentYear = availableMonths[newIdx].year;
+  if (newIdx >= 0 && newIdx < months.length) {
+    currentMonth = months[newIdx].month;
+    currentYear = months[newIdx].year;
     const surgeonId = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(surgeonId)) renderResults(surgeonId);
   }
+}
+
+// ─────────────────────────────────────────────
+//  MONTH DIFF STATUS & NAVIGABLE MONTHS
+// ─────────────────────────────────────────────
+function getMonthDiffStatus(month, year) {
+  if (!parsedDataV2) return 'no-v2';
+  const inV1 = availableMonths.some(m => m.month === month && m.year === year);
+  const inV2 = availableMonthsV2.some(m => m.month === month && m.year === year);
+  if (inV1 && inV2) return 'both';
+  if (inV1 && !inV2) return 'removed';
+  if (!inV1 && inV2) return 'added';
+  return 'neither';
+}
+
+function getNavigableMonths() {
+  if (!parsedDataV2 || !availableMonthsV2.length) return availableMonths;
+  const set = new Set(availableMonths.map(m => `${m.year}-${m.month}`));
+  for (const m of availableMonthsV2) set.add(`${m.year}-${m.month}`);
+  return [...set].map(k => { const [y, mo] = k.split('-').map(Number); return { year: y, month: mo }; })
+    .sort((a, b) => a.year - b.year || a.month - b.month);
 }
 
 // ─────────────────────────────────────────────
@@ -2147,9 +2207,7 @@ function renderDiff(selectedSurgeonId) {
   const section = document.getElementById('diff-section');
   if (!parsedDataV2) { section.style.display = 'none'; return; }
 
-  const allDiffs = computeAllDiffs(currentMonth, currentYear);
   section.style.display = '';
-  _lastDiffData = { allDiffs, selectedSurgeonId };
 
   // Update cirujano tab label with surgeon name
   const cirBtn = document.querySelector('#diff-toggle button[data-mode="cirujano"]');
@@ -2158,7 +2216,33 @@ function renderDiff(selectedSurgeonId) {
     cirBtn.textContent = sName ? sName.split(' ')[0] : 'Cirujano';
   }
 
+  // Render months banner
+  renderMonthsBanner();
+
   const contentEl = document.getElementById('diff-content');
+  const monthStatus = getMonthDiffStatus(currentMonth, currentYear);
+
+  if (monthStatus === 'removed') {
+    contentEl.innerHTML = `<div class="diff-month-removed">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <strong>${MONTH_NAMES[currentMonth]} ${currentYear}</strong> ha sido eliminado en V2
+    </div>`;
+    _lastDiffData = { allDiffs: null, selectedSurgeonId };
+    return;
+  }
+
+  if (monthStatus === 'added') {
+    contentEl.innerHTML = `<div class="diff-month-added">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <strong>${MONTH_NAMES[currentMonth]} ${currentYear}</strong> es nuevo en V2
+      <span class="diff-month-sub">Este mes no exist&iacute;a en V1</span>
+    </div>`;
+    _lastDiffData = { allDiffs: null, selectedSurgeonId };
+    return;
+  }
+
+  const allDiffs = computeAllDiffs(currentMonth, currentYear);
+  _lastDiffData = { allDiffs, selectedSurgeonId };
 
   if (!allDiffs.surgeons.length) {
     contentEl.innerHTML = '<div class="diff-no-changes">&#10004; Sin cambios este mes entre V1 y V2</div>';
@@ -2169,6 +2253,37 @@ function renderDiff(selectedSurgeonId) {
     renderDiffGlobal(allDiffs, Number(selectedSurgeonId), contentEl);
   } else {
     renderDiffCirujano(allDiffs, Number(selectedSurgeonId), contentEl);
+  }
+}
+
+function renderMonthsBanner() {
+  let banner = document.getElementById('diff-months-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'diff-months-banner';
+    banner.className = 'diff-months-banner';
+    const headerRow = document.querySelector('.diff-header-row');
+    if (headerRow) headerRow.parentNode.insertBefore(banner, headerRow.nextSibling);
+  }
+
+  const allMonths = getNavigableMonths();
+  const pills = [];
+  for (const m of allMonths) {
+    const status = getMonthDiffStatus(m.month, m.year);
+    const name = MONTH_NAMES[m.month];
+    if (status === 'removed') {
+      pills.push(`<span class="diff-month-pill pill-removed">&minus;${name}</span>`);
+    } else if (status === 'added') {
+      pills.push(`<span class="diff-month-pill pill-added">+${name}</span>`);
+    }
+  }
+
+  if (pills.length) {
+    banner.innerHTML = pills.join('');
+    banner.style.display = '';
+  } else {
+    banner.style.display = 'none';
+    banner.innerHTML = '';
   }
 }
 
