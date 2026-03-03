@@ -356,8 +356,8 @@
     }
     .cal-cell.festive .day-num { text-align: center; }
     .act-tag.act-centered { text-align: center; align-self: stretch; }
-    .cal-cell.weekend { justify-content: center; align-items: center; }
-    .cal-cell.weekend .cell-acts { align-items: center; flex: 1; justify-content: center; }
+    .cal-cell.weekend { justify-content: flex-start; align-items: stretch; }
+    .cal-cell.weekend .cell-acts { align-items: stretch; flex: 1; justify-content: center; }
     .cal-cell.weekend .day-num { text-align: center; }
     [data-theme="dark"] .cal-cell.festive {
       background: linear-gradient(135deg, #2a2520 0%, #2d2025 100%);
@@ -968,14 +968,18 @@
               </div>
             </div>
           </div>
-          <!-- Row 2: Comparativa -->
-          <div class="chart-card" id="card-comparativa">
+          <!-- Row 2: Comparativa (full width) -->
+          <div class="chart-card dash-wide" id="card-comparativa">
             <div class="chart-card-title" id="comparativa-title">Comparativa Unidad</div>
             <div class="toggle-btns" id="comparativa-toggle">
               <button class="active" data-mode="turnos">Turnos</button>
               <button data-mode="guardias">Guardias</button>
             </div>
             <div id="chart-unit-comparison" class="d3-chart-wrap"></div>
+          </div>
+          <div class="chart-card" id="card-ranking-gestion">
+            <div class="chart-card-title">Ranking Gesti&oacute;n</div>
+            <div id="ranking-gestion-content"></div>
           </div>
           <div class="chart-card" id="card-ayudantias">
             <div class="chart-card-title">Ayudant&iacute;as</div>
@@ -984,10 +988,6 @@
               <button data-mode="total" id="ayudantias-period-total">Total</button>
             </div>
             <div id="chart-ayudantias" class="d3-chart-wrap"></div>
-          </div>
-          <div class="chart-card" id="card-ranking-gestion">
-            <div class="chart-card-title">Ranking Gesti&oacute;n</div>
-            <div id="ranking-gestion-content"></div>
           </div>
           <!-- Comparador table -->
           <div class="chart-card dash-wide" id="card-comparador">
@@ -2508,7 +2508,7 @@ function renderDistributionChart(surgeonId) {
 function renderTreemapChart(container, info) {
   const { data, total } = info;
   const theme = getChartTheme();
-  const W = 440, H = 200;
+  const W = 520, H = 240;
 
   container.innerHTML = '';
   const svg = d3.select(container).append('svg')
@@ -2518,7 +2518,7 @@ function renderTreemapChart(container, info) {
   const root = d3.hierarchy({ children: data.map(d => ({ ...d, value: d.count })) })
     .sum(d => d.value);
 
-  d3.treemap().size([W - 8, H - 8]).padding(3).round(true)(root);
+  d3.treemap().size([W - 8, H - 8]).padding(4).round(true)(root);
 
   const cell = svg.selectAll('g.tm-cell')
     .data(root.leaves()).enter().append('g')
@@ -2540,32 +2540,36 @@ function renderTreemapChart(container, info) {
     .transition().duration(500).ease(d3.easeCubicOut)
     .attr('opacity', 0.88);
 
-  // Labels inside rectangles
+  // Labels inside rectangles — always show at least the label or percentage
   cell.each(function(d) {
     const w = d.x1 - d.x0, h = d.y1 - d.y0;
     const g = d3.select(this);
-    if (w > 40 && h > 28) {
+    if (w > 36 && h > 26) {
+      // Label + percentage
+      const fontSize = w > 90 ? '12px' : w > 55 ? '10px' : '8px';
       g.append('text')
-        .attr('x', w / 2).attr('y', h / 2 - 4)
+        .attr('x', w / 2).attr('y', h / 2 - 5)
         .attr('text-anchor', 'middle').attr('fill', '#fff')
-        .attr('font-size', w > 80 ? '12px' : '10px').attr('font-weight', '700')
+        .attr('font-size', fontSize).attr('font-weight', '700')
         .attr('font-family', "'Inter',sans-serif")
         .text(d.data.label)
         .attr('opacity', 0).transition().delay(400).duration(300).attr('opacity', 1);
       g.append('text')
-        .attr('x', w / 2).attr('y', h / 2 + 12)
+        .attr('x', w / 2).attr('y', h / 2 + 11)
         .attr('text-anchor', 'middle').attr('fill', 'rgba(255,255,255,0.75)')
-        .attr('font-size', '11px').attr('font-weight', '600')
+        .attr('font-size', w > 55 ? '11px' : '8px').attr('font-weight', '600')
         .attr('font-family', "'Inter',sans-serif")
         .text(`${Math.round(d.data.pct)}%`)
         .attr('opacity', 0).transition().delay(450).duration(300).attr('opacity', 1);
-    } else if (w > 25 && h > 18) {
+    } else if (w > 20 && h > 14) {
+      // Small cell: show abbreviated label
+      const txt = w > 30 ? d.data.label : `${Math.round(d.data.pct)}%`;
       g.append('text')
-        .attr('x', w / 2).attr('y', h / 2 + 4)
+        .attr('x', w / 2).attr('y', h / 2 + 3)
         .attr('text-anchor', 'middle').attr('fill', '#fff')
-        .attr('font-size', '9px').attr('font-weight', '700')
+        .attr('font-size', '7px').attr('font-weight', '700')
         .attr('font-family', "'Inter',sans-serif")
-        .text(`${Math.round(d.data.pct)}%`)
+        .text(txt)
         .attr('opacity', 0).transition().delay(400).duration(300).attr('opacity', 1);
     }
   });
@@ -3066,7 +3070,7 @@ function renderUnitComparisonChart(surgeonId) {
     const legendRows = usedGrps.length > 4 ? 2 : 1;
     const margin = { top: 8, right: 30, bottom: 20 + legendRows * 18, left: 80 };
     const barH = 26, gap = 4;
-    const width = 400, height = margin.top + margin.bottom + unitSurgeons.length * (barH + gap);
+    const width = 800, height = margin.top + margin.bottom + unitSurgeons.length * (barH + gap);
     const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
 
     const svg = createSVG('chart-unit-comparison', width, height);
@@ -3095,9 +3099,10 @@ function renderUnitComparisonChart(surgeonId) {
           .transition().duration(500).delay(idx * 35).ease(d3.easeCubicOut).attr('width', bw);
         // % label inside segment
         const pct = Math.round(val/total*100);
-        if (pct >= 12 && bw > 20) {
+        if (bw > 18) {
+          const fs = bw > 32 ? '9px' : '7px';
           g.append('text').attr('x', x(cx) + bw/2).attr('y', y(name) + y.bandwidth()/2).attr('dy','0.35em')
-            .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size','8px').style('font-weight','700')
+            .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size',fs).style('font-weight','700')
             .style('font-family',"'Inter',sans-serif").style('opacity',0).text(`${pct}%`)
             .transition().delay(idx*35+400).duration(200).style('opacity',1);
         }
@@ -3160,8 +3165,8 @@ function renderQxUnitChart(surgeonId) {
 
   // Grid
   g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-innerW).tickFormat('')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
-  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px'); });
-  g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).tickSize(0)).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-weight','600'); });
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Inter',sans-serif"); });
+  g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).tickSize(0)).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-weight','600').style('font-family',"'Inter',sans-serif"); });
 
   const accentQx = d3.color(theme.accentColor);
   const mutedQx = theme.isDark
