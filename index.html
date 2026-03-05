@@ -639,7 +639,7 @@
 
     /* D3 charts */
     .d3-chart-wrap { width: 100%; overflow: visible; }
-    .d3-chart-wrap svg { display: block; width: 100%; height: auto; }
+    .d3-chart-wrap svg { display: block; width: 100%; height: auto; max-width: 100%; }
     .d3-tooltip {
       position: fixed; pointer-events: none;
       background: var(--surface); color: var(--text);
@@ -2939,6 +2939,8 @@ function createSVG(containerId, width, height) {
   const container = d3.select('#' + containerId);
   container.html('');
   return container.append('svg')
+    .attr('width', width)
+    .attr('height', height)
     .attr('viewBox', `0 0 ${width} ${height}`)
     .attr('preserveAspectRatio', 'xMidYMid meet');
 }
@@ -3077,6 +3079,8 @@ function renderTreemapChart(container, info) {
 
   container.innerHTML = '';
   const svg = d3.select(container).append('svg')
+    .attr('width', W)
+    .attr('height', H)
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('preserveAspectRatio', 'xMidYMid meet');
 
@@ -3151,6 +3155,8 @@ function renderDonutChart(container, info) {
 
   container.innerHTML = '';
   const svg = d3.select(container).append('svg')
+    .attr('width', W)
+    .attr('height', H)
     .attr('viewBox', `0 0 ${W} ${H}`)
     .attr('preserveAspectRatio', 'xMidYMid meet');
 
