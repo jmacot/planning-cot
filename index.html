@@ -2945,6 +2945,11 @@ function createSVG(containerId, width, height) {
     .attr('preserveAspectRatio', 'xMidYMid meet');
 }
 
+// Fix SVG url(#id) for Windows file:// protocol
+function svgUrl(id) {
+  return `url(${window.location.href.split('#')[0]}#${id})`;
+}
+
 function addGradient(svg, id, color, horizontal) {
   const defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
   const grad = defs.append('linearGradient').attr('id', id)
@@ -2953,7 +2958,7 @@ function addGradient(svg, id, color, horizontal) {
   const c = d3.color(color);
   grad.append('stop').attr('offset', '0%').attr('stop-color', c.brighter(0.4));
   grad.append('stop').attr('offset', '100%').attr('stop-color', c.darker(0.15));
-  return `url(#${id})`;
+  return svgUrl(id);
 }
 
 function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, label }) {
