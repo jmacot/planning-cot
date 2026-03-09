@@ -136,7 +136,8 @@
     }
     [data-theme="dark"] .app-header {
       background: linear-gradient(135deg, #0a1628 0%, #111827 50%, #1a2744 100%);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
     }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -145,6 +146,11 @@
     @keyframes slideReveal {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.6); }
+      60% { transform: scale(1.08); }
+      to { opacity: 1; transform: scale(1); }
     }
     @keyframes focusPulse {
       0% { box-shadow: 0 0 0 0 rgba(26,58,92,0.25); }
@@ -330,6 +336,11 @@
       max-height: 240px; overflow-y: auto; overscroll-behavior: contain;
     }
     .custom-select.open .custom-select-dropdown { display: block; }
+    /* Custom scrollbar */
+    .custom-select-dropdown::-webkit-scrollbar { width: 6px; }
+    .custom-select-dropdown::-webkit-scrollbar-track { background: transparent; }
+    .custom-select-dropdown::-webkit-scrollbar-thumb { background: var(--accent-light); border-radius: 3px; }
+    [data-theme="dark"] .custom-select-dropdown::-webkit-scrollbar-thumb { background: var(--border); }
     .custom-select-option {
       padding: 8px 14px; font-size: 13px; cursor: pointer;
       transition: background 0.15s; border-bottom: 1px solid var(--border-light);
@@ -353,7 +364,7 @@
     .calendar-section {
       background: var(--surface); border: 1px solid var(--border-light);
       border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
-      display: flex; gap: 14px; align-items: flex-start;
+      display: flex; align-items: flex-start;
     }
     .cal-main { flex: 1; min-width: 0; }
     .calendar-section h2 {
@@ -363,31 +374,26 @@
     }
     .cal-nav {
       display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
-      justify-content: center;
+      justify-content: center; flex-wrap: wrap;
     }
-    .cal-nav button {
-      background: var(--surface2); border: 1.5px solid var(--border);
-      border-radius: 6px; width: 28px; height: 28px; cursor: pointer;
-      font-size: 12px; display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s; color: var(--text);
+    .month-pill {
+      flex-shrink: 0; padding: 6px 14px;
+      border-radius: 999px; border: 1.5px solid transparent;
+      background: transparent; color: var(--text-light); opacity: 0.55;
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
     }
-    .cal-nav button:hover { border-color: var(--accent); color: var(--accent); }
-    .cal-nav .month-label {
-      font-weight: 600; font-size: 13px; min-width: 120px; text-align: center;
+    .month-pill:hover { opacity: 0.85; color: var(--text); }
+    .month-pill.active {
+      background: var(--accent); color: white; opacity: 1;
+      border-color: var(--accent); box-shadow: 0 2px 8px rgba(26,58,92,0.25);
+    }
+    [data-theme="dark"] .month-pill.active {
+      background: var(--accent); color: #0f172a;
+      box-shadow: 0 2px 8px rgba(147,197,253,0.3);
     }
     .cal-grid {
       display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
-    }
-    .cal-legend-side {
-      width: 125px; flex-shrink: 0; display: flex; flex-direction: column;
-      gap: 4px; padding-top: 58px;
-    }
-    .cal-legend-side .legend-item {
-      font-size: 11px; display: flex; align-items: center; gap: 6px;
-      color: var(--text-muted); white-space: nowrap;
-    }
-    .cal-legend-side .legend-dot {
-      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
     }
     .cal-header {
       font-size: 11px; font-weight: 700; text-transform: uppercase;
@@ -437,6 +443,22 @@
     .cal-cell.weekend { justify-content: flex-start; align-items: stretch; }
     .cal-cell.weekend .cell-acts { align-items: stretch; flex: 1; justify-content: center; }
     .cal-cell.weekend .day-num { text-align: center; }
+    .cal-cell.today { border-color: #ea580c; box-shadow: inset 0 0 0 2px #ea580c, 0 0 8px rgba(234,88,12,0.25); }
+    .cal-cell.today .day-num {
+      background: #ea580c; color: white; border-radius: 50%;
+      width: 22px; height: 22px; line-height: 22px; padding: 0;
+      display: inline-block; text-align: center; margin: 0 auto;
+      box-shadow: 0 2px 8px rgba(234,88,12,0.4);
+    }
+    .cal-cell.empty.today { border-color: transparent; box-shadow: none; }
+    .cal-cell.empty.today .day-num {
+      background: #ea580c; color: white; border-radius: 50%;
+      width: 22px; height: 22px; line-height: 22px; padding: 0;
+      box-shadow: 0 2px 8px rgba(234,88,12,0.4);
+    }
+    [data-theme="dark"] .cal-cell.today { border-color: #f59e0b; box-shadow: inset 0 0 0 2px #f59e0b, 0 0 10px rgba(245,158,11,0.3); }
+    [data-theme="dark"] .cal-cell.today .day-num { background: #f59e0b; color: #1a1a1a; box-shadow: 0 2px 10px rgba(245,158,11,0.5); }
+    [data-theme="dark"] .cal-cell.empty.today .day-num { background: #f59e0b; color: #1a1a1a; box-shadow: 0 2px 10px rgba(245,158,11,0.5); }
     [data-theme="dark"] .cal-cell.festive {
       background: linear-gradient(135deg, #2a2520 0%, #2d2025 100%);
     }
@@ -837,11 +859,6 @@
       .bottom-grid { grid-template-columns: 1fr; }
       .dashboard-grid { grid-template-columns: 1fr; }
       .calendar-section { flex-direction: column; }
-      .cal-legend-side {
-        flex-direction: row; flex-wrap: wrap; width: auto;
-        padding-top: 0; border-top: 1px solid var(--border-light);
-        padding-top: 8px; margin-top: 8px;
-      }
     }
     @media (max-width: 600px) {
       body { padding: 20px 12px; }
@@ -1152,14 +1169,9 @@
     <div class="calendar-section">
       <div class="cal-main">
         <h2>&#128197; Calendario</h2>
-        <div class="cal-nav">
-          <button id="cal-prev" title="Mes anterior">&larr;</button>
-          <span class="month-label" id="cal-month-label"></span>
-          <button id="cal-next" title="Mes siguiente">&rarr;</button>
-        </div>
+        <div class="cal-nav" id="cal-nav"></div>
         <div class="cal-grid" id="cal-grid"></div>
       </div>
-      <div class="cal-legend-side" id="legend"></div>
     </div>
     <!-- Bottom: summary + turns -->
     <div class="bottom-grid">
@@ -2041,20 +2053,27 @@ function parseWorksheet(ws) {
   availableMonths = result.months;
   v1RefStart = { month: result.startMonth, year: result.startYear };
 
-  // Find the month with most dates
-  const monthCounts = {};
-  allDates.forEach(d => {
-    const key = `${d.year}-${d.month}`;
-    monthCounts[key] = (monthCounts[key] || 0) + 1;
-  });
-  const mainMonthKey = Object.entries(monthCounts).sort((a,b) => b[1] - a[1])[0]?.[0];
-  if (mainMonthKey) {
-    const [y, m] = mainMonthKey.split('-').map(Number);
-    currentMonth = m;
-    currentYear = y;
-  } else if (availableMonths.length > 0) {
-    currentMonth = availableMonths[0].month;
-    currentYear = availableMonths[0].year;
+  // Prefer current month if available, otherwise month with most dates
+  const now = new Date();
+  const todayInData = availableMonths.some(m => m.month === now.getMonth() && m.year === now.getFullYear());
+  if (todayInData) {
+    currentMonth = now.getMonth();
+    currentYear = now.getFullYear();
+  } else {
+    const monthCounts = {};
+    allDates.forEach(d => {
+      const key = `${d.year}-${d.month}`;
+      monthCounts[key] = (monthCounts[key] || 0) + 1;
+    });
+    const mainMonthKey = Object.entries(monthCounts).sort((a,b) => b[1] - a[1])[0]?.[0];
+    if (mainMonthKey) {
+      const [y, m] = mainMonthKey.split('-').map(Number);
+      currentMonth = m;
+      currentYear = y;
+    } else if (availableMonths.length > 0) {
+      currentMonth = availableMonths[0].month;
+      currentYear = availableMonths[0].year;
+    }
   }
 
   // Build inferred holidays from parsed data
@@ -2147,19 +2166,25 @@ document.getElementById('surgeon-select').addEventListener('change', function() 
   renderResults(id);
 });
 
-document.getElementById('cal-prev').addEventListener('click', () => navigateMonth(-1));
-document.getElementById('cal-next').addEventListener('click', () => navigateMonth(1));
-
-function navigateMonth(dir) {
+function renderMonthPills() {
+  const nav = document.getElementById('cal-nav');
+  nav.textContent = '';
   const months = getNavigableMonths();
-  const idx = months.findIndex(m => m.month === currentMonth && m.year === currentYear);
-  const newIdx = idx + dir;
-  if (newIdx >= 0 && newIdx < months.length) {
-    currentMonth = months[newIdx].month;
-    currentYear = months[newIdx].year;
-    const surgeonId = parseInt(document.getElementById('surgeon-select').value, 10);
-    if (!isNaN(surgeonId)) renderResults(surgeonId);
-  }
+  const SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  months.forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'month-pill';
+    if (m.month === currentMonth && m.year === currentYear) btn.classList.add('active');
+    btn.textContent = SHORT[m.month] + ' ' + m.year;
+    btn.addEventListener('click', () => {
+      if (m.month === currentMonth && m.year === currentYear) return;
+      currentMonth = m.month;
+      currentYear = m.year;
+      const surgeonId = parseInt(document.getElementById('surgeon-select').value, 10);
+      if (!isNaN(surgeonId)) renderResults(surgeonId);
+    });
+    nav.appendChild(btn);
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -2432,7 +2457,6 @@ function renderResults(surgeonId) {
   renderSummary(surgeonId);
   renderTurns(surgeonId);
   renderRetribution(surgeonId);
-  renderLegend();
   renderDiff(surgeonId);
   if (chartsExpanded) renderCharts(surgeonId);
 }
@@ -2455,8 +2479,6 @@ document.querySelectorAll('#summary-toggle button').forEach(btn => {
 // ─────────────────────────────────────────────
 function renderCalendar(surgeonId) {
   const grid = document.getElementById('cal-grid');
-  const label = document.getElementById('cal-month-label');
-  label.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
 
   const entries = (parsedData[surgeonId] || []).filter(
     e => e.month === currentMonth && e.year === currentYear
@@ -2504,11 +2526,17 @@ function renderCalendar(surgeonId) {
     html += '<div class="cal-cell empty"></div>';
   }
 
+  // Today detection
+  const now = new Date();
+  const isCurrentMonth = (now.getFullYear() === currentYear && now.getMonth() === currentMonth);
+  const todayDate = now.getDate();
+
   // Day cells
   for (let d = 1; d <= daysInMonth; d++) {
+    const todayClass = (isCurrentMonth && d === todayDate) ? ' today' : '';
     const dayItems = dayMap[d] || [];
     if (dayItems.length === 0) {
-      html += `<div class="cal-cell empty"><span class="day-num">${d}</span></div>`;
+      html += `<div class="cal-cell empty${todayClass}"><span class="day-num">${d}</span></div>`;
       continue;
     }
 
@@ -2528,7 +2556,7 @@ function renderCalendar(surgeonId) {
     const isInferred = isInferredHoliday(currentYear, currentMonth, d);
     const festiveClass = (isOfficialHoliday || isInferred) ? ' festive' : (isWeekend ? ' weekend' : '');
 
-    html += `<div class="cal-cell has-activity${festiveClass}" title="${tooltip}">`;
+    html += `<div class="cal-cell has-activity${festiveClass}${todayClass}" title="${tooltip}">`;
     html += `<span class="day-num">${d}</span>`;
     html += '<div class="cell-acts">';
 
@@ -2586,6 +2614,7 @@ function renderCalendar(surgeonId) {
       });
     });
   }
+  renderMonthPills();
 }
 
 // ─────────────────────────────────────────────
@@ -2868,17 +2897,6 @@ document.querySelectorAll('#retrib-toggle button').forEach(btn => {
   });
 });
 
-// ─────────────────────────────────────────────
-//  LEGEND
-// ─────────────────────────────────────────────
-function renderLegend() {
-  const legend = document.getElementById('legend');
-  let html = '';
-  for (const [key, info] of Object.entries(ACTIVITIES)) {
-    html += `<div class="legend-item"><span class="legend-dot" style="background:${info.color}"></span>${info.label}</div>`;
-  }
-  legend.innerHTML = html;
-}
 
 // ─────────────────────────────────────────────
 //  CHARTS / DASHBOARD

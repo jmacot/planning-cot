@@ -11,3 +11,4 @@ Desktop.ini
 *.ods
 *.csv
 .claude/
+node_modules/
