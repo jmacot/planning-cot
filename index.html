@@ -142,6 +142,20 @@
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes slideReveal {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes focusPulse {
+      0% { box-shadow: 0 0 0 0 rgba(26,58,92,0.25); }
+      70% { box-shadow: 0 0 0 6px rgba(26,58,92,0); }
+      100% { box-shadow: 0 0 0 0 rgba(26,58,92,0); }
+    }
+    @keyframes focusPulseDark {
+      0% { box-shadow: 0 0 0 0 rgba(147,197,253,0.3); }
+      70% { box-shadow: 0 0 0 6px rgba(147,197,253,0); }
+      100% { box-shadow: 0 0 0 0 rgba(147,197,253,0); }
+    }
 
     .theme-toggle {
       position: absolute; top: 12px; right: 12px;
@@ -293,6 +307,10 @@
     .controls select:focus {
       outline: none; border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(26,58,92,0.10);
+      animation: focusPulse 0.6s ease-out;
+    }
+    [data-theme="dark"] .controls select:focus {
+      animation: focusPulseDark 0.6s ease-out;
     }
     .custom-select { position: relative; min-width: 200px; max-width: 320px; }
     .custom-select-btn {
@@ -329,7 +347,7 @@
 
     /* Results layout */
     .results { display: none; }
-    .results.visible { display: flex; flex-direction: column; gap: 20px; }
+    .results.visible { display: flex; flex-direction: column; gap: 20px; animation: slideReveal 0.5s ease-out; }
 
     /* Calendar */
     .calendar-section {
