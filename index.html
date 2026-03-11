@@ -1120,6 +1120,10 @@
     }
     .diff-surgeon-stats { display: flex; gap: 4px; }
     .diff-surgeon-block .diff-table { border: none; border-radius: 0; }
+    /* Accesibilidad — focus visible para navegacion por teclado */
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -4595,6 +4599,21 @@ function renderCharts(surgeonId) {
       renderFestivosChart(surgeonId);
     } catch (e) {
       console.warn('D3 charts unavailable:', e.message);
+      // Fallback visual — mostrar mensaje en contenedores vacios
+      document.querySelectorAll('.d3-chart-wrap').forEach(function(el) {
+        if (!el.hasChildNodes()) {
+          var box = document.createElement('div');
+          box.style.cssText = 'text-align:center;padding:24px 16px;color:var(--text-light);font-size:12px;background:var(--surface2);border-radius:8px;';
+          var icon = document.createElement('span');
+          icon.style.cssText = 'font-size:18px;display:block;margin-bottom:6px;';
+          icon.textContent = '\uD83D\uDCCA';
+          var msg = document.createElement('span');
+          msg.textContent = 'Grafica no disponible — Libreria D3.js no cargada';
+          box.appendChild(icon);
+          box.appendChild(msg);
+          el.appendChild(box);
+        }
+      });
     }
   });
 }
