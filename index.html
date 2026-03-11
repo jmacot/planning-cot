@@ -22,7 +22,48 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script>
+  // SheetJS CDN fallback chain — corporate proxies may block some CDNs (ERR_CERT_AUTHORITY_INVALID)
+  (function() {
+      if (typeof XLSX !== 'undefined') return;
+      var cdns = [
+          'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+      ];
+      var i = 0;
+      function tryNext() {
+          if (i >= cdns.length || typeof XLSX !== 'undefined') return;
+          var s = document.createElement('script');
+          s.src = cdns[i++];
+          s.onload = function() { console.log('SheetJS loaded from fallback CDN: ' + s.src); };
+          s.onerror = tryNext;
+          document.head.appendChild(s);
+      }
+      tryNext();
+  })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script>
+  // D3 CDN fallback chain — corporate proxies may block some CDNs (ERR_CERT_AUTHORITY_INVALID)
+  (function() {
+      if (typeof d3 !== 'undefined') return;
+      var cdns = [
+          'https://d3js.org/d3.v7.min.js',
+          'https://unpkg.com/d3@7/dist/d3.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js'
+      ];
+      var i = 0;
+      function tryNext() {
+          if (i >= cdns.length || typeof d3 !== 'undefined') return;
+          var s = document.createElement('script');
+          s.src = cdns[i++];
+          s.onload = function() { console.log('D3 loaded from fallback CDN: ' + s.src); };
+          s.onerror = tryNext;
+          document.head.appendChild(s);
+      }
+      tryNext();
+  })();
+  </script>
   <style>
     :root {
       --bg: #e5eaf2; --surface: #ffffff; --surface2: #dbe2ec;
@@ -1498,7 +1539,9 @@ function applyTheme(dark) {
   // Refresh charts with new theme colors
   if (chartsExpanded && parsedData) {
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
-    if (!isNaN(sid)) setTimeout(() => renderCharts(sid), 50);
+    if (!isNaN(sid)) setTimeout(() => {
+      try { renderCharts(sid); } catch (e) { console.warn('D3 charts unavailable:', e.message); }
+    }, 50);
   }
 }
 function getAutoTheme() {
@@ -2461,7 +2504,9 @@ function renderResults(surgeonId) {
   renderTurns(surgeonId);
   renderRetribution(surgeonId);
   renderDiff(surgeonId);
-  if (chartsExpanded) renderCharts(surgeonId);
+  if (chartsExpanded) {
+    try { renderCharts(surgeonId); } catch (e) { console.warn('D3 charts unavailable:', e.message); }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -2825,7 +2870,9 @@ document.querySelectorAll('#jornada-toggle button').forEach(btn => {
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(sid)) {
       renderTurns(sid);
-      if (chartsExpanded) renderCharts(sid);
+      if (chartsExpanded) {
+        try { renderCharts(sid); } catch (e) { console.warn('D3 charts unavailable:', e.message); }
+      }
     }
   });
 });
@@ -4347,7 +4394,7 @@ function buildIcompSelector() {
           icompSelectedSurgeons.push(id);
         }
         buildIcompSelector();
-        renderInteractiveComparator();
+        try { renderInteractiveComparator(); } catch (e) { console.warn('D3 chart unavailable:', e.message); }
       });
     });
   } else {
@@ -4376,7 +4423,7 @@ function buildIcompSelector() {
           icompSelectedUnits.push(unit);
         }
         buildIcompSelector();
-        renderInteractiveComparator();
+        try { renderInteractiveComparator(); } catch (e) { console.warn('D3 chart unavailable:', e.message); }
       });
     });
   }
@@ -4403,7 +4450,7 @@ function buildIcompMetrics() {
         icompSelectedMetrics = icompSelectedMetrics.filter(k => k !== key);
       }
       cb.parentElement.classList.toggle('checked', cb.checked);
-      renderInteractiveComparator();
+      try { renderInteractiveComparator(); } catch (e) { console.warn('D3 chart unavailable:', e.message); }
     });
   });
 }
@@ -4521,7 +4568,7 @@ function renderInteractiveComparatorInit(surgeonId) {
   buildIcompMetrics();
   if ((icompMode === 'cirujano' && icompSelectedSurgeons.length >= 2) ||
       (icompMode === 'unidad' && icompSelectedUnits.length >= 2)) {
-    renderInteractiveComparator();
+    try { renderInteractiveComparator(); } catch (e) { console.warn('D3 chart unavailable:', e.message); }
   }
 }
 
@@ -4529,22 +4576,26 @@ function renderInteractiveComparatorInit(surgeonId) {
 function renderCharts(surgeonId) {
   destroyCharts();
   requestAnimationFrame(() => {
-    renderDistributionChart(surgeonId);
-    renderPercentilesCard(surgeonId);
-    renderRadarChart(surgeonId);
-    renderRadarTotalChart(surgeonId);
-    renderUnitComparisonChart(surgeonId);
-    renderAyudantiasChart(surgeonId);
-    updateAyudantiasPeriodLabels();
-    renderComparadorChart(surgeonId);
-    renderInteractiveComparatorInit(surgeonId);
-    renderQxUnitChart(surgeonId);
-    renderRankingGuardiasChart(surgeonId);
-    renderRankingLocalizadosChart(surgeonId);
-    renderRankingGestionChart(surgeonId);
-    renderRankingTurnosChart(surgeonId);
-    renderMorningAfternoonChart(surgeonId);
-    renderFestivosChart(surgeonId);
+    try {
+      renderDistributionChart(surgeonId);
+      renderPercentilesCard(surgeonId);
+      renderRadarChart(surgeonId);
+      renderRadarTotalChart(surgeonId);
+      renderUnitComparisonChart(surgeonId);
+      renderAyudantiasChart(surgeonId);
+      updateAyudantiasPeriodLabels();
+      renderComparadorChart(surgeonId);
+      renderInteractiveComparatorInit(surgeonId);
+      renderQxUnitChart(surgeonId);
+      renderRankingGuardiasChart(surgeonId);
+      renderRankingLocalizadosChart(surgeonId);
+      renderRankingGestionChart(surgeonId);
+      renderRankingTurnosChart(surgeonId);
+      renderMorningAfternoonChart(surgeonId);
+      renderFestivosChart(surgeonId);
+    } catch (e) {
+      console.warn('D3 charts unavailable:', e.message);
+    }
   });
 }
 
@@ -4557,7 +4608,9 @@ document.getElementById('charts-header').addEventListener('click', () => {
     body.classList.add('expanded');
     btn.classList.add('rotated');
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
-    if (!isNaN(sid)) renderCharts(sid);
+    if (!isNaN(sid)) {
+      try { renderCharts(sid); } catch (e) { console.warn('D3 charts unavailable:', e.message); }
+    }
   } else {
     body.classList.remove('expanded');
     btn.classList.remove('rotated');
@@ -4572,8 +4625,10 @@ document.querySelectorAll('#comparativa-toggle button').forEach(btn => {
     comparativaMode = this.dataset.mode;
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(sid) && chartsExpanded) {
-      document.getElementById('chart-unit-comparison').innerHTML = '';
-      renderUnitComparisonChart(sid);
+      try {
+        document.getElementById('chart-unit-comparison').innerHTML = '';
+        renderUnitComparisonChart(sid);
+      } catch (e) { console.warn('D3 chart unavailable:', e.message); }
     }
   });
 });
@@ -4586,8 +4641,10 @@ document.querySelectorAll('#ayudantias-toggle button').forEach(btn => {
     ayudantiasPeriod = this.dataset.mode;
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(sid) && chartsExpanded) {
-      document.getElementById('chart-ayudantias').innerHTML = '';
-      renderAyudantiasChart(sid);
+      try {
+        document.getElementById('chart-ayudantias').innerHTML = '';
+        renderAyudantiasChart(sid);
+      } catch (e) { console.warn('D3 chart unavailable:', e.message); }
     }
   });
 });
@@ -4600,8 +4657,10 @@ document.querySelectorAll('#qx-unit-toggle button').forEach(btn => {
     qxUnitMode = this.dataset.mode;
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
     if (!isNaN(sid) && chartsExpanded) {
-      document.getElementById('chart-qx-unit').innerHTML = '';
-      renderQxUnitChart(sid);
+      try {
+        document.getElementById('chart-qx-unit').innerHTML = '';
+        renderQxUnitChart(sid);
+      } catch (e) { console.warn('D3 chart unavailable:', e.message); }
     }
   });
 });
@@ -4613,7 +4672,9 @@ document.querySelectorAll('#comparador-toggle button').forEach(btn => {
     this.classList.add('active');
     comparadorMode = this.dataset.mode;
     const sid = parseInt(document.getElementById('surgeon-select').value, 10);
-    if (!isNaN(sid) && chartsExpanded) renderComparadorChart(sid);
+    if (!isNaN(sid) && chartsExpanded) {
+      try { renderComparadorChart(sid); } catch (e) { console.warn('D3 chart unavailable:', e.message); }
+    }
   });
 });
 
@@ -4636,7 +4697,7 @@ document.querySelectorAll('#icomp-period-toggle button').forEach(btn => {
     document.querySelectorAll('#icomp-period-toggle button').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
     icompPeriod = this.dataset.mode;
-    renderInteractiveComparator();
+    try { renderInteractiveComparator(); } catch (e) { console.warn('D3 chart unavailable:', e.message); }
   });
 });
 document.querySelectorAll('#icomp-viz-toggle button').forEach(btn => {
@@ -4644,7 +4705,7 @@ document.querySelectorAll('#icomp-viz-toggle button').forEach(btn => {
     document.querySelectorAll('#icomp-viz-toggle button').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
     icompViz = this.dataset.viz;
-    renderInteractiveComparator();
+    try { renderInteractiveComparator(); } catch (e) { console.warn('D3 chart unavailable:', e.message); }
   });
 });
 
