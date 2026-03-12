@@ -4952,18 +4952,27 @@ function exportICS(scope) {
     : `Planning_${surname}_${MONTH_NAMES[currentMonth]}_${currentYear}.ics`;
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
 
-  // Móvil (iOS/Android): Web Share API para mostrar Google Calendar en share sheet
+  // Móvil: intentar Web Share API directamente (sin canShare que puede rechazar .ics)
   const isMobile = /Mobi|Android|iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isMobile && navigator.share && navigator.canShare) {
-    const file = new File([blob], fileName, { type: 'text/calendar' });
-    if (navigator.canShare({ files: [file] })) {
+  if (isMobile && navigator.share) {
+    try {
+      const file = new File([blob], fileName, { type: 'text/calendar' });
       navigator.share({ files: [file], title: fileName.replace('.ics', '') })
         .then(() => mostrarToast('\u2713 Exportado ' + entries.length + ' eventos'))
-        .catch(() => {});
+        .catch(e => {
+          if (e.name === 'AbortError') return; // usuario canceló
+          // Share falló — fallback a descarga
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = fileName;
+          a.click();
+          URL.revokeObjectURL(a.href);
+          mostrarToast('\u2713 Exportado ' + entries.length + ' eventos');
+        });
       return;
-    }
+    } catch (e) { /* navigator.share no soporta files — fall through */ }
   }
-  // Desktop: descarga directa
+  // Desktop o share no disponible: descarga directa
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = fileName;
