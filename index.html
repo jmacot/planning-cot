@@ -4952,9 +4952,9 @@ function exportICS(scope) {
     : `Planning_${surname}_${MONTH_NAMES[currentMonth]}_${currentYear}.ics`;
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
 
-  // iOS: usar Web Share API para que aparezca Google Calendar en el share sheet
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isIOS && navigator.share && navigator.canShare) {
+  // Móvil (iOS/Android): Web Share API para mostrar Google Calendar en share sheet
+  const isMobile = /Mobi|Android|iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isMobile && navigator.share && navigator.canShare) {
     const file = new File([blob], fileName, { type: 'text/calendar' });
     if (navigator.canShare({ files: [file] })) {
       navigator.share({ files: [file], title: fileName.replace('.ics', '') })
@@ -4963,7 +4963,7 @@ function exportICS(scope) {
       return;
     }
   }
-  // Desktop / Android: descarga directa
+  // Desktop: descarga directa
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = fileName;
