@@ -1435,6 +1435,9 @@ const SURGEONS = {
   24:'Miriam Barcia', 25:'Veronica Delgado', 26:'Jose Maria Perez', 27:'Jaime Diez'
 };
 
+const SURGEON_FEMALE = {2:1,5:1,7:1,13:1,14:1,16:1,18:1,23:1,24:1,25:1};
+function drTitle(id) { return SURGEON_FEMALE[id] ? 'Dra.' : 'Dr.'; }
+
 const SURGEON_UNITS = {
   1:['Rodilla','Cadera'], 2:['Rodilla'], 3:['Rodilla','Cadera'],
   4:['Rodilla'], 5:['Hombro'], 6:['Hombro'], 7:null,
@@ -4856,8 +4859,8 @@ function showExportMenu(type) {
   const menu = document.getElementById('export-menu');
   const monthName = MONTH_NAMES[currentMonth];
   const label = type === 'ics' ? 'Calendario' : 'PDF';
-  document.getElementById('export-opt-month').textContent = `${label}: Solo ${monthName}`;
-  document.getElementById('export-opt-all').textContent = `${label}: Todos los meses`;
+  document.getElementById('export-opt-month').textContent = `Exportar: Solo ${monthName}`;
+  document.getElementById('export-opt-all').textContent = 'Exportar: Todos los meses';
   menu.style.display = 'flex';
   // Highlight active button
   document.querySelector('.export-btn-ics').classList.toggle('active', type === 'ics');
@@ -4892,44 +4895,57 @@ function exportICS(scope) {
   const surname = getSurnameOf(sid);
   const units = SURGEON_UNITS[sid];
   const unitStr = units ? units.join(', ') : '';
+  const TZ = 'Europe/Madrid';
 
   function pad2(n) { return String(n).padStart(2, '0'); }
   function icsDate(y, m, d) { return `${y}${pad2(m + 1)}${pad2(d)}`; }
   function icsDateTime(y, m, d, h, min) { return `${y}${pad2(m + 1)}${pad2(d)}T${pad2(h)}${pad2(min)}00`; }
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function icsStamp() { var d = new Date(); return d.getUTCFullYear() + pad2(d.getUTCMonth()+1) + pad2(d.getUTCDate()) + 'T' + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + pad2(d.getUTCSeconds()) + 'Z'; }
+  function icsEscape(s) { return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,'); }
+  function nextDay(y, m, d) { var dt = new Date(y, m, d + 1); return icsDate(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
 
-  let ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//COT Planning//ES\r\nCALSCALE:GREGORIAN\r\nX-WR-CALNAME:Planning ${surname}\r\n`;
+  var stamp = icsStamp();
+
+  let ics = 'BEGIN:VCALENDAR\r\n';
+  ics += 'VERSION:2.0\r\n';
+  ics += 'PRODID:-//COT Planning//ES\r\n';
+  ics += 'CALSCALE:GREGORIAN\r\n';
+  ics += 'METHOD:PUBLISH\r\n';
+  ics += `X-WR-CALNAME:Planning ${icsEscape(surname)}\r\n`;
+  ics += `X-WR-TIMEZONE:${TZ}\r\n`;
 
   for (const e of entries) {
     const info = ACTIVITIES[e.activity];
     if (!info) continue;
-    const title = info.tag;
-    let desc = `Cirujano: ${surgeonName}`;
-    if (unitStr) desc += `\\nUnidad: ${unitStr}`;
+    const title = icsEscape(info.label);
+    let desc = `Cirujano: ${icsEscape(surgeonName)}`;
+    if (unitStr) desc += `\\nUnidad: ${icsEscape(unitStr)}`;
     if (e.companions && e.companions.length > 0) {
       const compNames = e.companions.map(cid => SURGEONS[cid] || `T${cid}`).join(', ');
-      desc += `\\nCompa\u00f1ero: ${compNames}`;
+      desc += `\\nCompa\u00f1ero: ${icsEscape(compNames)}`;
     }
 
-    ics += `BEGIN:VEVENT\r\n`;
+    ics += 'BEGIN:VEVENT\r\n';
     ics += `UID:${uid()}@cot-planning\r\n`;
+    ics += `DTSTAMP:${stamp}\r\n`;
     ics += `SUMMARY:${title}\r\n`;
     ics += `DESCRIPTION:${desc}\r\n`;
-    ics += `LOCATION:Hospital San Juan de Dios del Aljarafe\r\n`;
+    ics += `LOCATION:${icsEscape('Hospital San Juan de Dios del Aljarafe')}\r\n`;
 
     if (info.period === 'morning') {
-      ics += `DTSTART:${icsDateTime(e.year, e.month, e.day, 8, 0)}\r\n`;
-      ics += `DTEND:${icsDateTime(e.year, e.month, e.day, 15, 0)}\r\n`;
+      ics += `DTSTART;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 8, 0)}\r\n`;
+      ics += `DTEND;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 15, 0)}\r\n`;
     } else if (info.period === 'afternoon') {
-      ics += `DTSTART:${icsDateTime(e.year, e.month, e.day, 15, 30)}\r\n`;
-      ics += `DTEND:${icsDateTime(e.year, e.month, e.day, 20, 30)}\r\n`;
+      ics += `DTSTART;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 15, 30)}\r\n`;
+      ics += `DTEND;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 20, 30)}\r\n`;
     } else {
       ics += `DTSTART;VALUE=DATE:${icsDate(e.year, e.month, e.day)}\r\n`;
-      ics += `DTEND;VALUE=DATE:${icsDate(e.year, e.month, e.day + 1)}\r\n`;
+      ics += `DTEND;VALUE=DATE:${nextDay(e.year, e.month, e.day)}\r\n`;
     }
-    ics += `END:VEVENT\r\n`;
+    ics += 'END:VEVENT\r\n';
   }
-  ics += `END:VCALENDAR\r\n`;
+  ics += 'END:VCALENDAR\r\n';
 
   const fileName = scope === 'all'
     ? `Planning_${surname}_Total.ics`
@@ -4973,7 +4989,7 @@ const fmtEur = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximu
 //  PDF: Landscape Single-Page Functions
 // ─────────────────────────────────────────────
 
-function pdfLandscapeHeader(pdf, surgeonName, monthName, year, units) {
+function pdfLandscapeHeader(pdf, surgeonName, monthName, year, units, sid) {
   const pageW = 297;
   // Dark blue header block
   pdf.setFillColor(26, 58, 92);
@@ -4994,7 +5010,7 @@ function pdfLandscapeHeader(pdf, surgeonName, monthName, year, units) {
   // Surgeon: name + unit on two lines, right-aligned
   const surname = surgeonName.split(' ').pop();
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11);
-  pdf.text(`Dr. ${surname}`, pageW - 10, 7.5, { align: 'right' });
+  pdf.text(`${drTitle(sid)} ${surname}`, pageW - 10, 7.5, { align: 'right' });
   // Full name + unit pill on second line
   pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6);
   pdf.setTextColor(200, 210, 225);
@@ -5093,13 +5109,13 @@ function pdfLandscapeCalendar(pdf, entries, mInfo, startY) {
       pdf.text(tagText, x + 1 + pillW / 2, tagY + 3, { align: 'center' });
       tagY += 4.2;
 
-      // Companion line below the pill (smaller, muted)
+      // Companion line below the pill
       if ((it.activity === 'qui_m' || it.activity === 'qui_t') && it.companions && it.companions.length > 0) {
         const compName = it.companions.map(cid => { const full = SURGEONS[cid]; return full ? full.split(' ').pop() : `T${cid}`; }).join(', ');
-        pdf.setFont('helvetica', 'italic'); pdf.setFontSize(5);
-        pdf.setTextColor(clr[0], clr[1], clr[2]);
-        pdf.text('\u2192 ' + compName, x + 1 + pillW / 2, tagY + 2, { align: 'center' });
-        tagY += 3;
+        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(5.5);
+        pdf.setTextColor(80, 80, 80);
+        pdf.text('con ' + compName, x + 1 + pillW / 2, tagY + 2.2, { align: 'center' });
+        tagY += 3.2;
       } else {
         tagY += 0.5;
       }
@@ -5237,7 +5253,7 @@ async function exportPDF() {
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
   // Header (14mm)
-  pdfLandscapeHeader(pdf, surgeonName, monthName, mInfo.year, units);
+  pdfLandscapeHeader(pdf, surgeonName, monthName, mInfo.year, units, sid);
 
   // Calendar (left 210mm)
   const calEnd = pdfLandscapeCalendar(pdf, entries, mInfo, 17);
@@ -5248,7 +5264,8 @@ async function exportPDF() {
   // Footer
   pdfLandscapeFooter(pdf);
 
-  const fileName = `Planning_${surname}_${monthName}_${mInfo.year}.pdf`;
+  const title = drTitle(sid);
+  const fileName = `${monthName}_${mInfo.year}_${title}_${surname}.pdf`;
   pdf.save(fileName);
   mostrarToast('\u2713 PDF exportado');
 }
