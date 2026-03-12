@@ -335,22 +335,106 @@
     .export-btn-ics.active, .export-btn-pdf.active {
       border-color: var(--accent); color: var(--accent); background: var(--accent-light);
     }
-    .export-menu {
-      display: flex; gap: 4px; align-items: center; margin-top: 4px;
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 8px; padding: 4px 8px; box-shadow: var(--shadow);
+    .gcal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9998;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
     }
-    .export-menu-opt {
-      font-size: 11px; font-weight: 600; color: var(--text);
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 4px; padding: 4px 10px; cursor: pointer;
+    .gcal-modal {
+      background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-hover);
+      max-width: 420px; width: 100%; max-height: 80vh; display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .gcal-modal-header {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .gcal-modal-header h3 {
+      font-family: 'Lora', serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0;
+    }
+    .gcal-modal-close {
+      background: none; border: none; font-size: 20px; color: var(--text-muted);
+      cursor: pointer; padding: 4px 8px; line-height: 1;
+    }
+    .gcal-modal-body { padding: 12px 20px; overflow-y: auto; flex: 1; }
+    .gcal-modal-info {
+      font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;
+    }
+    .gcal-event-list { list-style: none; padding: 0; margin: 0; }
+    .gcal-event-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid var(--border-light);
+    }
+    .gcal-event-item:last-child { border-bottom: none; }
+    .gcal-event-info { flex: 1; min-width: 0; }
+    .gcal-event-date { font-size: 11px; color: var(--text-light); font-weight: 600; }
+    .gcal-event-title { font-size: 13px; color: var(--text); font-weight: 500; }
+    .gcal-event-add {
+      flex-shrink: 0; font-size: 11px; font-weight: 700; color: #4285f4;
+      background: rgba(66,133,244,0.08); border: 1.5px solid rgba(66,133,244,0.3);
+      border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: all 0.2s;
+      text-decoration: none; white-space: nowrap;
+    }
+    .gcal-event-add:hover { background: #4285f4; color: white; }
+    .gcal-event-add.added {
+      color: var(--green); background: var(--green-light);
+      border-color: var(--green); pointer-events: none;
+    }
+    .gcal-add-all {
+      display: block; width: 100%; margin: 12px 0 4px; padding: 10px;
+      background: #4285f4; color: white; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .gcal-add-all:hover { background: #3367d6; }
+    .cal-panel {
+      margin-top: 8px; background: var(--surface);
+      border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; box-shadow: var(--shadow);
+      animation: fadeInUp 0.25s ease-out;
+      width: 260px;
+    }
+    .cal-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cal-panel-title {
+      font-size: 12px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .cal-panel-close {
+      font-size: 16px; color: var(--text-light); background: none; border: none;
+      cursor: pointer; padding: 0 4px; line-height: 1; transition: color 0.2s;
+    }
+    .cal-panel-close:hover { color: var(--text); }
+    .cal-panel-scope {
+      display: flex; gap: 0; background: var(--surface2);
+      border-radius: 8px; padding: 3px; margin-bottom: 10px;
+    }
+    .cal-scope-btn {
+      flex: 1; font-size: 12px; font-weight: 600; color: var(--text-muted);
+      background: transparent; border: none; border-radius: 6px;
+      padding: 6px 8px; cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .cal-scope-btn.active {
+      background: var(--surface); color: var(--text);
+      box-shadow: var(--shadow-sm);
+    }
+    .cal-panel-actions { display: flex; flex-direction: column; gap: 6px; }
+    .cal-action-btn {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 10px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
       transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+      border: 1.5px solid var(--border); background: var(--surface);
+      color: var(--text);
     }
-    .export-menu-opt:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .export-menu-close {
-      font-size: 14px; color: var(--text-muted); background: none; border: none;
-      cursor: pointer; padding: 2px 6px; line-height: 1;
-    }
+    .cal-action-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+    .cal-action-btn.gcal { border-color: #4285f4; color: #4285f4; }
+    .cal-action-btn.gcal:hover { background: #eef3ff; }
+    [data-theme="dark"] .cal-action-btn.gcal:hover { background: #1e2d4a; }
+    .cal-action-btn.ics svg { stroke: var(--text-muted); }
+    .cal-action-btn.ics:hover svg { stroke: var(--accent); }
     .controls select:focus {
       outline: none; border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(26,58,92,0.10);
@@ -398,6 +482,7 @@
       .custom-select-btn { padding: 6px 10px; font-size: 13px; }
       .custom-select-dropdown { max-height: 200px; }
       .custom-select-option { padding: 7px 12px; font-size: 12px; }
+      .cal-panel { width: 100%; }
     }
 
     /* Results layout */
@@ -1187,13 +1272,28 @@
     </select>
     <div class="export-group" id="export-group" style="display:none">
       <span class="export-label">Exportar:</span>
-      <button class="export-btn export-btn-ics" onclick="showExportMenu('ics')" title="Exportar a calendario (.ics)">&#128197; Calendario</button>
+      <button class="export-btn export-btn-ics" onclick="toggleCalPanel()" title="Exportar a calendario">&#128197; Calendario</button>
       <button class="export-btn export-btn-pdf" onclick="exportPDF()" title="Exportar a PDF">&#128196; PDF</button>
     </div>
-    <div class="export-menu" id="export-menu" style="display:none">
-      <button class="export-menu-opt" id="export-opt-month" onclick="doExport('month')"></button>
-      <button class="export-menu-opt" id="export-opt-all" onclick="doExport('all')"></button>
-      <button class="export-menu-close" onclick="closeExportMenu()">&times;</button>
+    <div class="cal-panel" id="cal-panel" style="display:none">
+      <div class="cal-panel-header">
+        <span class="cal-panel-title">Exportar calendario</span>
+        <button class="cal-panel-close" onclick="closeCalPanel()">&times;</button>
+      </div>
+      <div class="cal-panel-scope">
+        <button class="cal-scope-btn active" id="scope-month" onclick="setCalScope('month')"></button>
+        <button class="cal-scope-btn" id="scope-all" onclick="setCalScope('all')">Todos los meses</button>
+      </div>
+      <div class="cal-panel-actions">
+        <button class="cal-action-btn gcal" onclick="doCalExport('gcal')">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19.5 4h-1V2.5a.5.5 0 0 0-1 0V4h-11V2.5a.5.5 0 0 0-1 0V4h-1A2.5 2.5 0 0 0 2 6.5v13A2.5 2.5 0 0 0 4.5 22h15a2.5 2.5 0 0 0 2.5-2.5v-13A2.5 2.5 0 0 0 19.5 4z" fill="#4285f4"/><rect x="5" y="10" width="4" height="3" rx=".5" fill="#ea4335"/><rect x="10" y="10" width="4" height="3" rx=".5" fill="#fbbc04"/><rect x="15" y="10" width="4" height="3" rx=".5" fill="#34a853"/><rect x="5" y="15" width="4" height="3" rx=".5" fill="#4285f4"/><rect x="10" y="15" width="4" height="3" rx=".5" fill="#ea4335"/><rect x="15" y="15" width="4" height="3" rx=".5" fill="#34a853"/></svg>
+          Google Calendar
+        </button>
+        <button class="cal-action-btn ics" onclick="doCalExport('ics')">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Otras apps (.ics)
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1465,7 +1565,7 @@ const ACTIVITIES = {
   localizado:  { label: 'Localizado',        tag: 'Localiz',         icon: '&#128222;', color: 'var(--c-localizado)',  bg: 'var(--c-localizado-light)',  period: 'allday',     art: 'el' },
   gestion:     { label: 'Gestion',           tag: 'Gestion',         icon: '&#128188;', color: 'var(--c-gestion)',     bg: 'var(--c-gestion-light)',     period: 'allday',  lightTag: true, art: 'la' },
   diferida_t:  { label: 'Diferida', tag: 'Diferida', mobileTag: 'Dif', icon: '&#127973;', color: 'var(--c-diferida)',    bg: 'var(--c-diferida-light)',    period: 'afternoon',  art: 'la' },
-  rucot:       { label: 'RUCOT',             tag: 'RUCOT',           mobileTag: 'RUC',  icon: '&#128203;', color: 'var(--c-rucot)',       bg: 'var(--c-rucot-light)',       period: 'allday',     art: 'el' }
+  rucot:       { label: 'RUCOT',             tag: 'RUCOT',           mobileTag: 'RUC',  icon: '&#128203;', color: 'var(--c-rucot)',       bg: 'var(--c-rucot-light)',       period: 'morning',    art: 'el' }
 };
 
 // Row offsets from URG row
@@ -2237,7 +2337,7 @@ function populateCustomSelect() {
 document.getElementById('surgeon-select').addEventListener('change', function() {
   const id = parseInt(this.value, 10);
   const exportGroup = document.getElementById('export-group');
-  closeExportMenu();
+  closeCalPanel();
   if (isNaN(id)) {
     document.getElementById('results').classList.remove('visible');
     exportGroup.style.display = 'none';
@@ -4854,30 +4954,42 @@ document.querySelectorAll('#icomp-viz-toggle button').forEach(btn => {
 // ─────────────────────────────────────────────
 //  EXPORT: Menu logic
 // ─────────────────────────────────────────────
-function showExportMenu(type) {
-  pendingExportType = type;
-  const menu = document.getElementById('export-menu');
+var _calPanelScope = 'month';
+function toggleCalPanel() {
+  const panel = document.getElementById('cal-panel');
+  if (panel.style.display !== 'none') { closeCalPanel(); return; }
   const monthName = MONTH_NAMES[currentMonth];
-  const label = type === 'ics' ? 'Calendario' : 'PDF';
-  document.getElementById('export-opt-month').textContent = `Exportar: Solo ${monthName}`;
-  document.getElementById('export-opt-all').textContent = 'Exportar: Todos los meses';
-  menu.style.display = 'flex';
-  // Highlight active button
-  document.querySelector('.export-btn-ics').classList.toggle('active', type === 'ics');
-  document.querySelector('.export-btn-pdf').classList.toggle('active', type === 'pdf');
+  document.getElementById('scope-month').textContent = 'Solo ' + monthName;
+  _calPanelScope = 'month';
+  document.getElementById('scope-month').classList.add('active');
+  document.getElementById('scope-all').classList.remove('active');
+  panel.style.display = '';
+  panel.style.animation = 'none';
+  panel.offsetHeight;
+  panel.style.animation = 'fadeInUp 0.25s ease-out';
+  document.querySelector('.export-btn-ics').classList.add('active');
 }
-function closeExportMenu() {
-  document.getElementById('export-menu').style.display = 'none';
-  pendingExportType = null;
+function closeCalPanel() {
+  document.getElementById('cal-panel').style.display = 'none';
   document.querySelector('.export-btn-ics').classList.remove('active');
-  document.querySelector('.export-btn-pdf').classList.remove('active');
 }
-function doExport(scope) {
-  const type = pendingExportType;
-  closeExportMenu();
-  if (type === 'ics') exportICS(scope);
-  else if (type === 'pdf') exportPDF(scope);
+function setCalScope(scope) {
+  _calPanelScope = scope;
+  document.getElementById('scope-month').classList.toggle('active', scope === 'month');
+  document.getElementById('scope-all').classList.toggle('active', scope === 'all');
 }
+function doCalExport(calType) {
+  const scope = _calPanelScope;
+  closeCalPanel();
+  if (calType === 'gcal') exportGCal(scope);
+  else exportICS(scope);
+}
+// Close panel on click outside
+document.addEventListener('click', function(e) {
+  var panel = document.getElementById('cal-panel');
+  if (panel.style.display === 'none') return;
+  if (!panel.contains(e.target) && !e.target.closest('.export-btn-ics')) closeCalPanel();
+});
 
 // ─────────────────────────────────────────────
 //  EXPORT: ICS (iCalendar)
@@ -4938,7 +5050,7 @@ function exportICS(scope) {
       ics += `DTEND;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 15, 0)}\r\n`;
     } else if (info.period === 'afternoon') {
       ics += `DTSTART;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 15, 30)}\r\n`;
-      ics += `DTEND;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 20, 30)}\r\n`;
+      ics += `DTEND;TZID=${TZ}:${icsDateTime(e.year, e.month, e.day, 20, 0)}\r\n`;
     } else {
       ics += `DTSTART;VALUE=DATE:${icsDate(e.year, e.month, e.day)}\r\n`;
       ics += `DTEND;VALUE=DATE:${nextDay(e.year, e.month, e.day)}\r\n`;
@@ -4952,33 +5064,118 @@ function exportICS(scope) {
     : `Planning_${surname}_${MONTH_NAMES[currentMonth]}_${currentYear}.ics`;
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
 
-  // Móvil: intentar Web Share API directamente (sin canShare que puede rechazar .ics)
-  const isMobile = /Mobi|Android|iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isMobile && navigator.share) {
-    try {
-      const file = new File([blob], fileName, { type: 'text/calendar' });
-      navigator.share({ files: [file], title: fileName.replace('.ics', '') })
-        .then(() => mostrarToast('\u2713 Exportado ' + entries.length + ' eventos'))
-        .catch(e => {
-          if (e.name === 'AbortError') return; // usuario canceló
-          // Share falló — fallback a descarga
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = fileName;
-          a.click();
-          URL.revokeObjectURL(a.href);
-          mostrarToast('\u2713 Exportado ' + entries.length + ' eventos');
-        });
-      return;
-    } catch (e) { /* navigator.share no soporta files — fall through */ }
-  }
-  // Desktop o share no disponible: descarga directa
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = fileName;
   a.click();
   URL.revokeObjectURL(a.href);
   mostrarToast(`\u2713 Exportado ${entries.length} eventos`);
+}
+
+// ─────────────────────────────────────────────
+//  EXPORT: Google Calendar (URL-based)
+// ─────────────────────────────────────────────
+function exportGCal(scope) {
+  const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+  if (isNaN(sid) || !parsedData[sid]) return;
+  const entries = scope === 'all' ? (parsedData[sid] || []) : getMonthEntries(sid);
+  if (!entries.length) { mostrarToast('No hay datos para exportar'); return; }
+  const surgeonName = SURGEONS[sid] || 'T' + sid;
+  const units = SURGEON_UNITS[sid];
+  const unitStr = units ? units.join(', ') : '';
+  const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function gcalDT(y, m, d, h, min) { return y + pad2(m+1) + pad2(d) + 'T' + pad2(h) + pad2(min) + '00'; }
+  function gcalDate(y, m, d) { return y + pad2(m+1) + pad2(d); }
+  function nextDay(y, m, d) { var dt = new Date(y, m, d+1); return gcalDate(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
+
+  // Build event list
+  var events = [];
+  for (var i = 0; i < entries.length; i++) {
+    var e = entries[i];
+    var info = ACTIVITIES[e.activity];
+    if (!info) continue;
+    var title = info.label;
+    var details = 'Cirujano: ' + surgeonName;
+    if (unitStr) details += '\nUnidad: ' + unitStr;
+    if (e.companions && e.companions.length > 0) {
+      details += '\nCompañero: ' + e.companions.map(function(cid) { return SURGEONS[cid] || 'T'+cid; }).join(', ');
+    }
+    var dates;
+    if (info.period === 'morning') {
+      dates = gcalDT(e.year, e.month, e.day, 8, 0) + '/' + gcalDT(e.year, e.month, e.day, 15, 0);
+    } else if (info.period === 'afternoon') {
+      dates = gcalDT(e.year, e.month, e.day, 15, 30) + '/' + gcalDT(e.year, e.month, e.day, 20, 0);
+    } else {
+      dates = gcalDate(e.year, e.month, e.day) + '/' + nextDay(e.year, e.month, e.day);
+    }
+    var dateObj = new Date(e.year, e.month, e.day);
+    var dateLabel = DAYS[dateObj.getDay()] + ' ' + pad2(e.day) + '/' + pad2(e.month+1);
+    var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+      + '&text=' + encodeURIComponent(title)
+      + '&dates=' + dates
+      + '&details=' + encodeURIComponent(details)
+      + '&location=' + encodeURIComponent('Hospital San Juan de Dios del Aljarafe')
+      + '&ctz=Europe/Madrid';
+    events.push({ title: title, dateLabel: dateLabel, url: url, tag: info.tag });
+  }
+
+  // Build and show modal
+  var overlay = document.createElement('div');
+  overlay.className = 'gcal-overlay';
+  var modal = document.createElement('div');
+  modal.className = 'gcal-modal';
+  modal.innerHTML =
+    '<div class="gcal-modal-header">' +
+      '<h3>Google Calendar</h3>' +
+      '<button class="gcal-modal-close" onclick="this.closest(\'.gcal-overlay\').remove()">&times;</button>' +
+    '</div>' +
+    '<div class="gcal-modal-body">' +
+      '<div class="gcal-modal-info">' + events.length + ' eventos. Pulsa cada evento para añadirlo a Google Calendar.</div>' +
+      '<button class="gcal-add-all" id="gcal-add-all">Añadir todos (' + events.length + ')</button>' +
+      '<ul class="gcal-event-list" id="gcal-event-list"></ul>' +
+    '</div>';
+  overlay.appendChild(modal);
+  overlay.addEventListener('click', function(ev) { if (ev.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+
+  var list = document.getElementById('gcal-event-list');
+  for (var j = 0; j < events.length; j++) {
+    (function(ev, idx) {
+      var li = document.createElement('li');
+      li.className = 'gcal-event-item';
+      li.innerHTML =
+        '<div class="gcal-event-info">' +
+          '<div class="gcal-event-date">' + ev.dateLabel + '</div>' +
+          '<div class="gcal-event-title">' + ev.title + '</div>' +
+        '</div>';
+      var btn = document.createElement('a');
+      btn.className = 'gcal-event-add';
+      btn.textContent = 'Añadir';
+      btn.href = ev.url;
+      btn.target = '_blank';
+      btn.rel = 'noopener';
+      btn.addEventListener('click', function() {
+        setTimeout(function() { btn.textContent = '✓'; btn.classList.add('added'); }, 300);
+      });
+      li.appendChild(btn);
+      list.appendChild(li);
+    })(events[j], j);
+  }
+
+  // "Add all" button — opens events sequentially
+  document.getElementById('gcal-add-all').addEventListener('click', function() {
+    var btns = list.querySelectorAll('.gcal-event-add:not(.added)');
+    var delay = 0;
+    btns.forEach(function(b) {
+      setTimeout(function() {
+        window.open(b.href, '_blank');
+        b.textContent = '✓'; b.classList.add('added');
+      }, delay);
+      delay += 600;
+    });
+  });
 }
 
 // ─────────────────────────────────────────────
