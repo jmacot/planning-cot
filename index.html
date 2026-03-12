@@ -1310,6 +1310,10 @@
           </div>
           <div class="chart-card" id="card-ranking-gestion">
             <div class="chart-card-title">Ranking Gesti&oacute;n</div>
+            <div class="toggle-btns" id="gestion-period-toggle">
+              <button class="active" data-mode="month" id="gestion-period-month">Mes</button>
+              <button data-mode="total" id="gestion-period-total">Total</button>
+            </div>
             <div id="ranking-gestion-content"></div>
           </div>
           <div class="chart-card" id="card-ayudantias">
@@ -1354,6 +1358,10 @@
           <!-- Row 3: Global -->
           <div class="chart-card" id="card-qx-unidad">
             <div class="chart-card-title">Quir&oacute;fanos por Unidad</div>
+            <div class="toggle-btns" id="qx-unit-period-toggle">
+              <button class="active" data-mode="month" id="qx-unit-period-month">Mes</button>
+              <button data-mode="total" id="qx-unit-period-total">Total</button>
+            </div>
             <div class="toggle-btns" id="qx-unit-toggle">
               <button class="active" data-mode="total">Total</button>
               <button data-mode="manana">Ma&ntilde;ana</button>
@@ -1363,24 +1371,44 @@
           </div>
           <div class="chart-card" id="card-ranking-guardias">
             <div class="chart-card-title">Ranking Guardias</div>
+            <div class="toggle-btns" id="guardias-period-toggle">
+              <button class="active" data-mode="month" id="guardias-period-month">Mes</button>
+              <button data-mode="total" id="guardias-period-total">Total</button>
+            </div>
             <div id="chart-ranking-guardias" class="d3-chart-wrap"></div>
           </div>
           <div class="chart-card" id="card-ranking-localizados">
             <div class="chart-card-title">Ranking Localizados</div>
+            <div class="toggle-btns" id="localizados-period-toggle">
+              <button class="active" data-mode="month" id="localizados-period-month">Mes</button>
+              <button data-mode="total" id="localizados-period-total">Total</button>
+            </div>
             <div id="chart-ranking-localizados" class="d3-chart-wrap"></div>
           </div>
           <!-- Row 4: Global -->
           <div class="chart-card" id="card-ranking-turnos">
             <div class="chart-card-title">Ranking Actividad Total</div>
+            <div class="toggle-btns" id="turnos-period-toggle">
+              <button class="active" data-mode="month" id="turnos-period-month">Mes</button>
+              <button data-mode="total" id="turnos-period-total">Total</button>
+            </div>
             <div id="chart-ranking-turnos" class="d3-chart-wrap"></div>
           </div>
           <!-- Row 5: Mañana/Tarde + Festivos -->
           <div class="chart-card" id="card-morning-afternoon">
             <div class="chart-card-title">Ma&ntilde;ana vs Tarde</div>
+            <div class="toggle-btns" id="ma-period-toggle">
+              <button class="active" data-mode="month" id="ma-period-month">Mes</button>
+              <button data-mode="total" id="ma-period-total">Total</button>
+            </div>
             <div id="chart-morning-afternoon" class="d3-chart-wrap"></div>
           </div>
           <div class="chart-card" id="card-festivos">
             <div class="chart-card-title">Festivos Trabajados</div>
+            <div class="toggle-btns" id="festivos-period-toggle">
+              <button class="active" data-mode="month" id="festivos-period-month">Mes</button>
+              <button data-mode="total" id="festivos-period-total">Total</button>
+            </div>
             <div id="chart-festivos" class="d3-chart-wrap"></div>
           </div>
         </div>
@@ -2968,6 +2996,16 @@ let comparadorMode = 'cirujano';
 let ayudantiasPeriod = 'month';
 let retribMode = 'contaje';
 
+// Period toggles (month vs total) for chart cards
+const chartPeriod = {
+  gestion: 'month', qxUnit: 'month', guardias: 'month',
+  localizados: 'month', turnos: 'month', morningAfternoon: 'month', festivos: 'month'
+};
+
+function getEntriesForPeriod(surgeonId, period) {
+  return period === 'total' ? (parsedData[surgeonId] || []) : getMonthEntries(surgeonId);
+}
+
 // ── Interactive Comparator state ──
 let icompMode = 'cirujano';
 let icompPeriod = 'month';
@@ -3037,10 +3075,17 @@ function calcPercentile(val, allVals) {
 const d3Tooltip = { el: null };
 function showD3Tooltip(event, html) {
   if (!d3Tooltip.el) d3Tooltip.el = d3.select('#d3-tooltip');
-  d3Tooltip.el.html(html)
-    .style('left', (event.clientX + 14) + 'px')
-    .style('top', (event.clientY - 10) + 'px')
-    .classed('visible', true);
+  var node = d3Tooltip.el.html(html).classed('visible', true).node();
+  var tw = node.offsetWidth, th = node.offsetHeight;
+  var vw = window.innerWidth, vh = window.innerHeight;
+  var pad = 8;
+  var left = event.clientX + 14;
+  var top = event.clientY - 10;
+  if (left + tw + pad > vw) left = event.clientX - tw - 14;
+  if (left < pad) left = pad;
+  if (top + th + pad > vh) top = vh - th - pad;
+  if (top < pad) top = pad;
+  d3Tooltip.el.style('left', left + 'px').style('top', top + 'px');
 }
 function hideD3Tooltip() {
   if (d3Tooltip.el) d3Tooltip.el.classed('visible', false);
@@ -3890,7 +3935,7 @@ function renderQxUnitChart(surgeonId) {
     let count = 0;
     const surgeons = getSurgeonsByUnit(unit).filter(id => parsedData[id]);
     for (const id of surgeons) {
-      count += getMonthEntries(id).filter(e => {
+      count += getEntriesForPeriod(id, chartPeriod.qxUnit).filter(e => {
         if (qxUnitMode === 'manana') return e.activity === 'qui_m';
         if (qxUnitMode === 'tarde') return e.activity === 'qui_t';
         return e.activity === 'qui_m' || e.activity === 'qui_t';
@@ -4041,7 +4086,7 @@ function renderRankingGuardiasChart(surgeonId) {
   const theme = getChartTheme();
   const counts = {};
   for (const id of Object.keys(parsedData).map(Number)) {
-    const g = getMonthEntries(id).filter(e => e.activity === 'guardia').length;
+    const g = getEntriesForPeriod(id, chartPeriod.guardias).filter(e => e.activity === 'guardia').length;
     if (g > 0) counts[id] = g;
   }
   const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
@@ -4052,7 +4097,7 @@ function renderRankingLocalizadosChart(surgeonId) {
   const theme = getChartTheme();
   const counts = {};
   for (const id of Object.keys(parsedData).map(Number)) {
-    const g = getMonthEntries(id).filter(e => e.activity === 'localizado').length;
+    const g = getEntriesForPeriod(id, chartPeriod.localizados).filter(e => e.activity === 'localizado').length;
     if (g > 0) counts[id] = g;
   }
   const sorted = Object.keys(counts).map(Number).sort((a, b) => counts[b] - counts[a]).slice(0, 12);
@@ -4066,7 +4111,7 @@ function renderRankingGestionChart(surgeonId) {
   const dayNames = ['Dom', 'Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b'];
   const gestionData = {};
   for (const id of Object.keys(parsedData).map(Number)) {
-    const entries = getMonthEntries(id).filter(e => e.activity === 'gestion');
+    const entries = getEntriesForPeriod(id, chartPeriod.gestion).filter(e => e.activity === 'gestion');
     if (entries.length > 0) {
       gestionData[id] = entries.map(e => {
         const dow = new Date(e.year, e.month, e.day).getDay();
@@ -4101,7 +4146,7 @@ function renderRankingGestionChart(surgeonId) {
 function renderRankingTurnosChart(surgeonId) {
   const theme = getChartTheme();
   const counts = {};
-  for (const id of Object.keys(parsedData).map(Number)) counts[id] = getMonthEntries(id).length;
+  for (const id of Object.keys(parsedData).map(Number)) counts[id] = getEntriesForPeriod(id, chartPeriod.turnos).length;
   const sorted = Object.keys(counts).map(Number).filter(id => counts[id] > 0).sort((a, b) => counts[b] - counts[a]).slice(0, 15);
   d3HorizontalBar({ containerId: 'chart-ranking-turnos', data: sorted.map(id => ({ label: getSurnameOf(id), value: counts[id], id })), theme, surgeonId, accentColor: theme.accentColor, label: 'Turnos' });
 }
@@ -4113,7 +4158,7 @@ function renderMorningAfternoonChart(surgeonId) {
   const afternoonActs = new Set(['qui_t', 'cons_t', 'diferida_t']);
   const stats = {};
   for (const id of Object.keys(parsedData).map(Number)) {
-    const entries = getMonthEntries(id);
+    const entries = getEntriesForPeriod(id, chartPeriod.morningAfternoon);
     const m = entries.filter(e => morningActs.has(e.activity)).length;
     const t = entries.filter(e => afternoonActs.has(e.activity)).length;
     const total = m + t;
@@ -4195,15 +4240,23 @@ function renderMorningAfternoonChart(surgeonId) {
 // ── Festivos Trabajados chart ──
 function renderFestivosChart(surgeonId) {
   const theme = getChartTheme();
+  const dowShort = ['Dom', 'Lun', 'Mar', 'Mi\u00e9', 'Jue', 'Vie', 'S\u00e1b'];
+  const monShort = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const isTotal = chartPeriod.festivos === 'total';
   const stats = {};
   for (const id of Object.keys(parsedData).map(Number)) {
-    const entries = getMonthEntries(id); let fiestas = 0, fines = 0; const seen = new Set();
+    const entries = getEntriesForPeriod(id, chartPeriod.festivos);
+    let fiestas = 0, fines = 0; const seen = new Set();
+    const festDays = [], finDays = [];
     for (const e of entries) {
       const key = `${e.year}-${e.month}-${e.day}`; if (seen.has(key)) continue; seen.add(key);
-      if (isHoliday(e.year, e.month, e.day) || isInferredHoliday(e.year, e.month, e.day)) fiestas++;
-      else { const dow = new Date(e.year, e.month, e.day).getDay(); if (dow === 0 || dow === 6) fines++; }
+      const dow = new Date(e.year, e.month, e.day).getDay();
+      const lbl = isTotal ? `${e.day} ${monShort[e.month]}` : `${dowShort[dow]} ${e.day}`;
+      if (isHoliday(e.year, e.month, e.day) || isInferredHoliday(e.year, e.month, e.day)) { fiestas++; festDays.push(lbl); }
+      else if (dow === 0 || dow === 6) { fines++; finDays.push(lbl); }
     }
-    const total = fiestas + fines; if (total > 0) stats[id] = { fiestas, fines, total };
+    const total = fiestas + fines;
+    if (total > 0) stats[id] = { fiestas, fines, total, festDays, finDays };
   }
   const sorted = Object.keys(stats).map(Number).sort((a, b) => stats[b].total - stats[a].total).slice(0, 15);
   if (sorted.length === 0) { document.getElementById('card-festivos').style.display = 'none'; return; }
@@ -4233,11 +4286,19 @@ function renderFestivosChart(surgeonId) {
     const s = stats[id]; const name = getSurnameOf(id); const isMe = id === surgeonId;
     const yPos = y(name); const bw = y.bandwidth();
 
+    // Build tooltip HTML with date details
+    const festStr = s.festDays.length > 0 ? s.festDays.join(', ') : '';
+    const finStr = s.finDays.length > 0 ? s.finDays.join(', ') : '';
+    const tipHtml = `<strong>${SURGEONS[id]}</strong>`
+      + `<br>Festivos: ${s.fiestas}` + (festStr ? ` <span style="opacity:0.7">(${festStr})</span>` : '')
+      + `<br>Fines semana: ${s.fines}` + (finStr ? ` <span style="opacity:0.7">(${finStr})</span>` : '')
+      + `<br>Total: ${s.total}`;
+
     // Festivos bar (top half)
     const fGrad = addGradient(svg, `grad-fest-${i}`, festColor, true);
     g.append('rect').attr('x', 0).attr('y', yPos).attr('height', bw / 2 - 1).attr('rx', 2)
       .attr('fill', fGrad).style('opacity', isMe ? 1 : 0.65).attr('width', 0)
-      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>Festivos: ${s.fiestas}<br>Fines semana: ${s.fines}<br>Total: ${s.total}`))
+      .on('mouseover', ev => showD3Tooltip(ev, tipHtml))
       .on('mouseout', hideD3Tooltip)
       .transition().duration(500).delay(i * 35).ease(d3.easeCubicOut).attr('width', x(s.fiestas));
 
@@ -4245,7 +4306,7 @@ function renderFestivosChart(surgeonId) {
     const wGrad = addGradient(svg, `grad-fine-${i}`, fineColor, true);
     g.append('rect').attr('x', 0).attr('y', yPos + bw / 2 + 1).attr('height', bw / 2 - 1).attr('rx', 2)
       .attr('fill', wGrad).style('opacity', isMe ? 1 : 0.65).attr('width', 0)
-      .on('mouseover', ev => showD3Tooltip(ev, `<strong>${SURGEONS[id]}</strong><br>Festivos: ${s.fiestas}<br>Fines semana: ${s.fines}<br>Total: ${s.total}`))
+      .on('mouseover', ev => showD3Tooltip(ev, tipHtml))
       .on('mouseout', hideD3Tooltip)
       .transition().duration(500).delay(i * 35 + 60).ease(d3.easeCubicOut).attr('width', x(s.fines));
 
@@ -4588,6 +4649,7 @@ function renderCharts(surgeonId) {
       renderUnitComparisonChart(surgeonId);
       renderAyudantiasChart(surgeonId);
       updateAyudantiasPeriodLabels();
+      updateChartPeriodLabels();
       renderComparadorChart(surgeonId);
       renderInteractiveComparatorInit(surgeonId);
       renderQxUnitChart(surgeonId);
@@ -4683,6 +4745,64 @@ document.querySelectorAll('#qx-unit-toggle button').forEach(btn => {
     }
   });
 });
+
+// ── Chart period toggles (Mes/Total) ──
+const CHART_PERIOD_CONFIG = [
+  { toggleId: 'gestion-period-toggle', key: 'gestion', contentId: 'ranking-gestion-content', renderFn: renderRankingGestionChart },
+  { toggleId: 'qx-unit-period-toggle', key: 'qxUnit', contentId: 'chart-qx-unit', renderFn: renderQxUnitChart },
+  { toggleId: 'guardias-period-toggle', key: 'guardias', contentId: 'chart-ranking-guardias', renderFn: renderRankingGuardiasChart },
+  { toggleId: 'localizados-period-toggle', key: 'localizados', contentId: 'chart-ranking-localizados', renderFn: renderRankingLocalizadosChart },
+  { toggleId: 'turnos-period-toggle', key: 'turnos', contentId: 'chart-ranking-turnos', renderFn: renderRankingTurnosChart },
+  { toggleId: 'ma-period-toggle', key: 'morningAfternoon', contentId: 'chart-morning-afternoon', renderFn: renderMorningAfternoonChart },
+  { toggleId: 'festivos-period-toggle', key: 'festivos', contentId: 'chart-festivos', renderFn: renderFestivosChart }
+];
+CHART_PERIOD_CONFIG.forEach(cfg => {
+  document.querySelectorAll('#' + cfg.toggleId + ' button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#' + cfg.toggleId + ' button').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      chartPeriod[cfg.key] = this.dataset.mode;
+      const sid = parseInt(document.getElementById('surgeon-select').value, 10);
+      if (!isNaN(sid) && chartsExpanded) {
+        try {
+          var container = document.getElementById(cfg.contentId);
+          while (container.firstChild) container.removeChild(container.firstChild);
+          cfg.renderFn(sid);
+        } catch (e) { console.warn('D3 chart unavailable:', e.message); }
+      }
+    });
+  });
+});
+
+function updateChartPeriodLabels() {
+  const ids = [
+    ['gestion-period-month', 'gestion-period-total'],
+    ['qx-unit-period-month', 'qx-unit-period-total'],
+    ['guardias-period-month', 'guardias-period-total'],
+    ['localizados-period-month', 'localizados-period-total'],
+    ['turnos-period-month', 'turnos-period-total'],
+    ['ma-period-month', 'ma-period-total'],
+    ['festivos-period-month', 'festivos-period-total']
+  ];
+  var monthLabel = 'Mes', totalLabel = 'Total';
+  if (currentMonth !== null && currentYear !== null) {
+    monthLabel = MONTH_NAMES[currentMonth].substring(0, 3) + ' ' + currentYear;
+  }
+  if (availableMonths.length >= 2) {
+    var first = availableMonths[0], last = availableMonths[availableMonths.length - 1];
+    var f = MONTH_NAMES[first.month].substring(0, 3);
+    var l = MONTH_NAMES[last.month].substring(0, 3);
+    totalLabel = first.year === last.year
+      ? f + '\u2013' + l + ' ' + last.year
+      : f + ' ' + first.year + '\u2013' + l + ' ' + last.year;
+  }
+  ids.forEach(function(pair) {
+    var bm = document.getElementById(pair[0]);
+    var bt = document.getElementById(pair[1]);
+    if (bm) bm.textContent = monthLabel;
+    if (bt) bt.textContent = totalLabel;
+  });
+}
 
 // Comparador toggle
 document.querySelectorAll('#comparador-toggle button').forEach(btn => {
