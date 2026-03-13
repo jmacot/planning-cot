@@ -379,13 +379,6 @@
       color: var(--green); background: var(--green-light);
       border-color: var(--green); pointer-events: none;
     }
-    .gcal-add-all {
-      display: block; width: 100%; margin: 12px 0 4px; padding: 10px;
-      background: #4285f4; color: white; border: none; border-radius: 8px;
-      font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
-      font-family: 'Inter', Arial, sans-serif;
-    }
-    .gcal-add-all:hover { background: #3367d6; }
     .cal-panel {
       margin-top: 8px; background: var(--surface);
       border: 1.5px solid var(--border); border-radius: 12px;
@@ -5064,12 +5057,30 @@ function exportICS(scope) {
     : `Planning_${surname}_${MONTH_NAMES[currentMonth]}_${currentYear}.ics`;
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
 
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  mostrarToast(`\u2713 Exportado ${entries.length} eventos`);
+  // Mobile: use Web Share API (iOS Safari doesn't support a.download)
+  if (navigator.share) {
+    const file = new File([blob], fileName, { type: 'text/calendar' });
+    navigator.share({ files: [file] }).then(function() {
+      mostrarToast(`\u2713 Exportado ${entries.length} eventos`);
+    }).catch(function(err) {
+      if (err.name !== 'AbortError') {
+        // Fallback to download if share fails
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        mostrarToast(`\u2713 Exportado ${entries.length} eventos`);
+      }
+    });
+  } else {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    mostrarToast(`\u2713 Exportado ${entries.length} eventos`);
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -5132,8 +5143,7 @@ function exportGCal(scope) {
       '<button class="gcal-modal-close" onclick="this.closest(\'.gcal-overlay\').remove()">&times;</button>' +
     '</div>' +
     '<div class="gcal-modal-body">' +
-      '<div class="gcal-modal-info">' + events.length + ' eventos. Pulsa cada evento para añadirlo a Google Calendar.</div>' +
-      '<button class="gcal-add-all" id="gcal-add-all">Añadir todos (' + events.length + ')</button>' +
+      '<div class="gcal-modal-info">' + events.length + ' eventos. Pulsa cada evento para añadirlo a Google Calendar.<br>Para importar todos a la vez, usa la opción <b>Calendario → ICS</b>.</div>' +
       '<ul class="gcal-event-list" id="gcal-event-list"></ul>' +
     '</div>';
   overlay.appendChild(modal);
@@ -5164,18 +5174,6 @@ function exportGCal(scope) {
     })(events[j], j);
   }
 
-  // "Add all" button — opens events sequentially
-  document.getElementById('gcal-add-all').addEventListener('click', function() {
-    var btns = list.querySelectorAll('.gcal-event-add:not(.added)');
-    var delay = 0;
-    btns.forEach(function(b) {
-      setTimeout(function() {
-        window.open(b.href, '_blank');
-        b.textContent = '✓'; b.classList.add('added');
-      }, delay);
-      delay += 600;
-    });
-  });
 }
 
 // ─────────────────────────────────────────────
