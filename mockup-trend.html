@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup — Tendencia Mensual</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <style>
+    :root {
+      --bg: #e5eaf2; --surface: #ffffff; --surface2: #dbe2ec;
+      --border: #e2e8f0; --border-light: #e5e7eb;
+      --accent: #1a3a5c; --accent-light: #eef2f7;
+      --text: #222222; --text-muted: #555555; --text-light: #888888;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+      --radius: 16px; --radius-sm: 8px;
+    }
+    [data-theme="dark"] {
+      --bg: #111827; --surface: #1f2937; --surface2: #283244;
+      --border: #374151; --border-light: #4b5563;
+      --text: #f1f5f9; --text-muted: #a8b8cc; --text-light: #64748b;
+      --accent: #93c5fd; --accent-light: #1e3a5f;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', Arial, sans-serif; background: var(--bg);
+      color: var(--text); padding: 30px 20px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 20px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-family: 'Lora', serif; font-size: 1.1rem; font-weight: 700;
+      color: var(--accent); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      padding: 4px 10px; border-radius: 999px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      transition: all 0.2s; user-select: none;
+    }
+    .legend-item.active { border-color: currentColor; }
+    .legend-item.inactive { opacity: 0.35; }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .d3-chart-wrap { width: 100%; overflow: visible; }
+    .d3-chart-wrap svg { display: block; width: 100%; height: auto; max-width: 100%; }
+    .d3-tooltip {
+      position: fixed; pointer-events: none;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 14px; font-size: 11px; font-family: 'Inter', sans-serif;
+      box-shadow: var(--shadow); z-index: 9999;
+      opacity: 0; transition: opacity 0.15s; max-width: 240px; line-height: 1.6;
+    }
+    .d3-tooltip.visible { opacity: 1; }
+    .note {
+      font-size: 12px; color: var(--text-light); text-align: center;
+      margin-top: 8px; font-style: italic;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="card-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Tendencia Mensual — Antonio Ortiz
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="d3-chart-wrap" id="trend-chart"></div>
+    <div class="note">Datos de ejemplo · Dic 2025 — May 2026</div>
+  </div>
+</div>
+<div id="d3-tooltip" class="d3-tooltip"></div>
+
+<script>
+var MONTHS = [
+  { key: '2025-12', label: 'Dic 25' },
+  { key: '2026-01', label: 'Ene 26' },
+  { key: '2026-02', label: 'Feb 26' },
+  { key: '2026-03', label: 'Mar 26' },
+  { key: '2026-04', label: 'Abr 26' },
+  { key: '2026-05', label: 'May 26' }
+];
+
+var SERIES = [
+  { id: 'turnos',   label: 'Turnos Totales', color: '#1a3a5c', data: [18, 20, 17, 22, 19, 21] },
+  { id: 'quirof',   label: 'Quirófano',      color: '#3b82f6', data: [6, 7, 5, 8, 6, 7] },
+  { id: 'consulta', label: 'Consultas',       color: '#16a34a', data: [5, 6, 5, 4, 6, 5] },
+  { id: 'guardia',  label: 'Guardias',        color: '#dc2626', data: [3, 2, 3, 2, 3, 2] },
+  { id: 'localiz',  label: 'Localizados',     color: '#7c3aed', data: [2, 3, 2, 2, 1, 3] },
+  { id: 'diferida', label: 'Diferida',        color: '#64748b', data: [2, 2, 2, 4, 3, 3] },
+  { id: 'gestion',  label: 'Gestión',         color: '#ca8a04', data: [0, 0, 0, 2, 0, 1] }
+];
+
+var activeSet = new Set(SERIES.map(function(s) { return s.id; }));
+
+function svgUrl(id) { return 'url(' + window.location.href.split('#')[0] + '#' + id + ')'; }
+
+function buildLegend() {
+  var el = document.getElementById('legend');
+  while (el.firstChild) el.removeChild(el.firstChild);
+  SERIES.forEach(function(s) {
+    var item = document.createElement('div');
+    item.className = 'legend-item' + (activeSet.has(s.id) ? ' active' : ' inactive');
+    item.style.color = s.color;
+
+    var dot = document.createElement('span');
+    dot.className = 'legend-dot';
+    dot.style.background = s.color;
+    item.appendChild(dot);
+    item.appendChild(document.createTextNode(s.label));
+
+    item.addEventListener('click', function() {
+      if (activeSet.has(s.id)) activeSet.delete(s.id); else activeSet.add(s.id);
+      buildLegend();
+      renderChart();
+    });
+    el.appendChild(item);
+  });
+}
+
+function renderChart() {
+  var container = document.getElementById('trend-chart');
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  var W = 820, H = 340;
+  var margin = { top: 20, right: 20, bottom: 40, left: 36 };
+  var w = W - margin.left - margin.right;
+  var h = H - margin.top - margin.bottom;
+
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var gridColor = isDark ? 'rgba(75,85,99,0.3)' : 'rgba(0,0,0,0.06)';
+  var textColor = isDark ? '#94a3b8' : '#888888';
+  var bgStroke = isDark ? '#1f2937' : 'white';
+
+  var svg = d3.select(container).append('svg')
+    .attr('width', W).attr('height', H)
+    .attr('viewBox', '0 0 ' + W + ' ' + H)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+  var g = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+  var x = d3.scalePoint().domain(MONTHS.map(function(m) { return m.key; })).range([0, w]).padding(0.1);
+  var visibleSeries = SERIES.filter(function(s) { return activeSet.has(s.id); });
+  var maxVal = d3.max(visibleSeries, function(s) { return d3.max(s.data); }) || 10;
+  var y = d3.scaleLinear().domain([0, maxVal + 2]).range([h, 0]).nice();
+
+  // Grid lines
+  g.selectAll('.grid-line')
+    .data(y.ticks(6)).enter().append('line')
+    .attr('x1', 0).attr('x2', w)
+    .attr('y1', function(d) { return y(d); }).attr('y2', function(d) { return y(d); })
+    .attr('stroke', gridColor).attr('stroke-dasharray', '3,3');
+
+  // X axis
+  g.append('g').attr('transform', 'translate(0,' + h + ')')
+    .call(d3.axisBottom(x).tickFormat(function(k) {
+      var found = MONTHS.find(function(m) { return m.key === k; });
+      return found ? found.label : k;
+    }))
+    .call(function(sel) { sel.select('.domain').attr('stroke', gridColor); })
+    .call(function(sel) { sel.selectAll('.tick line').attr('stroke', gridColor); })
+    .call(function(sel) { sel.selectAll('.tick text').attr('fill', textColor).attr('font-size', 11).attr('font-weight', 600); });
+
+  // Y axis
+  g.append('g')
+    .call(d3.axisLeft(y).ticks(6).tickSize(0))
+    .call(function(sel) { sel.select('.domain').remove(); })
+    .call(function(sel) { sel.selectAll('.tick text').attr('fill', textColor).attr('font-size', 10); });
+
+  // Lines + areas + dots
+  var line = d3.line()
+    .x(function(d, i) { return x(MONTHS[i].key); })
+    .y(function(d) { return y(d); })
+    .curve(d3.curveMonotoneX);
+
+  var area = d3.area()
+    .x(function(d, i) { return x(MONTHS[i].key); })
+    .y0(h)
+    .y1(function(d) { return y(d); })
+    .curve(d3.curveMonotoneX);
+
+  visibleSeries.forEach(function(s, si) {
+    var areaId = 'area-grad-' + s.id;
+    var defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
+    var grad = defs.append('linearGradient').attr('id', areaId)
+      .attr('x1', '0%').attr('y1', '0%').attr('x2', '0%').attr('y2', '100%');
+    grad.append('stop').attr('offset', '0%').attr('stop-color', s.color).attr('stop-opacity', 0.15);
+    grad.append('stop').attr('offset', '100%').attr('stop-color', s.color).attr('stop-opacity', 0.0);
+
+    g.append('path')
+      .datum(s.data)
+      .attr('fill', svgUrl(areaId))
+      .attr('d', area)
+      .attr('opacity', 0)
+      .transition().duration(600).delay(si * 80).attr('opacity', 1);
+
+    var path = g.append('path')
+      .datum(s.data)
+      .attr('fill', 'none')
+      .attr('stroke', s.color)
+      .attr('stroke-width', 2.5)
+      .attr('stroke-linejoin', 'round')
+      .attr('stroke-linecap', 'round')
+      .attr('d', line);
+
+    var totalLen = path.node().getTotalLength();
+    path.attr('stroke-dasharray', totalLen)
+      .attr('stroke-dashoffset', totalLen)
+      .transition().duration(800).delay(si * 80).ease(d3.easeCubicOut)
+      .attr('stroke-dashoffset', 0);
+
+    g.selectAll('.dot-' + s.id)
+      .data(s.data).enter().append('circle')
+      .attr('cx', function(d, i) { return x(MONTHS[i].key); })
+      .attr('cy', function(d) { return y(d); })
+      .attr('r', 0)
+      .attr('fill', s.color)
+      .attr('stroke', bgStroke)
+      .attr('stroke-width', 2.5)
+      .on('mouseover', function(event, d) {
+        d3.select(this).transition().duration(150).attr('r', 7);
+        var idx = s.data.indexOf(d);
+        var month = MONTHS[idx] ? MONTHS[idx].label : '';
+        var tipEl = document.getElementById('d3-tooltip');
+        while (tipEl.firstChild) tipEl.removeChild(tipEl.firstChild);
+        var strong1 = document.createElement('strong');
+        strong1.style.color = s.color;
+        strong1.textContent = s.label;
+        tipEl.appendChild(strong1);
+        tipEl.appendChild(document.createElement('br'));
+        var valStrong = document.createElement('strong');
+        valStrong.textContent = d;
+        tipEl.appendChild(document.createTextNode(month + ': '));
+        tipEl.appendChild(valStrong);
+        if (idx > 0) {
+          var diff = d - s.data[idx - 1];
+          var sign = diff > 0 ? '+' : '';
+          var diffSpan = document.createElement('span');
+          diffSpan.style.color = diff > 0 ? '#16a34a' : diff < 0 ? '#dc2626' : textColor;
+          diffSpan.textContent = ' (' + sign + diff + ')';
+          tipEl.appendChild(diffSpan);
+        }
+        tipEl.style.left = (event.clientX + 14) + 'px';
+        tipEl.style.top = (event.clientY - 10) + 'px';
+        tipEl.classList.add('visible');
+      })
+      .on('mouseout', function() {
+        d3.select(this).transition().duration(150).attr('r', 4.5);
+        document.getElementById('d3-tooltip').classList.remove('visible');
+      })
+      .transition().duration(400).delay(function(d, i) { return si * 80 + i * 60; })
+      .attr('r', 4.5);
+  });
+
+  // Vertical hover line
+  var hoverLine = g.append('line')
+    .attr('y1', 0).attr('y2', h)
+    .attr('stroke', gridColor).attr('stroke-width', 1).attr('stroke-dasharray', '4,4')
+    .attr('opacity', 0);
+
+  svg.append('rect')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+    .attr('width', w).attr('height', h)
+    .attr('fill', 'none').attr('pointer-events', 'all')
+    .on('mousemove', function(event) {
+      var mx = d3.pointer(event, this)[0];
+      var keys = MONTHS.map(function(m) { return m.key; });
+      var closest = keys[0], minDist = Infinity;
+      keys.forEach(function(k) {
+        var dist = Math.abs(x(k) - mx);
+        if (dist < minDist) { minDist = dist; closest = k; }
+      });
+      hoverLine.attr('x1', x(closest)).attr('x2', x(closest)).attr('opacity', 0.5);
+    })
+    .on('mouseleave', function() { hoverLine.attr('opacity', 0); });
+}
+
+buildLegend();
+renderChart();
+</script>
+</body>
+</html>
