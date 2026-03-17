@@ -1991,7 +1991,7 @@ function extractSurgeonIds(ws, row, dayRange) {
   return ids;
 }
 
-// Adjust day ranges for quirófano rows: ensures even surgeon count per day
+// Adjust day ranges for quirófano rows: ensures even surgeon count per day.
 // Quirófano always has surgeon pairs (main+assistant), so count must be even.
 // Scans right-to-left: if a day has odd count, extends its start by 1 column
 // and shrinks the previous day accordingly.
@@ -2032,6 +2032,66 @@ function adjustQuiRanges(ws, actRow, dayRanges) {
     }
   }
   return adjusted;
+}
+
+// Group surgeon IDs into quirófano teams.
+// Step 1: split by column gaps (non-consecutive cells).
+// Step 2: any group with >3 members (no gap = afternoon style) gets
+//         subdivided into pairs, last sub-group gets remainder (2 or 3).
+// Returns array of arrays: [[{id,gestion,col}, ...], ...]
+
+// Strict pair grouping for afternoon quirófano (qui_t).
+// Always groups in pairs of 2, ignoring gaps. No triples.
+function groupSurgeonsAsPairs(surgeonIds) {
+  if (surgeonIds.length === 0) return [];
+  const groups = [];
+  for (let i = 0; i < surgeonIds.length; i += 2) {
+    if (i + 1 < surgeonIds.length) {
+      groups.push([surgeonIds[i], surgeonIds[i + 1]]);
+    } else {
+      groups.push([surgeonIds[i]]);
+    }
+  }
+  return groups;
+}
+
+// Gap-based grouping for morning quirófano (qui_m).
+// Splits by column gaps, then subdivides large groups into pairs
+// (last sub-group gets remainder of 2 or 3).
+function groupSurgeonsByConsecutive(surgeonIds) {
+  if (surgeonIds.length === 0) return [];
+  // Step 1: group by consecutive columns
+  const rawGroups = [];
+  let current = [surgeonIds[0]];
+  for (let i = 1; i < surgeonIds.length; i++) {
+    if (surgeonIds[i].col === surgeonIds[i - 1].col + 1) {
+      current.push(surgeonIds[i]);
+    } else {
+      rawGroups.push(current);
+      current = [surgeonIds[i]];
+    }
+  }
+  rawGroups.push(current);
+  // Step 2: subdivide large groups into pairs (last gets remainder)
+  const groups = [];
+  for (const raw of rawGroups) {
+    if (raw.length <= 3) {
+      groups.push(raw);
+    } else {
+      let i = 0;
+      while (i < raw.length) {
+        const remaining = raw.length - i;
+        if (remaining <= 3) {
+          groups.push(raw.slice(i));
+          break;
+        } else {
+          groups.push(raw.slice(i, i + 2));
+          i += 2;
+        }
+      }
+    }
+  }
+  return groups;
 }
 
 // General gap-based range adjustment for any row type.
@@ -2196,6 +2256,23 @@ function parseWorksheetPure(ws, refStart) {
 
         const surgeonIds = extractSurgeonIds(ws, actRow, range);
 
+        // Build companion groups for quirófano:
+        // Morning (qui_m): gap-based grouping (allows triples)
+        // Afternoon (qui_t): strict pairs only (no triples ever)
+        let companionMap = null;
+        if (isQuirofano && surgeonIds.length > 0) {
+          companionMap = {};
+          const groups = actKey === 'qui_t'
+            ? groupSurgeonsAsPairs(surgeonIds)
+            : groupSurgeonsByConsecutive(surgeonIds);
+          for (const group of groups) {
+            const groupIds = group.map(s => s.id);
+            for (const s of group) {
+              companionMap[s.col] = groupIds.filter(gid => gid !== s.id);
+            }
+          }
+        }
+
         for (let si = 0; si < surgeonIds.length; si++) {
           const { id, gestion, col } = surgeonIds[si];
           if (!data[id]) data[id] = [];
@@ -2213,13 +2290,8 @@ function parseWorksheetPure(ws, refStart) {
 
           const entry = { day: wd.date, month: trackMonth, year: trackYear, dayOfWeek, activity };
 
-          if (isQuirofano && (activity === 'qui_m' || activity === 'qui_t')) {
-            const pairIdx = (si % 2 === 0) ? si + 1 : si - 1;
-            if (pairIdx >= 0 && pairIdx < surgeonIds.length) {
-              entry.companions = [surgeonIds[pairIdx].id];
-            } else {
-              entry.companions = [];
-            }
+          if (isQuirofano && (activity === 'qui_m' || activity === 'qui_t') && companionMap) {
+            entry.companions = companionMap[col] || [];
           }
 
           data[id].push(entry);
