@@ -1573,11 +1573,11 @@ function getSurgeonsByUnit(unit) {
 
 const ACTIVITIES = {
   diferida:    { label: 'Diferida/Planta',   tag: 'Diferida/Planta', mobileTag: 'D/P', icon: '&#127973;', color: 'var(--c-diferida)',    bg: 'var(--c-diferida-light)',    period: 'morning',    art: 'la' },
-  qui_m:       { label: 'Quirofano M',       tag: 'Quirof M',        icon: '&#129657;', color: 'var(--c-qui-m)',       bg: 'var(--c-qui-m-light)',       period: 'morning',    art: 'el' },
+  qui_m:       { label: 'Quirófano M',       tag: 'Quirof M',        icon: '&#129657;', color: 'var(--c-qui-m)',       bg: 'var(--c-qui-m-light)',       period: 'morning',    art: 'el' },
   cons_m:      { label: 'Consulta M',        tag: 'Cons M',          icon: '&#128196;', color: 'var(--c-cons-m)',      bg: 'var(--c-cons-m-light)',      period: 'morning',    art: 'la' },
   saliente:    { label: 'Saliente',          tag: 'Saliente',        icon: '&#128164;', color: 'var(--c-saliente)',    bg: 'var(--c-saliente-light)',    period: 'allday',  lightTag: true, art: 'el' },
   cons_t:      { label: 'Consulta T',        tag: 'Cons T',          icon: '&#128203;', color: 'var(--c-cons-t)',      bg: 'var(--c-cons-t-light)',      period: 'afternoon',  art: 'la' },
-  qui_t:       { label: 'Quirofano T',       tag: 'Quirof T',        icon: '&#128137;', color: 'var(--c-qui-t)',       bg: 'var(--c-qui-t-light)',       period: 'afternoon',  art: 'el' },
+  qui_t:       { label: 'Quirófano T',       tag: 'Quirof T',        icon: '&#128137;', color: 'var(--c-qui-t)',       bg: 'var(--c-qui-t-light)',       period: 'afternoon',  art: 'el' },
   guardia:     { label: 'Guardia',           tag: 'Guardia',         icon: '&#128680;', color: 'var(--c-guardia)',     bg: 'var(--c-guardia-light)',     period: 'allday',     art: 'la' },
   localizado:  { label: 'Localizado',        tag: 'Localiz',         icon: '&#128222;', color: 'var(--c-localizado)',  bg: 'var(--c-localizado-light)',  period: 'allday',     art: 'el' },
   gestion:     { label: 'Gestion',           tag: 'Gestion',         icon: '&#128188;', color: 'var(--c-gestion)',     bg: 'var(--c-gestion-light)',     period: 'allday',  lightTag: true, art: 'la' },
@@ -5264,8 +5264,6 @@ function exportICS(scope) {
 
   const surgeonName = SURGEONS[sid] || `T${sid}`;
   const surname = getSurnameOf(sid);
-  const units = SURGEON_UNITS[sid];
-  const unitStr = units ? units.join(', ') : '';
   const TZ = 'Europe/Madrid';
 
   function pad2(n) { return String(n).padStart(2, '0'); }
@@ -5291,7 +5289,6 @@ function exportICS(scope) {
     if (!info) continue;
     const title = icsEscape(info.label);
     let desc = `Cirujano: ${icsEscape(surgeonName)}`;
-    if (unitStr) desc += `\\nUnidad: ${icsEscape(unitStr)}`;
     if (e.companions && e.companions.length > 0) {
       const compNames = e.companions.map(cid => SURGEONS[cid] || `T${cid}`).join(', ');
       desc += `\\nCompa\u00f1ero: ${icsEscape(compNames)}`;
@@ -5358,8 +5355,6 @@ function exportGCal(scope) {
   const entries = scope === 'all' ? (parsedData[sid] || []) : getMonthEntries(sid);
   if (!entries.length) { mostrarToast('No hay datos para exportar'); return; }
   const surgeonName = SURGEONS[sid] || 'T' + sid;
-  const units = SURGEON_UNITS[sid];
-  const unitStr = units ? units.join(', ') : '';
   const DAYS = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
   function pad2(n) { return String(n).padStart(2, '0'); }
@@ -5375,7 +5370,6 @@ function exportGCal(scope) {
     if (!info) continue;
     var title = info.label;
     var details = 'Cirujano: ' + surgeonName;
-    if (unitStr) details += '\nUnidad: ' + unitStr;
     if (e.companions && e.companions.length > 0) {
       details += '\nCompañero: ' + e.companions.map(function(cid) { return SURGEONS[cid] || 'T'+cid; }).join(', ');
     }
