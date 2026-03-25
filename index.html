@@ -3027,7 +3027,7 @@ function renderTurns(surgeonId) {
       const dow = new Date(currentYear, currentMonth, e.day).getDay();
       return dow >= 1 && dow <= 5;
     });
-    const weekTurns = weekEntries.length;
+    const weekTurns = countTurnos(weekEntries);
     totalTurns += weekTurns;
     const workdays = countWorkdays(w.start, w.end);
     const holidays = countHolidaysInRange(w.start, w.end);
@@ -3254,6 +3254,26 @@ function getMonthEntries(surgeonId) {
   );
 }
 
+// Count turnos: a day with guardia = 1 turno regardless of other activities
+function countTurnos(entries) {
+  const dayKey = e => `${e.year}-${e.month}-${e.day}`;
+  const byDay = {};
+  entries.forEach(e => {
+    const k = dayKey(e);
+    if (!byDay[k]) byDay[k] = [];
+    byDay[k].push(e.activity);
+  });
+  let count = 0;
+  Object.values(byDay).forEach(acts => {
+    if (acts.includes('guardia')) {
+      count += 1; // guardia day = 1 turno (absorbs diferida, quirofano, etc.)
+    } else {
+      count += acts.length;
+    }
+  });
+  return count;
+}
+
 function calcPercentile(val, allVals) {
   if (allVals.length <= 1) return 50;
   const below = allVals.filter(v => v < val).length;
@@ -3406,9 +3426,15 @@ function getDistributionData(surgeonId) {
     localizado:'#7c3aed', gestion:'#ca8a04',
     diferida_planta:'#64748b', rucot:'#e11d48', saliente:'#f59e0b'
   };
+  // On guardia days, only count the guardia (1 turno absorbs other activities)
+  const guardiaDays = new Set(entries.filter(e => e.activity === 'guardia').map(e => e.day));
+  const dedupedEntries = entries.filter(e => {
+    if (e.activity !== 'guardia' && guardiaDays.has(e.day)) return false;
+    return true;
+  });
   const counts = {};
-  entries.forEach(e => { const g = grpMap[e.activity] || e.activity; counts[g] = (counts[g] || 0) + 1; });
-  const total = entries.length;
+  dedupedEntries.forEach(e => { const g = grpMap[e.activity] || e.activity; counts[g] = (counts[g] || 0) + 1; });
+  const total = dedupedEntries.length;
   const sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
   const data = sorted.map(g => ({
     key: g, label: grpLabels[g] || g, color: grpColors[g] || '#999',
@@ -4338,7 +4364,7 @@ function renderRankingGestionChart(surgeonId) {
 function renderRankingTurnosChart(surgeonId) {
   const theme = getChartTheme();
   const counts = {};
-  for (const id of Object.keys(parsedData).map(Number)) counts[id] = getEntriesForPeriod(id, chartPeriod.turnos).length;
+  for (const id of Object.keys(parsedData).map(Number)) counts[id] = countTurnos(getEntriesForPeriod(id, chartPeriod.turnos));
   const sorted = Object.keys(counts).map(Number).filter(id => counts[id] > 0).sort((a, b) => counts[b] - counts[a]).slice(0, 15);
   d3HorizontalBar({ containerId: 'chart-ranking-turnos', data: sorted.map(id => ({ label: getSurnameOf(id), value: counts[id], id })), theme, surgeonId, accentColor: theme.accentColor, label: 'Turnos' });
 }
@@ -4858,10 +4884,13 @@ function renderTrendChart(surgeonId) {
   // Aggregate counts per month
   var counts = {};
   monthKeys.forEach(function(k) { counts[k] = { total: 0, qx_total: 0, qx_m: 0, qx_t: 0, cons: 0, guardia: 0, localizado: 0, diferida: 0, gestion: 0 }; });
+  // Group entries by month for countTurnos deduplication
+  var entriesByMonth = {};
+  monthKeys.forEach(function(k) { entriesByMonth[k] = []; });
   allEntries.forEach(function(e) {
     var k = e.year + '-' + String(e.month).padStart(2, '0');
     if (!counts[k]) return;
-    counts[k].total++;
+    entriesByMonth[k].push(e);
     if (e.activity === 'qui_m') { counts[k].qx_m++; counts[k].qx_total++; }
     else if (e.activity === 'qui_t') { counts[k].qx_t++; counts[k].qx_total++; }
     else if (e.activity === 'cons_m' || e.activity === 'cons_t') counts[k].cons++;
@@ -4870,6 +4899,8 @@ function renderTrendChart(surgeonId) {
     else if (e.activity === 'diferida' || e.activity === 'diferida_t') counts[k].diferida++;
     else if (e.activity === 'gestion') counts[k].gestion++;
   });
+  // Compute total turnos deduplicating guardia+diferida on same day
+  monthKeys.forEach(function(k) { counts[k].total = countTurnos(entriesByMonth[k]); });
 
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   var TREND_SERIES = [
@@ -5864,7 +5895,7 @@ function pdfTurnsCard(pdf, entries, mInfo, startY) {
       const dow = new Date(mInfo.year, mInfo.month, e.day).getDay();
       return dow >= 1 && dow <= 5;
     });
-    const turns = weekEntries.length;
+    const turns = countTurnos(weekEntries);
     totalTurns += turns;
     return { num: i + 1, start: w.start, end: w.end, turns };
   });
