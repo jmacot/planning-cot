@@ -1353,7 +1353,7 @@
         <div id="turns-content"></div>
       </div>
       <div class="retrib-section" id="retrib-section">
-        <h2>&#128176; Retribuci&oacute;n Guardias</h2>
+        <h2>&#128176; Guardias</h2>
         <div class="toggle-btns" id="retrib-toggle">
           <button class="active" data-mode="contaje">Contaje</button>
           <button data-mode="bruto">Bruto</button>
@@ -2002,10 +2002,28 @@ function adjustQuiRanges(ws, actRow, dayRanges) {
     if (!dayRanges[day]) continue;
     adjusted[day] = { start: dayRanges[day].start, end: dayRanges[day].end, headerCol: dayRanges[day].headerCol };
   }
-  // Process right-to-left: extend left if odd count
-  for (let i = dayOrder.length - 1; i >= 0; i--) {
-    const day = dayOrder[i];
-    if (!adjusted[day]) continue;
+
+  // Quirófano overflow fix: the 2 columns immediately before each day's header
+  // contain a pair that belongs to THAT day, not the previous day.
+  // Extend each day's start left by 2 and shrink the previous day's end.
+  const activeDays = dayOrder.filter(d => adjusted[d]);
+  for (let i = 0; i < activeDays.length; i++) {
+    const day = activeDays[i];
+    const range = adjusted[day];
+    const c1 = range.headerCol - 2;
+    const c2 = range.headerCol - 1;
+    if (c1 < 2) continue;
+    const v1 = cellVal(ws, actRow, c1);
+    const v2 = cellVal(ws, actRow, c2);
+    if (v1 != null && v2 != null) {
+      range.start = c1;
+      if (i > 0) adjusted[activeDays[i - 1]].end = c1 - 1;
+    }
+  }
+
+  // Fallback: right-to-left pass to fix any remaining odd counts
+  for (let i = activeDays.length - 1; i >= 0; i--) {
+    const day = activeDays[i];
     const range = adjusted[day];
     let count = 0;
     for (let c = range.start; c <= range.end; c++) {
@@ -2022,11 +2040,7 @@ function adjustQuiRanges(ws, actRow, dayRanges) {
         const str = String(val).trim();
         if (str !== '' && str.toUpperCase() !== 'R') {
           adjusted[day].start = extraCol;
-          // Shrink previous day to avoid double-counting
-          const prevDay = dayOrder[i - 1];
-          if (prevDay && adjusted[prevDay]) {
-            adjusted[prevDay].end = extraCol - 1;
-          }
+          if (i > 0) adjusted[activeDays[i - 1]].end = extraCol - 1;
         }
       }
     }
@@ -2284,6 +2298,7 @@ function parseWorksheetPure(ws, refStart) {
 
         for (let si = 0; si < surgeonIds.length; si++) {
           const { id, gestion, col } = surgeonIds[si];
+
           if (!data[id]) data[id] = [];
 
           let activity;
@@ -2299,7 +2314,7 @@ function parseWorksheetPure(ws, refStart) {
 
           const entry = { day: wd.date, month: trackMonth, year: trackYear, dayOfWeek, activity };
 
-          if (isQuirofano && (activity === 'qui_m' || activity === 'qui_t') && companionMap) {
+          if (isQuirofano && (activity === 'qui_m' || activity === 'qui_t' || activity === 'diferida_t') && companionMap) {
             entry.companions = companionMap[col] || [];
           }
 
@@ -2850,7 +2865,7 @@ function renderCalendar(surgeonId) {
       const tagText = (info.mobileTag && isMobile) ? info.mobileTag : info.tag;
       let tagHtml = `<span class="act-tag${lightClass}${centeredClass}" style="background:${info.color}">${tagText}</span>`;
       // Companion badge for quirofano
-      if ((item.activity === 'qui_m' || item.activity === 'qui_t') && item.companions.length > 0) {
+      if ((item.activity === 'qui_m' || item.activity === 'qui_t' || item.activity === 'diferida_t') && item.companions.length > 0) {
         const names = item.companions.map(cid => {
           const full = SURGEONS[cid];
           return full ? full.split(' ').pop() : `T${cid}`;
@@ -4220,7 +4235,7 @@ function renderAyudantiasChart(surgeonId) {
   // Count companions from quirófano entries
   const companionCounts = {};
   for (const e of entries) {
-    if ((e.activity === 'qui_m' || e.activity === 'qui_t') && e.companions && e.companions.length > 0) {
+    if ((e.activity === 'qui_m' || e.activity === 'qui_t' || e.activity === 'diferida_t') && e.companions && e.companions.length > 0) {
       for (const cid of e.companions) {
         companionCounts[cid] = (companionCounts[cid] || 0) + 1;
       }
@@ -5699,7 +5714,7 @@ function pdfLandscapeCalendar(pdf, entries, mInfo, startY) {
       tagY += 4.2;
 
       // Companion line below the pill
-      if ((it.activity === 'qui_m' || it.activity === 'qui_t') && it.companions && it.companions.length > 0) {
+      if ((it.activity === 'qui_m' || it.activity === 'qui_t' || it.activity === 'diferida_t') && it.companions && it.companions.length > 0) {
         const compName = it.companions.map(cid => { const full = SURGEONS[cid]; return full ? full.split(' ').pop() : `T${cid}`; }).join(', ');
         pdf.setFont('helvetica', 'bold'); pdf.setFontSize(5.5);
         pdf.setTextColor(80, 80, 80);
