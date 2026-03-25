@@ -2210,6 +2210,15 @@ function parseWorksheetPure(ws, refStart) {
     }
   }
 
+  // Validate: if first segment's maxDate exceeds days in guessed startMonth, shift forward
+  if (segments.length > 0) {
+    const daysInGuess = new Date(startYear, startMonth + 1, 0).getDate();
+    if (segments[0].maxDate > daysInGuess) {
+      startMonth++;
+      if (startMonth > 11) { startMonth = 0; startYear++; }
+    }
+  }
+
   let trackMonth = startMonth;
   let trackYear = startYear;
   let prevDate = 0;
