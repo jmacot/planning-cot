@@ -12,3 +12,5 @@ Desktop.ini
 *.csv
 .claude/
 node_modules/
+package.json
+package-lock.json
