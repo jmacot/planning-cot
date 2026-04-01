@@ -335,6 +335,23 @@
     .export-btn-ics.active, .export-btn-pdf.active {
       border-color: var(--accent); color: var(--accent); background: var(--accent-light);
     }
+    .export-btn-hospital {
+      color: var(--red, #dc2626); background: var(--red-light, #fee2e2);
+      border: 1.5px solid var(--red, #dc2626);
+    }
+    .export-btn-hospital:hover {
+      background: var(--red, #dc2626); color: white;
+    }
+    .export-btn-hospital:hover .live-dot { background: white; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+    .live-dot {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--red, #dc2626);
+      animation: liveBlink 1.4s ease-in-out infinite;
+    }
+    @keyframes liveBlink {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
+      50% { opacity: 0.3; box-shadow: 0 0 0 4px rgba(220,38,38,0); }
+    }
     .gcal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9998;
       display: flex; align-items: center; justify-content: center; padding: 16px;
@@ -1284,6 +1301,7 @@
       <span class="export-label">Exportar:</span>
       <button class="export-btn export-btn-ics" onclick="toggleCalPanel()" title="Exportar a calendario">&#128197; Calendario</button>
       <button class="export-btn export-btn-pdf" onclick="exportPDF()" title="Exportar a PDF">&#128196; PDF</button>
+      <a class="export-btn export-btn-hospital" href="hospital-topdown.html" title="HSJD en directo" style="text-decoration:none"><span class="live-dot"></span> HSJD en directo</a>
     </div>
     <div class="cal-panel" id="cal-panel" style="display:none">
       <div class="cal-panel-header">
@@ -2346,6 +2364,16 @@ function parseWorksheet(ws) {
 
   // Build inferred holidays from parsed data
   buildInferredHolidays();
+
+  // Serialize data to localStorage for hospital.html
+  try {
+    localStorage.setItem('planning-parsedData', JSON.stringify(parsedData));
+    localStorage.setItem('planning-surgeons', JSON.stringify(SURGEONS));
+    localStorage.setItem('planning-units', JSON.stringify(SURGEON_UNITS));
+    localStorage.setItem('planning-months', JSON.stringify(availableMonths));
+    localStorage.setItem('planning-dates', JSON.stringify(allDates));
+    localStorage.setItem('planning-ts', Date.now().toString());
+  } catch (e) { console.warn('localStorage save failed:', e.message); }
 
   // Populate UI
   showUploadSuccess();
