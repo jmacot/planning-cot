@@ -117,6 +117,10 @@
       position: relative; background: #1a1a2e; border-radius: var(--radius);
       overflow: hidden; box-shadow: var(--shadow);
     }
+    .canvas-wrap.zoomable {
+      overflow: scroll; -webkit-overflow-scrolling: touch;
+      max-height: 60vh; touch-action: pan-x pan-y;
+    }
     #game-canvas {
       display: block; width: 100%; height: auto;
       image-rendering: pixelated; image-rendering: crisp-edges;
@@ -645,11 +649,12 @@ var imgWindows = new Image();
 var imgCupboard = new Image();
 var imgFlowers = new Image();
 
-// Pre-rendered quirofano rooms
+// Pre-rendered rooms (from user's tile editor)
 var imgQx1 = new Image();
 var imgQx2 = new Image();
 var imgQx3 = new Image();
 var imgQx4 = new Image();
+var imgCons = new Image(); // Consulta room: 272x160 px
 
 // Interior pack assets
 var imgSofas = new Image();      // LivingRoom1-Sheet: 384x960, 4 cols x 10 rows = 96x96 per frame
@@ -674,6 +679,7 @@ loadImg(imgQx1, 'assets/zones/qx1.png');
 loadImg(imgQx2, 'assets/zones/qx2.png');
 loadImg(imgQx3, 'assets/zones/qx3.png');
 loadImg(imgQx4, 'assets/zones/qx4.png');
+loadImg(imgCons, 'assets/zones/consultas.png');
 loadImg(imgSofas, 'assets/interior/LivingRoom1-Sheet.png');
 loadImg(imgTV, 'assets/interior/TV-Sheet.png');
 loadImg(imgCupboards, 'assets/interior/Cupboard-Sheet.png');
@@ -687,7 +693,7 @@ loadImg(imgCarpet, 'assets/interior/Carpet-Sheet.png');
 
 // Invalidate tile cache when environment images load
 [imgTilesH, imgBedH, imgMiscH, imgDoorsH, imgWindows, imgCupboard, imgFlowers,
- imgQx1, imgQx2, imgQx3, imgQx4,
+ imgQx1, imgQx2, imgQx3, imgQx4, imgCons,
  imgSofas, imgTV, imgCupboards, imgPaintings, imgPaintings1, imgBeds, imgChimney, imgHomePlants, imgTilesHouse, imgCarpet].forEach(function(img) {
   img.addEventListener('load', function() { tileCache = null; });
 });
@@ -1483,14 +1489,38 @@ function renderTilesToCache() {
     }
   }
 
-  // ── 8. CONSULTAS — desks + monitors + chairs + cabinets (rooms C1-C4) ──
-  var cRooms = [[1,5], [6,5], [11,5], [16,5]];
-  for (var ci = 0; ci < cRooms.length; ci++) {
-    var dx = cRooms[ci][0]*T+4, dy = cRooms[ci][1]*T+4;
-    drawDesk(oc, dx, dy, isDark);
-    drawScreen(oc, dx+38, dy+4);
-    drawChair(oc, dx+26, dy+42, isDark);
-    drawMedicalCabinet(oc, (cRooms[ci][0]+3)*T-4, cRooms[ci][1]*T+6, isDark);
+  // ── 8. CONSULTAS — pre-rendered room PNG (all 4 identical) ──
+  var consOk = imgCons.complete && imgCons.naturalWidth > 0;
+  // Consulta rooms: cols 1-4, 6-9, 11-14, 16-18 × rows 5-8
+  var consRooms = [
+    {x: 1*T, y: 5*T, w: 4*T, h: 4*T},   // C1
+    {x: 6*T, y: 5*T, w: 4*T, h: 4*T},   // C2
+    {x: 11*T, y: 5*T, w: 4*T, h: 4*T},  // C3
+    {x: 16*T, y: 5*T, w: 3*T, h: 4*T}   // C4
+  ];
+  if (consOk) {
+    for (var ci = 0; ci < consRooms.length; ci++) {
+      var room = consRooms[ci];
+      // Fit inside room preserving aspect ratio
+      var scaleW = room.w / imgCons.naturalWidth;
+      var scaleH = room.h / imgCons.naturalHeight;
+      var scale = Math.min(scaleW, scaleH);
+      var dw = Math.round(imgCons.naturalWidth * scale);
+      var dh = Math.round(imgCons.naturalHeight * scale);
+      var dx = room.x + Math.round((room.w - dw) / 2);
+      var dy = room.y + Math.round((room.h - dh) / 2);
+      oc.imageSmoothingEnabled = false;
+      oc.drawImage(imgCons, 0, 0, imgCons.naturalWidth, imgCons.naturalHeight, dx, dy, dw, dh);
+    }
+  } else {
+    var cRooms = [[1,5], [6,5], [11,5], [16,5]];
+    for (var ci = 0; ci < cRooms.length; ci++) {
+      var cdx = cRooms[ci][0]*T+4, cdy = cRooms[ci][1]*T+4;
+      drawDesk(oc, cdx, cdy, isDark);
+      drawScreen(oc, cdx+38, cdy+4);
+      drawChair(oc, cdx+26, cdy+42, isDark);
+      drawMedicalCabinet(oc, (cRooms[ci][0]+3)*T-4, cRooms[ci][1]*T+6, isDark);
+    }
   }
 
   // ── 8b. DIFERIDA LOUNGE — central urgencias room (cols 7-12, rows 10-13) ──
