@@ -115,11 +115,10 @@
     .canvas-area { flex: 1; min-width: 0; }
     .canvas-wrap {
       position: relative; background: #1a1a2e; border-radius: var(--radius);
-      overflow: auto; box-shadow: var(--shadow);
-      max-height: 70vh; -webkit-overflow-scrolling: touch;
+      overflow: hidden; box-shadow: var(--shadow);
     }
     #game-canvas {
-      display: block;
+      display: block; width: 100%; height: auto;
       image-rendering: pixelated; image-rendering: crisp-edges;
       transform-origin: 0 0;
     }
