@@ -115,14 +115,11 @@
     .canvas-area { flex: 1; min-width: 0; }
     .canvas-wrap {
       position: relative; background: #1a1a2e; border-radius: var(--radius);
-      overflow: hidden; box-shadow: var(--shadow);
-    }
-    .canvas-wrap.zoomable {
-      overflow: scroll; -webkit-overflow-scrolling: touch;
-      max-height: 60vh; touch-action: pan-x pan-y;
+      overflow: auto; box-shadow: var(--shadow);
+      max-height: 70vh; -webkit-overflow-scrolling: touch;
     }
     #game-canvas {
-      display: block; width: 100%; height: auto;
+      display: block;
       image-rendering: pixelated; image-rendering: crisp-edges;
       transform-origin: 0 0;
     }
@@ -211,6 +208,82 @@
       .app-header h1 { font-size: 1.2rem; }
       .back-home { padding: 3px 6px; font-size: 9px; top: 6px; left: 6px; }
     }
+    /* ─── Splash screen ─── */
+    #splash {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 10000; display: flex; align-items: center; justify-content: center;
+    }
+    .splash-bg {
+      width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, #1a1040 0%, #0a0a1a 70%, #000 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 32px; position: relative; overflow: hidden;
+    }
+    .splash-rings {
+      position: absolute; top: 50%; left: 50%;
+      width: 600px; height: 600px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center,
+        transparent 30%,
+        rgba(100, 80, 160, 0.06) 35%,
+        transparent 40%,
+        rgba(100, 80, 160, 0.05) 45%,
+        transparent 50%,
+        rgba(100, 80, 160, 0.04) 55%,
+        transparent 60%,
+        rgba(100, 80, 160, 0.03) 65%,
+        transparent 70%,
+        rgba(100, 80, 160, 0.02) 80%,
+        transparent 100%
+      );
+      animation: splashPulse 3s ease-in-out infinite;
+    }
+    @keyframes splashPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+      50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+    }
+    .splash-logo {
+      max-width: min(500px, 80vw); height: auto;
+      position: relative; z-index: 1;
+      animation: splashLogoIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+      filter: drop-shadow(0 0 40px rgba(100, 60, 180, 0.3));
+    }
+    @keyframes splashLogoIn {
+      from { opacity: 0; transform: scale(0.85); filter: drop-shadow(0 0 0 transparent); }
+      to { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 40px rgba(100, 60, 180, 0.3)); }
+    }
+    .splash-enter {
+      position: relative; z-index: 1;
+      padding: 14px 40px; border-radius: 999px;
+      border: 2px solid rgba(140, 120, 200, 0.4);
+      background: rgba(140, 120, 200, 0.1);
+      color: rgba(255, 255, 255, 0.85);
+      font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s ease;
+      animation: splashBtnIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+    }
+    @keyframes splashBtnIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .splash-enter:hover {
+      background: rgba(140, 120, 200, 0.25);
+      border-color: rgba(140, 120, 200, 0.7);
+      color: white;
+      box-shadow: 0 0 30px rgba(100, 60, 180, 0.3);
+      transform: translateY(-2px);
+    }
+    .splash-enter:active { transform: translateY(0); }
+    #splash.fade-out {
+      animation: splashOut 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes splashOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; pointer-events: none; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -230,6 +303,15 @@
   <div id="no-data" class="no-data-msg" style="display:none">
     <p>No hay datos cargados.</p>
     <a href="index.html">Ir al Planning para cargar Excel</a>
+  </div>
+
+  <!-- Splash screen -->
+  <div id="splash" style="display:none">
+    <div class="splash-bg">
+      <div class="splash-rings"></div>
+      <img src="granhermano.png" alt="Gran Hermano" class="splash-logo">
+      <button class="splash-enter" id="btn-enter">Entrar en el hospital</button>
+    </div>
   </div>
 
   <div id="main-content" style="display:none">
@@ -564,6 +646,12 @@ var imgWindows = new Image();
 var imgCupboard = new Image();
 var imgFlowers = new Image();
 
+// Pre-rendered quirofano rooms
+var imgQx1 = new Image();
+var imgQx2 = new Image();
+var imgQx3 = new Image();
+var imgQx4 = new Image();
+
 // Interior pack assets
 var imgSofas = new Image();      // LivingRoom1-Sheet: 384x960, 4 cols x 10 rows = 96x96 per frame
 var imgTV = new Image();          // TV-Sheet: 256x96, 4 cols = 64x96 (items 3-4 are flat TVs)
@@ -583,6 +671,10 @@ loadImg(imgDoorsH, 'assets/hospital/DoorsHospital.png');
 loadImg(imgWindows, 'assets/hospital/Windows.png');
 loadImg(imgCupboard, 'assets/hospital/Cupboard.png');
 loadImg(imgFlowers, 'assets/hospital/Flowers.png');
+loadImg(imgQx1, 'assets/zones/qx1.png');
+loadImg(imgQx2, 'assets/zones/qx2.png');
+loadImg(imgQx3, 'assets/zones/qx3.png');
+loadImg(imgQx4, 'assets/zones/qx4.png');
 loadImg(imgSofas, 'assets/interior/LivingRoom1-Sheet.png');
 loadImg(imgTV, 'assets/interior/TV-Sheet.png');
 loadImg(imgCupboards, 'assets/interior/Cupboard-Sheet.png');
@@ -596,6 +688,7 @@ loadImg(imgCarpet, 'assets/interior/Carpet-Sheet.png');
 
 // Invalidate tile cache when environment images load
 [imgTilesH, imgBedH, imgMiscH, imgDoorsH, imgWindows, imgCupboard, imgFlowers,
+ imgQx1, imgQx2, imgQx3, imgQx4,
  imgSofas, imgTV, imgCupboards, imgPaintings, imgPaintings1, imgBeds, imgChimney, imgHomePlants, imgTilesHouse, imgCarpet].forEach(function(img) {
   img.addEventListener('load', function() { tileCache = null; });
 });
@@ -1364,23 +1457,31 @@ function renderTilesToCache() {
   // Urgencias (top = row 10, corridor at row 9) — saliente, diferida, guardia rooms
   [[3,10],[9,10],[16,10]].forEach(function(d) { drawDoorFrame(oc, d[0]*T, d[1]*T-T, isDark); });
 
-  // ── 7. QUIROFANOS — beds + surgical equipment ──
-  var bedOk = imgBedH.complete && imgBedH.naturalWidth > 0;
-  var qRooms = [[2,1], [7,1], [12,1], [16,1]];
-  for (var q = 0; q < qRooms.length; q++) {
-    var bx = qRooms[q][0]*T, by = qRooms[q][1]*T;
-    // Surgical light (above bed)
-    drawSurgicalLight(oc, bx+16, by-4);
-    // Hospital bed
-    if (bedOk) {
-      oc.drawImage(imgBedH, (q%2)*64, 0, 64, 64, bx, by+4, 64, 64);
+  // ── 7. QUIROFANOS — pre-rendered room PNGs (aspect-ratio preserved) ──
+  var qxImgs = [imgQx1, imgQx2, imgQx3, imgQx4];
+  var qxRoomCenters = [
+    {cx: 3*T, cy: 2.5*T, maxH: 3*T},  // Q1: cols 1-4
+    {cx: 8*T, cy: 2.5*T, maxH: 3*T},  // Q2: cols 6-9
+    {cx: 13*T, cy: 2.5*T, maxH: 3*T}, // Q3: cols 11-14
+    {cx: 17.5*T, cy: 2.5*T, maxH: 3*T} // Q4: cols 16-18
+  ];
+  for (var q = 0; q < 4; q++) {
+    var qImg = qxImgs[q];
+    if (qImg.complete && qImg.naturalWidth > 0) {
+      var room = qxRoomCenters[q];
+      var scale = room.maxH / qImg.naturalHeight;
+      var dw = Math.round(qImg.naturalWidth * scale);
+      var dh = room.maxH;
+      var dx = Math.round(room.cx - dw / 2);
+      var dy = Math.round(room.cy - dh / 2);
+      oc.imageSmoothingEnabled = false;
+      oc.drawImage(qImg, 0, 0, qImg.naturalWidth, qImg.naturalHeight, dx, dy, dw, dh);
     } else {
-      drawStretcher(oc, bx+18, by+8, q);
+      var bx = qxRoomCenters[q].cx - T, by = qxRoomCenters[q].cy - T;
+      drawSurgicalLight(oc, bx+16, by-4);
+      drawIVStand(oc, bx-16, by+14);
+      drawMonitorCart(oc, bx+66, by+8);
     }
-    // IV stand
-    drawIVStand(oc, bx-16, by+14);
-    // Monitor cart
-    drawMonitorCart(oc, bx+66, by+8);
   }
 
   // ── 8. CONSULTAS — desks + monitors + chairs + cabinets (rooms C1-C4) ──
@@ -1429,6 +1530,7 @@ function renderTilesToCache() {
   } else { drawPlant(oc, 12*T-12, 10*T+6); }
 
   // ── 9. URGENCIAS — stretchers + equipment (right room only, cols 14-18) ──
+  var bedOk = imgBedH.complete && imgBedH.naturalWidth > 0;
   var uBeds = [[14,11,0],[17,11,1]];
   for (var u = 0; u < uBeds.length; u++) {
     var ux = uBeds[u][0]*T, uy = uBeds[u][1]*T;
@@ -1768,8 +1870,23 @@ function renderLegend() {
 // ─────────────────────────────────────────────
 initTheme();
 
-if (loadData()) {
-  document.getElementById('main-content').style.display = '';
+// ─────────────────────────────────────────────
+//  SPLASH SCREEN
+// ─────────────────────────────────────────────
+function showSplash() {
+  var splash = document.getElementById('splash');
+  splash.style.display = '';
+  document.getElementById('btn-enter').addEventListener('click', function() {
+    splash.classList.add('fade-out');
+    setTimeout(function() {
+      splash.style.display = 'none';
+      document.getElementById('main-content').style.display = '';
+      initHospital();
+    }, 800);
+  });
+}
+
+function initHospital() {
   var now = new Date();
   var allE = [];
   for (var sid in parsedData) for (var i = 0; i < parsedData[sid].length; i++) allE.push(parsedData[sid][i]);
@@ -1794,6 +1911,10 @@ if (loadData()) {
     });
   });
   requestAnimationFrame(gameLoop);
+}
+
+if (loadData()) {
+  showSplash();
 } else {
   document.getElementById('no-data').style.display = '';
 }
