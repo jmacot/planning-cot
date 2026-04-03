@@ -400,7 +400,7 @@ function initTheme() {
 btnTheme.addEventListener('click', function() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   applyTheme(!isDark);
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
   localStorage.setItem('theme-date', new Date().toDateString());
   tileCache = null;
 });
@@ -483,13 +483,24 @@ var SURGEON_GENDER = {
 var MALE_HAIRS = [0, 1, 6, 7];
 var FEMALE_HAIRS = [2, 3, 4, 5];
 
-var BUBBLE_TEXTS = {
-  qui_m: 'Operando', qui_t: 'Operando',
-  cons_m: 'Consulta', cons_t: 'Consulta',
-  diferida: 'Planta', diferida_t: 'Planta',
-  rucot: 'RUCOT', gestion: 'Gestion',
-  guardia: 'Guardia', saliente: 'Saliente', localizado: 'Loc.'
+var BUBBLE_DIALOGUES = {
+  qui_m: ['Bisturi','Aspirar','Cerrar','Hemostasia','Sutura','Separador','Pinza','Motor','Broca','Lavado','Placa y tornillos','Clavo','Cementar','Isquemia','Reduccion','Fluoroscopia','Comprobando','Cotilo','Vastago','Aguja de Kirschner'],
+  qui_t: ['Bisturi','Aspirar','Cerrar','Hemostasia','Sutura','Separador','Pinza','Motor','Broca','Lavado','Placa y tornillos','Clavo','Cementar','Isquemia','Reduccion','Fluoroscopia','Comprobando','Cotilo','Vastago','Aguja de Kirschner'],
+  cons_m: ['Siguiente','Desde cuando?','Mueva el brazo','Rx normal','Vamos bien','Revision OK','Alta','Dolor aqui?','Flexione','Pida RMN','Control en 1 mes','Evolucion buena','Infiltramos?','Haga fuerza','Pida TAC','Vendaje'],
+  cons_t: ['Siguiente','Desde cuando?','Mueva el brazo','Rx normal','Vamos bien','Revision OK','Alta','Dolor aqui?','Flexione','Pida RMN','Control en 1 mes','Evolucion buena','Infiltramos?','Haga fuerza','Pida TAC','Vendaje'],
+  diferida: ['Subiendo a planta','Cura hecha','Evolucion OK','Pase de visita','Alta manana','Drenaje OK','Rx control','Herida limpia','Sin fiebre','Movilizar','Analitica bien','Profilaxis','Puede caminar'],
+  diferida_t: ['Subiendo a planta','Cura hecha','Evolucion OK','Pase de visita','Alta manana','Drenaje OK','Rx control','Herida limpia','Sin fiebre','Movilizar','Analitica bien'],
+  rucot: ['Revisando caso','Comite','Lista espera','Prioridad?','Programar IQ','Indicacion?','Consentimiento','Preoperatorio'],
+  gestion: ['Firmando','Reunion','Informes','Estadisticas','Email','Presupuesto','Planning','Llamada'],
+  guardia: ['Urgencia!','Fractura','Rx urgente','Reducir','Ferula','Avisar Qx','Ingreso','Cadera!','Politrauma','Valoracion','Suturar','Luxacion'],
+  saliente: ['Zzz...','Que noche...','*bosteza*','Cafe...','Al fin...','Menuda guardia','...5 min mas','Vaya tela...','Necesito dormir'],
+  localizado: ['Telefono ON','Disponible','Por si acaso','Esperando','Sin llamadas','Atento','En casa','Movil cargado']
 };
+function getBubbleText(activity) {
+  var arr = BUBBLE_DIALOGUES[activity];
+  if (!arr) return '...';
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 // ─────────────────────────────────────────────
 //  TILE MAP (20x15 tiles, each 32x32)
@@ -835,7 +846,7 @@ function makeSprite(a, t, fi) {
     x: 10 * TILE + TILE / 2, y: (ROWS - 1) * TILE,
     dir: DIR_UP, frame: 0, frameTimer: 0, state: 'walk',
     wanderTimer: 4000 + Math.random() * 6000, isWandering: false,
-    bubbleTimer: 3000 + Math.random() * 8000, bubbleVisible: false, bubbleAlpha: 0,
+    bubbleTimer: 3000 + Math.random() * 8000, bubbleVisible: false, bubbleAlpha: 0, bubbleText: '',
     idleTimer: 2000 + Math.random() * 3000
   };
 }
@@ -1652,7 +1663,7 @@ function renderAll() {
     drawChar(sp.x, sp.y, sp.skinRow, sp.hairRow, sp.outfit, sp.dir, Math.floor(sp.frame));
     drawNameTag(sp.x, sp.y, sp.name, sp === selectedSprite, sp.outfit);
     if (sp.bubbleVisible && sp.bubbleAlpha > 0.1) {
-      drawBubble(sp.x, sp.y, BUBBLE_TEXTS[sp.activity] || '...', sp.bubbleAlpha);
+      drawBubble(sp.x, sp.y, sp.bubbleText || '...', sp.bubbleAlpha);
     }
   }
 }
@@ -1670,7 +1681,7 @@ function gameLoop(ts) {
     // Bubble
     sp.bubbleTimer -= dt;
     if (sp.bubbleTimer <= 0) {
-      if (!sp.bubbleVisible) { sp.bubbleVisible = true; sp.bubbleAlpha = 0; sp.bubbleTimer = 3000 + Math.random() * 2000; }
+      if (!sp.bubbleVisible) { sp.bubbleVisible = true; sp.bubbleAlpha = 0; sp.bubbleText = getBubbleText(sp.activity); sp.bubbleTimer = 3000 + Math.random() * 2000; }
       else { sp.bubbleVisible = false; sp.bubbleTimer = 6000 + Math.random() * 10000; }
     }
     if (sp.bubbleVisible && sp.bubbleAlpha < 1) sp.bubbleAlpha = Math.min(1, sp.bubbleAlpha + dt / 300);
@@ -1731,7 +1742,7 @@ function hitTest(wx, wy) {
 canvas.addEventListener('click', function(e) {
   var w = canvasXY(e), hit = hitTest(w.x, w.y);
   if (hit && selectedSprite === hit) { selectedSprite = null; updateSelPanel(null); }
-  else if (hit) { selectedSprite = hit; hit.bubbleVisible = true; hit.bubbleAlpha = 1; hit.bubbleTimer = 4000; updateSelPanel(hit); }
+  else if (hit) { selectedSprite = hit; hit.bubbleVisible = true; hit.bubbleAlpha = 1; hit.bubbleText = getBubbleText(hit.activity); hit.bubbleTimer = 4000; updateSelPanel(hit); }
   else { selectedSprite = null; updateSelPanel(null); }
 });
 

@@ -1911,7 +1911,7 @@ function initTheme() {
 skyCheck.addEventListener('change', function() {
       var isDark = skyCheck.checked;
       applyTheme(isDark);
-  localStorage.setItem('planning-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('planning-theme', isDark ? 'dark' : 'light');
   localStorage.setItem('planning-theme-date', new Date().toDateString());
 });
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {

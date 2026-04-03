@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital COT — Vista Pixel Art</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Hospital COT">
+  <meta name="theme-color" id="meta-theme" content="#1a3a5c">
+  <meta name="description" content="Visualizacion pixel art del hospital COT con cirujanos animados" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #e5eaf2; --surface: #ffffff; --surface2: #dbe2ec;
+      --border: #e2e8f0; --border-light: #e5e7eb;
+      --accent: #1a3a5c; --accent-light: #eef2f7; --accent-hover: #14304f;
+      --text: #222222; --text-muted: #555555; --text-light: #888888;
+      --green: #16a34a; --green-light: #dcfce7;
+      --amber: #c0540a; --amber-light: #fef3c7;
+      --red: #dc2626; --red-light: #fee2e2;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+      --radius-sm: 8px; --radius: 16px; --radius-lg: 24px;
+    }
+    [data-theme="dark"] {
+      --bg: #111827; --surface: #1f2937; --surface2: #283244;
+      --border: #374151; --border-light: #4b5563;
+      --text: #f1f5f9; --text-muted: #a8b8cc; --text-light: #64748b;
+      --accent: #93c5fd; --accent-hover: #bae0ff; --accent-light: #1e3a5f;
+      --green: #4ade80; --green-light: #14352a;
+      --amber: #fbbf24; --amber-light: #3b2a10;
+      --red: #f87171; --red-light: #3b1010;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2);
+      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', Arial, sans-serif; background: var(--bg);
+      color: var(--text); min-height: 100vh; padding: 30px 20px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .app-container { max-width: 1100px; margin: 0 auto; }
+    .back-home {
+      position: fixed; top: 10px; left: 10px;
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; letter-spacing: 0.05em;
+      color: var(--text-muted); text-decoration: none;
+      padding: 6px 12px; border-radius: 999px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      transition: border-color 0.2s, color 0.2s; z-index: 100;
+    }
+    .back-home:hover { border-color: var(--accent); color: var(--accent); }
+    .app-header {
+      text-align: center; margin-bottom: 20px; position: relative;
+      background: linear-gradient(135deg, #0f2240 0%, #1a3a5c 50%, #234e77 100%);
+      color: white; padding: 40px 32px 32px;
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: 0 8px 32px rgba(15,34,64,0.25);
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .app-header::before {
+      content: ''; position: absolute; top: -80px; right: -30px;
+      width: 250px; height: 250px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%);
+      filter: blur(40px);
+    }
+    .app-header::after {
+      content: ''; position: absolute; bottom: -60px; left: 15%;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
+      filter: blur(40px);
+    }
+    .app-header h1 {
+      font-family: 'Lora', serif; color: white; position: relative;
+      font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 700;
+    }
+    .app-header p { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; position: relative; }
+    [data-theme="dark"] .app-header {
+      background: linear-gradient(135deg, #152238 0%, #1c2f4a 50%, #213656 100%);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    }
+    .theme-toggle {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, background 0.2s; z-index: 1; color: white;
+    }
+    .theme-toggle:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.12); }
+
+    .hospital-layout {
+      display: grid; grid-template-columns: 220px 1fr; gap: 16px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+    .sidebar { display: flex; flex-direction: column; gap: 12px; }
+    .sidebar-card {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow-sm);
+    }
+    .sidebar-card h3 {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;
+    }
+
+    .mini-cal-nav {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    }
+    .mini-cal-nav span { font-size: 13px; font-weight: 700; color: var(--text); }
+    .mini-cal-nav button {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      width: 28px; height: 28px; cursor: pointer; font-size: 14px;
+      color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .mini-cal-nav button:hover { border-color: var(--accent); color: var(--accent); }
+    .mini-cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center;
+    }
+    .mini-cal-hdr {
+      font-size: 9px; font-weight: 700; color: var(--text-light);
+      text-transform: uppercase; padding: 2px 0;
+    }
+    .mini-cal-day {
+      font-size: 11px; padding: 4px 0; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s; color: var(--text); border: 1.5px solid transparent;
+      font-weight: 500;
+    }
+    .mini-cal-day:hover { background: var(--accent-light); }
+    .mini-cal-day.selected {
+      background: var(--accent); color: white; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(26,58,92,0.25);
+    }
+    [data-theme="dark"] .mini-cal-day.selected { background: #3b82f6; }
+    .mini-cal-day.empty { visibility: hidden; }
+    .mini-cal-day.no-data { color: var(--text-light); opacity: 0.4; cursor: default; }
+    .mini-cal-day.today { border-color: var(--amber); }
+    .mini-cal-day.weekend { color: var(--red); }
+
+    .day-info { font-size: 12px; line-height: 1.6; }
+    .day-info .day-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .day-info .day-count { font-size: 22px; font-weight: 700; color: var(--accent); }
+    .day-info .day-label { color: var(--text-muted); }
+    .floor-counts { margin-top: 8px; }
+    .floor-count-row {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
+      font-size: 11px; color: var(--text-muted);
+    }
+    .floor-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+    .canvas-wrap {
+      background: var(--surface); border: 1px solid var(--border-light);
+      border-radius: var(--radius) var(--radius) 0 0; box-shadow: var(--shadow);
+      overflow: hidden; position: relative;
+    }
+    .canvas-wrap canvas {
+      display: block; width: 100%; height: auto;
+      image-rendering: pixelated; image-rendering: crisp-edges;
+    }
+
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px;
+      border: 1px solid var(--border-light); border-top: none;
+      background: var(--surface); border-radius: 0 0 var(--radius) var(--radius);
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 5px; font-size: 10px;
+      font-weight: 600; color: var(--text-muted);
+    }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    .pixel-tooltip {
+      position: fixed; pointer-events: none;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; font-size: 11px; font-family: 'Inter', sans-serif;
+      box-shadow: var(--shadow); z-index: 9999;
+      opacity: 0; transition: opacity 0.15s; max-width: 220px; line-height: 1.5;
+    }
+    .pixel-tooltip.visible { opacity: 1; }
+    .pixel-tooltip .tt-name { font-weight: 700; font-size: 12px; }
+    .pixel-tooltip .tt-unit { color: var(--text-muted); font-size: 10px; }
+    .pixel-tooltip .tt-act { margin-top: 3px; }
+    .pixel-tooltip .tt-comp { font-size: 10px; color: var(--text-light); margin-top: 2px; }
+
+    .no-data-msg {
+      text-align: center; padding: 80px 32px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+    .no-data-msg h2 { font-family: 'Lora', serif; font-size: 1.3rem; margin-bottom: 12px; }
+    .no-data-msg p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+    .no-data-msg a {
+      display: inline-block; background: var(--accent); color: white;
+      padding: 10px 24px; border-radius: 8px; text-decoration: none;
+      font-weight: 600; font-size: 13px; transition: all 0.2s;
+    }
+    .no-data-msg a:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+    .app-footer { text-align: center; padding: 16px 0 8px; }
+    .app-footer span { font-size: 0.7rem; color: var(--text-light); }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 700px) {
+      .hospital-layout { grid-template-columns: 1fr; }
+      .sidebar { flex-direction: row; flex-wrap: wrap; }
+      .sidebar-card { flex: 1; min-width: 140px; }
+      .back-home { padding: 4px 8px; font-size: 10px; top: 6px; left: 6px; }
+      .app-header { padding: 32px 20px 24px; border-radius: var(--radius); }
+      .app-header::before, .app-header::after { display: none; }
+      .theme-toggle { width: 36px; height: 36px; font-size: 1.1rem; top: 8px; right: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <a class="back-home" href="index.html" title="Volver a Planning">&#8592; Planning</a>
+  <div class="app-header">
+    <button class="theme-toggle" id="btn-theme" title="Cambiar tema" aria-label="Cambiar a modo oscuro"></button>
+    <h1>&#127963; Hospital COT</h1>
+    <p>Vista Pixel Art &mdash; Actividad diaria de cirujanos</p>
+  </div>
+
+  <div id="no-data" class="no-data-msg" style="display:none">
+    <h2>Sin datos cargados</h2>
+    <p>Primero carga el Excel de planificacion en la pagina principal.</p>
+    <a href="index.html">Ir a Planning COT</a>
+  </div>
+
+  <div id="main-content" style="display:none">
+    <div class="hospital-layout">
+      <div class="sidebar">
+        <div class="sidebar-card">
+          <h3>Calendario</h3>
+          <div class="mini-cal-nav">
+            <button id="cal-prev" title="Mes anterior">&#9664;</button>
+            <span id="cal-month-label"></span>
+            <button id="cal-next" title="Mes siguiente">&#9654;</button>
+          </div>
+          <div class="mini-cal-grid" id="mini-cal"></div>
+        </div>
+        <div class="sidebar-card">
+          <h3>Dia seleccionado</h3>
+          <div class="day-info">
+            <div class="day-title" id="day-title">&mdash;</div>
+            <div><span class="day-count" id="day-count">0</span> <span class="day-label">cirujanos</span></div>
+            <div class="floor-counts" id="floor-counts"></div>
+          </div>
+        </div>
+        <div class="sidebar-card" id="selected-panel" style="display:none">
+          <h3>Cirujano seleccionado</h3>
+          <div id="selected-info" style="font-size:12px;line-height:1.8"></div>
+        </div>
+        <div class="sidebar-card" style="text-align:center">
+          <button id="btn-calibrate" onclick="toggleCalibration()" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;width:100%">Calibrar posiciones</button>
+          <div id="calib-log" style="font-size:10px;color:var(--text-muted);margin-top:6px;text-align:left;max-height:120px;overflow-y:auto;line-height:1.5"></div>
+        </div>
+      </div>
+      <div>
+        <div class="canvas-wrap">
+          <canvas id="hospital-canvas" width="960" height="886"></canvas>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-footer"><span>COT &mdash; Hospital Pixel Art v3.0</span></div>
+</div>
+<div class="pixel-tooltip" id="tooltip"></div>
+
+<script>
+// ─────────────────────────────────────────────
+//  THEME
+// ─────────────────────────────────────────────
+var btnTheme = document.getElementById('btn-theme');
+function applyTheme(dark) {
+  var mt = document.getElementById('meta-theme');
+  if (dark) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    btnTheme.textContent = '\u2600\uFE0F';
+    btnTheme.setAttribute('aria-label', 'Cambiar a modo claro');
+    if (mt) mt.setAttribute('content', '#0a1628');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    btnTheme.textContent = '\uD83C\uDF19';
+    btnTheme.setAttribute('aria-label', 'Cambiar a modo oscuro');
+    if (mt) mt.setAttribute('content', '#1a3a5c');
+  }
+}
+function getAutoTheme() {
+  var h = new Date().getHours();
+  return (h >= 21 || h < 7 || window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+}
+function initTheme() {
+  var saved = localStorage.getItem('planning-theme');
+  var savedDate = localStorage.getItem('planning-theme-date');
+  var today = new Date().toDateString();
+  if (saved && savedDate === today) applyTheme(saved === 'dark');
+  else { localStorage.removeItem('planning-theme'); applyTheme(getAutoTheme() === 'dark'); }
+}
+btnTheme.addEventListener('click', function() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  applyTheme(!isDark);
+  localStorage.setItem('planning-theme', isDark ? 'dark' : 'light');
+  localStorage.setItem('planning-theme-date', new Date().toDateString());
+});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+  var s = localStorage.getItem('planning-theme');
+  if (!s || localStorage.getItem('planning-theme-date') !== new Date().toDateString()) applyTheme(getAutoTheme() === 'dark');
+});
+
+// ─────────────────────────────────────────────
+//  DATA LOADING
+// ─────────────────────────────────────────────
+var parsedData, SURGEONS, SURGEON_UNITS, availableMonths, allDates;
+var currentMonth, currentYear, selectedDay;
+
+function loadData() {
+  var raw = localStorage.getItem('planning-parsedData');
+  if (!raw) return false;
+  try {
+    parsedData = JSON.parse(raw);
+    SURGEONS = JSON.parse(localStorage.getItem('planning-surgeons'));
+    SURGEON_UNITS = JSON.parse(localStorage.getItem('planning-units'));
+    availableMonths = JSON.parse(localStorage.getItem('planning-months'));
+    allDates = JSON.parse(localStorage.getItem('planning-dates'));
+    return !!(parsedData && SURGEONS);
+  } catch (e) { return false; }
+}
+
+// ─────────────────────────────────────────────
+//  CONSTANTS
+// ─────────────────────────────────────────────
+var MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DAY_NAMES_SHORT = ['L','M','X','J','V','S','D'];
+var DAY_NAMES_FULL = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo'];
+
+var FLOOR_MAP = {
+  qui_m: 2, qui_t: 2,
+  cons_m: 1, cons_t: 1, diferida: 1, diferida_t: 1, rucot: 1, gestion: 1,
+  guardia: 0, saliente: 0, localizado: 0
+};
+
+var ACTIVITY_LABELS = {
+  qui_m: 'Quirofano M', qui_t: 'Quirofano T',
+  cons_m: 'Consulta M', cons_t: 'Consulta T',
+  diferida: 'Diferida/Planta', diferida_t: 'Diferida T',
+  rucot: 'RUCOT', gestion: 'Gestion',
+  guardia: 'Guardia', saliente: 'Saliente', localizado: 'Localizado'
+};
+
+var ACTIVITY_COLORS = {
+  qui_m: '#1a3a5c', qui_t: '#2563eb',
+  cons_m: '#16a34a', cons_t: '#0d9488',
+  diferida: '#64748b', diferida_t: '#64748b',
+  rucot: '#e11d48', gestion: '#ca8a04',
+  guardia: '#dc2626', saliente: '#f59e0b', localizado: '#7c3aed'
+};
+
+var FLOOR_COLORS = ['#dc2626', '#16a34a', '#1a3a5c'];
+var FLOOR_NAMES = ['Urgencias', 'Consultas', 'Quirofanos'];
+
+// ─────────────────────────────────────────────
+//  CANVAS DIMENSIONS & FLOOR ZONES
+//  Mapped to hospital-bg.png (2150x1984)
+//  Canvas: 960x886 (same aspect ratio)
+// ─────────────────────────────────────────────
+var PX = 4;
+var CW = 960, CH = 886;
+
+// Fixed slot positions from calibration (x, y per slot)
+var FLOOR_SLOTS = [
+  // Floor 0 — Urgencias (2 slots)
+  [{ x: 332, y: 797 }, { x: 689, y: 799 }],
+  // Floor 1 — Consultas (6 slots)
+  [{ x: 157, y: 587 }, { x: 255, y: 595 }, { x: 382, y: 580 }, { x: 695, y: 586 }, { x: 770, y: 580 }, { x: 906, y: 580 }],
+  // Floor 2 — Quirofanos (10 slots)
+  [{ x: 115, y: 423 }, { x: 220, y: 429 }, { x: 275, y: 436 }, { x: 368, y: 432 }, { x: 453, y: 430 }, { x: 563, y: 433 }, { x: 647, y: 440 }, { x: 730, y: 434 }, { x: 795, y: 436 }, { x: 890, y: 433 }]
+];
+
+// Reference values for calibration overlay
+var FLOOR_GROUND = [798, 587, 432];
+var SLOT_LEFT = 90;
+var SLOT_RIGHT = 910;
+var SLOT_WIDTH = SLOT_RIGHT - SLOT_LEFT;
+
+// ─────────────────────────────────────────────
+//  CANVAS & STATE
+// ─────────────────────────────────────────────
+var canvas = document.getElementById('hospital-canvas');
+var ctx = canvas.getContext('2d');
+var tooltipEl = document.getElementById('tooltip');
+
+var sprites = [];
+var lastTime = 0;
+var hoveredSprite = null;
+var selectedSprite = null;
+
+// Short bubble labels for activities
+var BUBBLE_TEXTS = {
+  qui_m: 'Operando...', qui_t: 'Operando...',
+  cons_m: 'En consulta', cons_t: 'En consulta',
+  diferida: 'Planta', diferida_t: 'Planta',
+  rucot: 'RUCOT', gestion: 'Gestion',
+  guardia: 'De guardia', saliente: 'Saliente', localizado: 'Localizado'
+};
+var BUBBLE_EMOJIS = {
+  qui_m: '\u2702', qui_t: '\u2702',
+  cons_m: '\uD83D\uDCCB', cons_t: '\uD83D\uDCCB',
+  diferida: '\uD83C\uDFE5', diferida_t: '\uD83C\uDFE5',
+  rucot: '\uD83D\uDCC5', gestion: '\uD83D\uDCCA',
+  guardia: '\uD83D\uDEA8', saliente: '\u2600\uFE0F', localizado: '\uD83D\uDCF1'
+};
+
+// Background image
+var bgImage = new Image();
+var bgLoaded = false;
+bgImage.onload = function() { bgLoaded = true; };
+bgImage.src = 'hospital-bg.png';
+
+// ─────────────────────────────────────────────
+//  SURGEON HUE
+// ─────────────────────────────────────────────
+function surgeonHue(id) { return (id * 137 + 30) % 360; }
+
+// ─────────────────────────────────────────────
+//  GET DAY DATA
+// ─────────────────────────────────────────────
+function getDayActivities(day, month, year) {
+  var result = [];
+  if (!parsedData) return result;
+  for (var sid in parsedData) {
+    var entries = parsedData[sid];
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (e.day === day && e.month === month && e.year === year) {
+        if (e.activity === 'diferida') {
+          var hasGuardia = entries.some(function(e2) {
+            return e2.day === day && e2.month === month && e2.year === year && e2.activity === 'guardia';
+          });
+          if (hasGuardia) continue;
+        }
+        result.push({ surgeonId: Number(sid), activity: e.activity, companions: e.companions || [] });
+      }
+    }
+  }
+  return result;
+}
+
+// ─────────────────────────────────────────────
+//  SLOT ASSIGNMENT
+// ─────────────────────────────────────────────
+function assignSlots(activities) {
+  var floors = [[], [], []];
+  for (var i = 0; i < activities.length; i++) {
+    var f = FLOOR_MAP[activities[i].activity];
+    if (f !== undefined) floors[f].push(activities[i]);
+  }
+
+  var placed = [];
+  for (var fi = 0; fi < 3; fi++) {
+    var list = floors[fi];
+    var slots = FLOOR_SLOTS[fi];
+
+    for (var j = 0; j < list.length; j++) {
+      var a = list[j];
+      // Use fixed slot if available, otherwise offset from last slot
+      var slot;
+      if (j < slots.length) {
+        slot = slots[j];
+      } else {
+        var lastSlot = slots[slots.length - 1];
+        slot = { x: lastSlot.x + (j - slots.length + 1) * 50, y: lastSlot.y };
+      }
+      placed.push({
+        id: a.surgeonId,
+        name: SURGEONS[a.surgeonId] || 'Cirujano ' + a.surgeonId,
+        floor: fi,
+        activity: a.activity,
+        companions: a.companions,
+        unit: SURGEON_UNITS[a.surgeonId] || null,
+        hue: surgeonHue(a.surgeonId),
+        homeX: slot.x, homeY: slot.y,
+        targetX: slot.x,
+        targetY: slot.y,
+        x: -30 - Math.random() * 120,
+        y: slot.y,
+        frame: Math.floor(Math.random() * 8),
+        state: 'walk',
+        facing: 1,
+        frameTimer: 0,
+        // Wandering
+        wanderTimer: 3000 + Math.random() * 5000,
+        isWandering: false,
+        // Speech bubble
+        bubbleTimer: 2000 + Math.random() * 8000,
+        bubbleVisible: false,
+        bubbleAlpha: 0,
+        // Idle variety
+        idleAction: 'stand', // stand, lookAround, turnBack
+        idleActionTimer: 2000 + Math.random() * 4000
+      });
+    }
+  }
+  return placed;
+}
+
+// ─────────────────────────────────────────────
+//  DRAW SURGEON SPRITE
+// ─────────────────────────────────────────────
+function drawSurgeon(x, y, hue, frame, state, facing, isDark) {
+  var s = PX;
+  var skin = '#FFDAB9';
+  var skinShadow = '#E8967A';
+  var coat = '#ffffff';
+  var coatShadow = '#e2e8f0';
+  var capColor = 'hsl(' + hue + ', 60%, 38%)';
+  var scrubColor = 'hsl(' + hue + ', 65%, 45%)';
+  var eyes = '#333';
+  var shoes = '#444';
+  var pants = '#4b5563';
+  var f = facing;
+
+  var legOff = (state === 'walk') ? Math.sin(frame * Math.PI * 0.5) * 1.5 * s : 0;
+  var armAnim = (state === 'work') ? Math.sin(frame * Math.PI * 0.5) * s : 0;
+  var breathe = (state === 'idle') ? Math.sin(frame * 0.8) * 0.3 * s : 0;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 11.5 * s, 5 * s, 1.5 * s, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Shoes
+  ctx.fillStyle = shoes;
+  ctx.fillRect(x - 3 * s, y + 10 * s + legOff, 3 * s, s);
+  ctx.fillRect(x + 1 * s, y + 10 * s - legOff, 3 * s, s);
+
+  // Legs
+  ctx.fillStyle = pants;
+  ctx.fillRect(x - 2 * s, y + 8 * s + legOff, 2 * s, 2 * s);
+  ctx.fillRect(x + 1 * s, y + 8 * s - legOff, 2 * s, 2 * s);
+
+  // Body (coat)
+  ctx.fillStyle = coat;
+  ctx.fillRect(x - 3 * s, y + 2 * s + breathe, 8 * s, 6 * s);
+  ctx.fillStyle = coatShadow;
+  ctx.fillRect(x + (f > 0 ? 4 : -3) * s, y + 3 * s + breathe, s, 4 * s);
+  // Buttons
+  ctx.fillStyle = '#cbd5e1';
+  ctx.fillRect(x + 0.5 * s, y + 4 * s + breathe, s, s);
+  ctx.fillRect(x + 0.5 * s, y + 6 * s + breathe, s, s);
+
+  // Collar/Scrubs
+  ctx.fillStyle = scrubColor;
+  ctx.fillRect(x - 2 * s, y + 1.5 * s + breathe, 6 * s, 2 * s);
+
+  // Arms
+  ctx.fillStyle = coat;
+  ctx.fillRect(x - 4 * s, y + 3 * s + breathe + armAnim, 2 * s, 4 * s);
+  ctx.fillRect(x + 4 * s, y + 3 * s + breathe - armAnim, 2 * s, 4 * s);
+  ctx.fillStyle = skin;
+  ctx.fillRect(x - 4 * s, y + 7 * s + breathe + armAnim, 2 * s, s);
+  ctx.fillRect(x + 4 * s, y + 7 * s + breathe - armAnim, 2 * s, s);
+
+  // Stethoscope (work state)
+  if (state === 'work') {
+    ctx.fillStyle = '#3b82f6';
+    ctx.fillRect(x - s, y + 2 * s + breathe, s, 4 * s);
+    ctx.fillRect(x - s, y + 5 * s + breathe, 3 * s, s);
+    ctx.fillRect(x - 2 * s, y + s + breathe, s, s);
+    ctx.fillRect(x, y + s + breathe, s, s);
+  }
+
+  // Head
+  ctx.fillStyle = skin;
+  ctx.fillRect(x - 2 * s, y - 3 * s, 6 * s, 4 * s);
+  ctx.fillStyle = skinShadow;
+  ctx.fillRect(x + (f > 0 ? 3 : -2) * s, y - 2 * s, s, 2 * s);
+
+  // Surgical cap
+  ctx.fillStyle = capColor;
+  ctx.fillRect(x - 1 * s, y - 5 * s, 4 * s, s);
+  ctx.fillRect(x - 2 * s, y - 4 * s, 6 * s, s);
+  ctx.fillStyle = 'hsl(' + hue + ', 50%, 28%)';
+  ctx.fillRect(x - 2 * s, y - 3 * s, 6 * s, s);
+
+  // Eyes
+  ctx.fillStyle = eyes;
+  var blink = frame % 10 === 0;
+  if (!blink) {
+    var ex = f > 0 ? 0 : -1;
+    ctx.fillRect(x + ex * s, y - 2 * s, s, s);
+    ctx.fillRect(x + (ex + 3) * s, y - 2 * s, s, s);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x + (ex + (f > 0 ? 0 : 1)) * s, y - 2 * s, 0.5 * s, 0.5 * s);
+  } else {
+    ctx.fillRect(x - s, y - 1.5 * s, 4 * s, 0.5 * s);
+  }
+
+  // Mouth
+  ctx.fillStyle = '#E8967A';
+  ctx.fillRect(x, y - 0.5 * s, 2 * s, 0.5 * s);
+
+  // Activity badge
+  ctx.fillStyle = scrubColor;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(x + 2 * s, y + 3 * s + breathe, 2 * s, 2 * s);
+  ctx.globalAlpha = 1;
+}
+
+// ─────────────────────────────────────────────
+//  NAME TAG
+// ─────────────────────────────────────────────
+function drawNameTag(x, y, name) {
+  var lastName = name.split(' ').pop();
+  ctx.font = 'bold 10px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  var tw = ctx.measureText(lastName).width;
+  var tagY = y - 7 * PX;
+  var rx = x - tw / 2 - 6, ry = tagY - 11, rw = tw + 12, rh = 15;
+  // Pill background
+  ctx.beginPath();
+  ctx.moveTo(rx + 4, ry); ctx.lineTo(rx + rw - 4, ry);
+  ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + 4);
+  ctx.lineTo(rx + rw, ry + rh - 4);
+  ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - 4, ry + rh);
+  ctx.lineTo(rx + 4, ry + rh);
+  ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - 4);
+  ctx.lineTo(rx, ry + 4);
+  ctx.quadraticCurveTo(rx, ry, rx + 4, ry);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  // Text
+  ctx.fillStyle = '#1e293b';
+  ctx.fillText(lastName, x, tagY);
+}
+
+// ─────────────────────────────────────────────
+//  SPEECH BUBBLE
+// ─────────────────────────────────────────────
+function drawBubble(x, y, text, emoji, alpha) {
+  if (alpha <= 0) return;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  var fullText = emoji + ' ' + text;
+  ctx.font = '10px Inter, sans-serif';
+  var tw = ctx.measureText(fullText).width;
+  var bw = tw + 16, bh = 20;
+  var bx = x - bw / 2, by = y - 14 * PX;
+
+  // Bubble body
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.beginPath();
+  ctx.moveTo(bx + 6, by); ctx.lineTo(bx + bw - 6, by);
+  ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + 6);
+  ctx.lineTo(bx + bw, by + bh - 6);
+  ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - 6, by + bh);
+  ctx.lineTo(bx + 6, by + bh);
+  ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - 6);
+  ctx.lineTo(bx, by + 6);
+  ctx.quadraticCurveTo(bx, by, bx + 6, by);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Tail
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.beginPath();
+  ctx.moveTo(x - 4, by + bh);
+  ctx.lineTo(x, by + bh + 6);
+  ctx.lineTo(x + 4, by + bh);
+  ctx.closePath();
+  ctx.fill();
+
+  // Text
+  ctx.fillStyle = '#1e293b';
+  ctx.textAlign = 'center';
+  ctx.fillText(fullText, x, by + 14);
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────
+//  SELECTION GLOW
+// ─────────────────────────────────────────────
+function drawGlow(x, y, hue, intensity) {
+  ctx.save();
+  ctx.globalAlpha = intensity * 0.4;
+  ctx.fillStyle = 'hsl(' + hue + ', 80%, 60%)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 2 * PX, 10 * PX, 14 * PX, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────
+//  RENDER ALL
+// ─────────────────────────────────────────────
+function renderAll() {
+  ctx.clearRect(0, 0, CW, CH);
+
+  // Draw background image
+  if (bgLoaded) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(bgImage, 0, 0, CW, CH);
+  } else {
+    // Fallback while loading
+    ctx.fillStyle = '#87ceeb';
+    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillStyle = '#555';
+    ctx.font = 'bold 16px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Cargando imagen del hospital...', CW / 2, CH / 2);
+  }
+
+  // Dark mode overlay
+  if (document.documentElement.getAttribute('data-theme') === 'dark') {
+    ctx.fillStyle = 'rgba(10, 15, 30, 0.55)';
+    ctx.fillRect(0, 0, CW, CH);
+  }
+
+  // Draw sprites
+  for (var i = 0; i < sprites.length; i++) {
+    var sp = sprites[i];
+    // Hover/selection glow
+    if (sp === selectedSprite) {
+      drawGlow(sp.x, sp.y, sp.hue, 0.8);
+    } else if (sp === hoveredSprite) {
+      drawGlow(sp.x, sp.y, sp.hue, 0.4);
+    }
+    drawSurgeon(sp.x, sp.y, sp.hue, Math.floor(sp.frame), sp.state, sp.facing);
+    drawNameTag(sp.x, sp.y, sp.name);
+    // Speech bubble
+    if (sp.bubbleVisible && sp.bubbleAlpha > 0) {
+      drawBubble(sp.x, sp.y, BUBBLE_TEXTS[sp.activity] || '', BUBBLE_EMOJIS[sp.activity] || '', sp.bubbleAlpha);
+    }
+  }
+
+  // Calibration overlay
+  if (calibrationMode) {
+    // Draw crosshairs at stored clicks
+    for (var ci = 0; ci < calibrationClicks.length; ci++) {
+      var cc = calibrationClicks[ci];
+      ctx.save();
+      ctx.strokeStyle = '#ff0000';
+      ctx.lineWidth = 1;
+      // Horizontal line across full width
+      ctx.beginPath(); ctx.moveTo(0, cc.y); ctx.lineTo(CW, cc.y); ctx.stroke();
+      // Vertical short line
+      ctx.beginPath(); ctx.moveTo(cc.x, cc.y - 15); ctx.lineTo(cc.x, cc.y + 15); ctx.stroke();
+      // Label
+      ctx.fillStyle = '#ff0000';
+      ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('(' + cc.x + ', ' + cc.y + ')  #' + (ci + 1), cc.x + 8, cc.y - 4);
+      ctx.restore();
+    }
+    // Draw current FLOOR_GROUND lines for reference
+    var floorLabels = ['Urgencias Y=' + FLOOR_GROUND[0], 'Consultas Y=' + FLOOR_GROUND[1], 'Quirofanos Y=' + FLOOR_GROUND[2]];
+    var floorColors = ['#ff6b6b', '#51cf66', '#339af0'];
+    for (var fi = 0; fi < 3; fi++) {
+      ctx.save();
+      ctx.strokeStyle = floorColors[fi];
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(0, FLOOR_GROUND[fi]); ctx.lineTo(CW, FLOOR_GROUND[fi]); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = floorColors[fi];
+      ctx.font = 'bold 11px Inter, sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(floorLabels[fi], CW - 10, FLOOR_GROUND[fi] - 6);
+      ctx.restore();
+    }
+    // Draw SLOT_LEFT and SLOT_RIGHT vertical lines
+    ctx.save();
+    ctx.strokeStyle = '#ffd43b';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(SLOT_LEFT, 0); ctx.lineTo(SLOT_LEFT, CH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(SLOT_RIGHT, 0); ctx.lineTo(SLOT_RIGHT, CH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffd43b';
+    ctx.font = 'bold 11px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('LEFT=' + SLOT_LEFT, SLOT_LEFT + 4, 20);
+    ctx.textAlign = 'right';
+    ctx.fillText('RIGHT=' + SLOT_RIGHT, SLOT_RIGHT - 4, 20);
+    ctx.restore();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  CALIBRATION MODE
+// ─────────────────────────────────────────────
+var calibrationMode = false;
+var calibrationClicks = [];
+
+canvas.addEventListener('click', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  var scaleX = CW / rect.width;
+  var scaleY = CH / rect.height;
+  var cx = Math.round((e.clientX - rect.left) * scaleX);
+  var cy = Math.round((e.clientY - rect.top) * scaleY);
+
+  if (calibrationMode) {
+    calibrationClicks.push({ x: cx, y: cy });
+    var log = document.getElementById('calib-log');
+    log.innerHTML += '<div>#' + calibrationClicks.length + ': <b>x=' + cx + ', y=' + cy + '</b></div>';
+    log.scrollTop = log.scrollHeight;
+    renderAll();
+    return;
+  }
+
+  // Click to select/deselect surgeon
+  var hit = null;
+  for (var i = 0; i < sprites.length; i++) {
+    var sp = sprites[i];
+    if (Math.abs(cx - sp.x) < 22 && Math.abs(cy - sp.y) < 32) { hit = sp; break; }
+  }
+  if (hit && selectedSprite === hit) {
+    selectedSprite = null;
+    updateSelectedPanel(null);
+  } else if (hit) {
+    selectedSprite = hit;
+    // Make selected surgeon show bubble
+    hit.bubbleVisible = true;
+    hit.bubbleAlpha = 1;
+    hit.bubbleTimer = 4000;
+    updateSelectedPanel(hit);
+  } else {
+    selectedSprite = null;
+    updateSelectedPanel(null);
+  }
+});
+
+function toggleCalibration() {
+  calibrationMode = !calibrationMode;
+  var btn = document.getElementById('btn-calibrate');
+  if (calibrationMode) {
+    btn.textContent = 'Salir calibracion';
+    btn.style.background = '#dc2626';
+    calibrationClicks = [];
+  } else {
+    btn.textContent = 'Calibrar posiciones';
+    btn.style.background = '';
+    calibrationClicks = [];
+  }
+  renderAll();
+}
+
+// ─────────────────────────────────────────────
+//  ANIMATION LOOP
+// ─────────────────────────────────────────────
+function gameLoop(timestamp) {
+  var dt = timestamp - lastTime;
+  lastTime = timestamp;
+  if (dt > 100) { requestAnimationFrame(gameLoop); return; }
+
+  for (var i = 0; i < sprites.length; i++) {
+    var sp = sprites[i];
+    sp.frameTimer += dt;
+
+    // Speech bubble timer
+    sp.bubbleTimer -= dt;
+    if (sp.bubbleTimer <= 0) {
+      if (!sp.bubbleVisible) {
+        sp.bubbleVisible = true;
+        sp.bubbleAlpha = 0;
+        sp.bubbleTimer = 3000 + Math.random() * 2000; // show duration
+      } else {
+        sp.bubbleVisible = false;
+        sp.bubbleAlpha = 0;
+        sp.bubbleTimer = 5000 + Math.random() * 10000; // next bubble delay
+      }
+    }
+    // Bubble fade in/out
+    if (sp.bubbleVisible && sp.bubbleAlpha < 1) {
+      sp.bubbleAlpha = Math.min(1, sp.bubbleAlpha + dt / 300);
+    }
+    if (!sp.bubbleVisible && sp.bubbleAlpha > 0) {
+      sp.bubbleAlpha = Math.max(0, sp.bubbleAlpha - dt / 200);
+    }
+
+    if (sp.state === 'walk') {
+      var speed = 1.8;
+      var dx = sp.targetX - sp.x;
+      var dy = sp.targetY - sp.y;
+      var dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 3) {
+        sp.x = sp.targetX; sp.y = sp.targetY;
+        if (sp.isWandering) {
+          // Returned from wandering — go back to normal
+          sp.isWandering = false;
+          sp.state = FLOOR_MAP[sp.activity] === 2 ? 'work' : 'idle';
+          sp.wanderTimer = 4000 + Math.random() * 8000;
+        } else {
+          sp.state = FLOOR_MAP[sp.activity] === 2 ? 'work' : 'idle';
+        }
+        sp.frame = 0; sp.frameTimer = 0;
+      } else {
+        sp.x += (dx / dist) * speed * (dt / 16);
+        sp.y += (dy / dist) * speed * (dt / 16);
+        sp.facing = dx > 0 ? 1 : -1;
+        if (sp.frameTimer > 100) { sp.frame = (sp.frame + 1) % 4; sp.frameTimer = 0; }
+      }
+    } else {
+      var interval = sp.state === 'work' ? 300 : 400;
+      if (sp.frameTimer > interval) { sp.frame = (sp.frame + 1) % 8; sp.frameTimer = 0; }
+
+      // Idle variety — random facing changes
+      sp.idleActionTimer -= dt;
+      if (sp.idleActionTimer <= 0 && sp.state === 'idle') {
+        var rand = Math.random();
+        if (rand < 0.3) {
+          sp.facing = sp.facing * -1; // turn around
+        }
+        sp.idleActionTimer = 2000 + Math.random() * 4000;
+      }
+
+      // Wandering — occasionally walk to a nearby position and back
+      sp.wanderTimer -= dt;
+      if (sp.wanderTimer <= 0 && !sp.isWandering && sp.state !== 'walk') {
+        sp.isWandering = true;
+        var wanderDist = 20 + Math.random() * 40;
+        var wanderDir = Math.random() < 0.5 ? -1 : 1;
+        sp.targetX = sp.homeX + wanderDist * wanderDir;
+        sp.targetY = sp.homeY;
+        sp.state = 'walk';
+        sp.frame = 0; sp.frameTimer = 0;
+        sp.wanderTimer = 1500 + Math.random() * 2000; // time before returning
+      }
+      // Return from wander
+      if (sp.isWandering && sp.state !== 'walk') {
+        sp.wanderTimer -= dt;
+        if (sp.wanderTimer <= 0) {
+          sp.targetX = sp.homeX;
+          sp.targetY = sp.homeY;
+          sp.state = 'walk';
+          sp.frame = 0; sp.frameTimer = 0;
+        }
+      }
+    }
+  }
+
+  renderAll();
+  requestAnimationFrame(gameLoop);
+}
+
+// ─────────────────────────────────────────────
+//  SELECT DAY
+// ─────────────────────────────────────────────
+function selectDay(day) {
+  if (!day) return;
+  selectedDay = day;
+  var activities = getDayActivities(day, currentMonth, currentYear);
+  sprites = assignSlots(activities);
+
+  var floorCounts = [0, 0, 0];
+  for (var i = 0; i < activities.length; i++) {
+    var f = FLOOR_MAP[activities[i].activity];
+    if (f !== undefined) floorCounts[f]++;
+  }
+
+  var dow = new Date(currentYear, currentMonth, day).getDay();
+  var dowIdx = dow === 0 ? 6 : dow - 1;
+  document.getElementById('day-title').textContent =
+    DAY_NAMES_FULL[dowIdx] + ' ' + day + ' ' + MONTH_NAMES[currentMonth];
+  document.getElementById('day-count').textContent = activities.length;
+
+  var fcEl = document.getElementById('floor-counts');
+  fcEl.textContent = '';
+  for (var fi = 2; fi >= 0; fi--) {
+    var row = document.createElement('div');
+    row.className = 'floor-count-row';
+    var dot = document.createElement('div');
+    dot.className = 'floor-dot';
+    dot.style.background = FLOOR_COLORS[fi];
+    row.appendChild(dot);
+    row.appendChild(document.createTextNode(FLOOR_NAMES[fi] + ': ' + floorCounts[fi]));
+    fcEl.appendChild(row);
+  }
+
+  var prev = document.querySelectorAll('.mini-cal-day.selected');
+  for (var i = 0; i < prev.length; i++) prev[i].classList.remove('selected');
+  var dayEl = document.querySelector('.mini-cal-day[data-day="' + day + '"]');
+  if (dayEl) dayEl.classList.add('selected');
+}
+
+// ─────────────────────────────────────────────
+//  MINI CALENDAR
+// ─────────────────────────────────────────────
+function renderMiniCal() {
+  var grid = document.getElementById('mini-cal');
+  grid.textContent = '';
+  document.getElementById('cal-month-label').textContent =
+    MONTH_NAMES[currentMonth] + ' ' + currentYear;
+
+  for (var di = 0; di < DAY_NAMES_SHORT.length; di++) {
+    var hdr = document.createElement('div');
+    hdr.className = 'mini-cal-hdr';
+    hdr.textContent = DAY_NAMES_SHORT[di];
+    grid.appendChild(hdr);
+  }
+
+  var firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  var startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  var daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  var today = new Date();
+
+  var daysWithData = {};
+  if (parsedData) {
+    for (var sid in parsedData) {
+      for (var i = 0; i < parsedData[sid].length; i++) {
+        var e = parsedData[sid][i];
+        if (e.month === currentMonth && e.year === currentYear) daysWithData[e.day] = true;
+      }
+    }
+  }
+
+  for (var i = 0; i < startOffset; i++) {
+    var empty = document.createElement('div');
+    empty.className = 'mini-cal-day empty';
+    grid.appendChild(empty);
+  }
+
+  for (var d = 1; d <= daysInMonth; d++) {
+    var cell = document.createElement('div');
+    cell.className = 'mini-cal-day';
+    cell.textContent = d;
+    cell.setAttribute('data-day', d);
+    var dow = new Date(currentYear, currentMonth, d).getDay();
+    if (dow === 0 || dow === 6) cell.classList.add('weekend');
+    if (d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) cell.classList.add('today');
+    if (!daysWithData[d]) cell.classList.add('no-data');
+    else cell.addEventListener('click', (function(dd) { return function() { selectDay(dd); }; })(d));
+    if (d === selectedDay) cell.classList.add('selected');
+    grid.appendChild(cell);
+  }
+}
+
+function navigateMonth(delta) {
+  var idx = -1;
+  for (var i = 0; i < availableMonths.length; i++) {
+    if (availableMonths[i].month === currentMonth && availableMonths[i].year === currentYear) { idx = i; break; }
+  }
+  var newIdx = idx + delta;
+  if (newIdx >= 0 && newIdx < availableMonths.length) {
+    currentMonth = availableMonths[newIdx].month;
+    currentYear = availableMonths[newIdx].year;
+    selectedDay = null; sprites = [];
+    renderMiniCal(); renderAll();
+    document.getElementById('day-title').textContent = '\u2014';
+    document.getElementById('day-count').textContent = '0';
+    document.getElementById('floor-counts').textContent = '';
+  }
+}
+
+// ─────────────────────────────────────────────
+//  LEGEND
+// ─────────────────────────────────────────────
+function renderLegend() {
+  var legend = document.getElementById('legend');
+  legend.textContent = '';
+  var keys = Object.keys(ACTIVITY_LABELS);
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var item = document.createElement('div');
+    item.className = 'legend-item';
+    var dot = document.createElement('div');
+    dot.className = 'legend-dot';
+    dot.style.background = ACTIVITY_COLORS[key];
+    item.appendChild(dot);
+    item.appendChild(document.createTextNode(ACTIVITY_LABELS[key]));
+    legend.appendChild(item);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  TOOLTIP
+// ─────────────────────────────────────────────
+canvas.addEventListener('mousemove', function(e) {
+  var rect = canvas.getBoundingClientRect();
+  var scaleX = CW / rect.width;
+  var scaleY = CH / rect.height;
+  var mx = (e.clientX - rect.left) * scaleX;
+  var my = (e.clientY - rect.top) * scaleY;
+
+  var hit = null;
+  for (var i = 0; i < sprites.length; i++) {
+    var sp = sprites[i];
+    if (Math.abs(mx - sp.x) < 22 && Math.abs(my - sp.y) < 32) { hit = sp; break; }
+  }
+
+  hoveredSprite = hit;
+
+  if (hit) {
+    var unitStr = hit.unit ? (Array.isArray(hit.unit) ? hit.unit.join(', ') : hit.unit) : '';
+    var ttName = document.createElement('div'); ttName.className = 'tt-name'; ttName.textContent = hit.name;
+    var ttContent = document.createDocumentFragment();
+    ttContent.appendChild(ttName);
+    if (unitStr) {
+      var ttUnit = document.createElement('div'); ttUnit.className = 'tt-unit'; ttUnit.textContent = unitStr;
+      ttContent.appendChild(ttUnit);
+    }
+    var ttAct = document.createElement('div'); ttAct.className = 'tt-act';
+    ttAct.style.color = ACTIVITY_COLORS[hit.activity];
+    ttAct.textContent = ACTIVITY_LABELS[hit.activity];
+    ttContent.appendChild(ttAct);
+    if (hit.companions && hit.companions.length > 0) {
+      var compNames = [];
+      for (var ci = 0; ci < hit.companions.length; ci++) {
+        var cid = hit.companions[ci];
+        compNames.push(SURGEONS[cid] ? SURGEONS[cid].split(' ').pop() : cid);
+      }
+      var ttComp = document.createElement('div'); ttComp.className = 'tt-comp';
+      ttComp.textContent = '\u21B3 ' + compNames.join(', ');
+      ttContent.appendChild(ttComp);
+    }
+    tooltipEl.textContent = '';
+    tooltipEl.appendChild(ttContent);
+    tooltipEl.style.left = (e.clientX + 14) + 'px';
+    tooltipEl.style.top = (e.clientY - 10) + 'px';
+    tooltipEl.classList.add('visible');
+    canvas.style.cursor = 'pointer';
+  } else {
+    tooltipEl.classList.remove('visible');
+    canvas.style.cursor = 'default';
+  }
+});
+
+canvas.addEventListener('mouseleave', function() {
+  hoveredSprite = null;
+  tooltipEl.classList.remove('visible');
+  canvas.style.cursor = 'default';
+});
+
+// ─────────────────────────────────────────────
+//  SELECTED PANEL
+// ─────────────────────────────────────────────
+function updateSelectedPanel(sp) {
+  var panel = document.getElementById('selected-panel');
+  var info = document.getElementById('selected-info');
+  if (!sp) {
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = '';
+  panel.style.animation = 'none';
+  panel.offsetHeight;
+  panel.style.animation = 'fadeInUp 0.3s ease-out';
+
+  var unitStr = sp.unit ? (Array.isArray(sp.unit) ? sp.unit.join(', ') : sp.unit) : '';
+  var actColor = ACTIVITY_COLORS[sp.activity] || 'var(--text)';
+  var floorName = FLOOR_NAMES[sp.floor] || '';
+
+  var html = '<div style="font-size:14px;font-weight:700;color:var(--text)">' + sp.name + '</div>';
+  if (unitStr) html += '<div style="font-size:11px;color:var(--text-muted)">' + unitStr + '</div>';
+  html += '<div style="margin-top:4px">';
+  html += '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:white;background:' + actColor + '">' + (ACTIVITY_LABELS[sp.activity] || sp.activity) + '</span>';
+  html += '</div>';
+  html += '<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Planta: ' + floorName + '</div>';
+
+  if (sp.companions && sp.companions.length > 0) {
+    var compNames = [];
+    for (var ci = 0; ci < sp.companions.length; ci++) {
+      var cid = sp.companions[ci];
+      compNames.push(SURGEONS[cid] ? SURGEONS[cid].split(' ').pop() : cid);
+    }
+    html += '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">Con: ' + compNames.join(', ') + '</div>';
+  }
+
+  info.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+initTheme();
+
+if (loadData()) {
+  document.getElementById('main-content').style.display = '';
+
+  var now = new Date();
+  var todayInData = availableMonths.some(function(m) { return m.month === now.getMonth() && m.year === now.getFullYear(); });
+  if (todayInData) { currentMonth = now.getMonth(); currentYear = now.getFullYear(); }
+  else if (availableMonths.length > 0) { currentMonth = availableMonths[0].month; currentYear = availableMonths[0].year; }
+
+  renderMiniCal();
+  renderLegend();
+  renderAll();
+
+  if (todayInData) selectDay(now.getDate());
+
+  document.getElementById('cal-prev').addEventListener('click', function() { navigateMonth(-1); });
+  document.getElementById('cal-next').addEventListener('click', function() { navigateMonth(1); });
+
+  requestAnimationFrame(gameLoop);
+} else {
+  document.getElementById('no-data').style.display = '';
+}
+
+if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  var extLinks = document.querySelectorAll('a[href^="https://jmacot.github.io"]');
+  for (var eli = 0; eli < extLinks.length; eli++) {
+    extLinks[eli].removeAttribute('href');
+    extLinks[eli].style.opacity = '0.4';
+    extLinks[eli].style.pointerEvents = 'none';
+  }
+}
+</script>
+</body>
+</html>
