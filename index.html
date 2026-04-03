@@ -481,11 +481,12 @@
     .export-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .export-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
     .export-btn {
-      display: inline-flex; align-items: center; gap: 4px;
+      display: inline-flex; align-items: center; gap: 5px;
       font-size: 11px; font-weight: 600;
       border-radius: 6px; padding: 5px 12px; cursor: pointer;
       transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
     }
+    .export-btn svg { flex-shrink: 0; }
     .export-btn-ics, .export-btn-pdf {
       color: var(--text-muted); background: var(--surface);
       border: 1.5px solid var(--border);
@@ -497,15 +498,17 @@
     .export-btn-hospital {
       color: var(--red, #dc2626); background: var(--red-light, #fee2e2);
       border: 1.5px solid var(--red, #dc2626);
+      padding: 5px 10px;
     }
     .export-btn-hospital:hover {
-      background: var(--red, #dc2626); color: white;
+      background: var(--red, #dc2626);
     }
     .export-btn-hospital:hover .live-dot { background: white; box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
     .live-dot {
-      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      display: inline-block; width: 10px; height: 10px; border-radius: 50%;
       background: var(--red, #dc2626);
       animation: liveBlink 1.4s ease-in-out infinite;
+      transition: transform 0.2s;
     }
     @keyframes liveBlink {
       0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
@@ -1479,9 +1482,9 @@
     </select>
     <div class="export-group" id="export-group" style="display:none">
       <span class="export-label">Exportar:</span>
-      <button class="export-btn export-btn-ics" onclick="toggleCalPanel()" title="Exportar a calendario">&#128197; Calendario</button>
-      <button class="export-btn export-btn-pdf" onclick="exportPDF()" title="Exportar a PDF">&#128196; PDF</button>
-      <a class="export-btn export-btn-hospital" href="hospital-topdown.html" title="HSJD en directo" style="text-decoration:none"><span class="live-dot"></span> HSJD en directo</a>
+      <button class="export-btn export-btn-ics" onclick="toggleCalPanel()" title="Exportar a calendario"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="m8 3v4"/><path d="m16 3v4"/><path d="m4 11h16"/></svg> Calendario</button>
+      <button class="export-btn export-btn-pdf" onclick="exportPDF()" title="Exportar a PDF"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> PDF</button>
+      <a class="export-btn export-btn-hospital" href="hospital-topdown.html" title="HSJD en directo" style="text-decoration:none" aria-label="HSJD en directo"><span class="live-dot"></span></a>
     </div>
     <div class="cal-panel" id="cal-panel" style="display:none">
       <div class="cal-panel-header">
