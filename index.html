@@ -128,6 +128,16 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    .skip-link {
+      position: absolute; top: -100px; left: 16px;
+      background: var(--ink, var(--text, #0f172a)); color: var(--bg, #fff);
+      padding: 10px 20px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; z-index: 1000;
+      text-decoration: none; transition: top 0.2s;
+    }
+    .skip-link:focus { top: 16px; }
+
+
     body {
       font-family: 'Inter', Arial, sans-serif; background: var(--bg);
       color: var(--text); min-height: 100vh; padding: 30px 20px;
@@ -1271,11 +1281,13 @@
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
       }
+      .hero-glow { animation: none; }
     }
   </style>
 </head>
 <body>
-<div class="app-container">
+  <a href="#main" class="skip-link">Saltar al contenido</a>
+<div class="app-container" id="main">
   <a class="back-home" id="back-home-link" href="https://jmacot.github.io/" title="Volver al inicio">&larr; Inicio</a>
 
   <div class="app-header">
