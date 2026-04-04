@@ -5874,10 +5874,12 @@ const fmtEur = n => n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximu
 function pdfLandscapeHeader(pdf, surgeonName, monthName, year, units, sid) {
   const pageW = 297;
   // Dark blue header block
-  pdf.setFillColor(26, 58, 92);
+  pdf.setFillColor(30, 41, 59);
   pdf.rect(0, 0, pageW, 14, 'F');
-  pdf.setFillColor(35, 78, 122);
-  pdf.rect(0, 14, pageW, 1.5, 'F');
+  pdf.setFillColor(56, 189, 248);
+  pdf.rect(0, 14, pageW, 0.8, 'F');
+  pdf.setFillColor(167, 139, 250);
+  pdf.rect(0, 14.8, pageW, 0.7, 'F');
   // Logo
   try { pdf.addImage(HSJD_LOGO, 'JPEG', 8, 2, 10, 10); } catch(e) {}
   // Hospital name
@@ -5904,7 +5906,7 @@ function pdfLandscapeHeader(pdf, surgeonName, monthName, year, units, sid) {
 function pdfLandscapeFooter(pdf) {
   const pageW = 297, pageH = 210;
   const y = pageH - 7;
-  pdf.setDrawColor(26, 58, 92); pdf.setLineWidth(0.3);
+  pdf.setDrawColor(51, 65, 85); pdf.setLineWidth(0.3);
   pdf.line(10, y, pageW - 10, y);
   pdf.setFontSize(6.5); pdf.setTextColor(120);
   pdf.setFont('helvetica', 'normal');
@@ -5921,7 +5923,7 @@ function pdfLandscapeCalendar(pdf, entries, mInfo, startY) {
   let y = startY;
 
   // Day headers
-  pdf.setFillColor(26, 58, 92);
+  pdf.setFillColor(30, 41, 59);
   pdf.rect(mx, y, calW, 7, 'F');
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7.5);
   pdf.setTextColor(255, 255, 255);
@@ -6045,15 +6047,15 @@ function pdfGuardSummaryCard(pdf, entries, mInfo, calStartY) {
   const cY = calStartY; // start position
 
   // Card shadow + background
-  pdf.setFillColor(240, 242, 245);
+  pdf.setFillColor(235, 238, 244);
   pdf.roundedRect(cX + 0.5, cY + 0.5, cW, cH, 4, 4, 'F');
   pdf.setFillColor(255, 255, 255);
   pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'F');
-  pdf.setDrawColor(26, 58, 92); pdf.setLineWidth(0.6);
+  pdf.setDrawColor(51, 65, 85); pdf.setLineWidth(0.4);
   pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'S');
 
   // Title bar
-  pdf.setFillColor(26, 58, 92);
+  pdf.setFillColor(30, 41, 59);
   pdf.roundedRect(cX, cY, cW, 9, 4, 4, 'F');
   pdf.rect(cX, cY + 5, cW, 4, 'F');
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8);
@@ -6131,15 +6133,15 @@ function pdfActivitySummaryCard(pdf, entries, startY) {
   const cY = startY;
 
   // Card shadow + background
-  pdf.setFillColor(240, 242, 245);
+  pdf.setFillColor(235, 238, 244);
   pdf.roundedRect(cX + 0.5, cY + 0.5, cW, cH, 4, 4, 'F');
   pdf.setFillColor(255, 255, 255);
   pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'F');
-  pdf.setDrawColor(26, 58, 92); pdf.setLineWidth(0.6);
+  pdf.setDrawColor(51, 65, 85); pdf.setLineWidth(0.4);
   pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'S');
 
   // Title bar
-  pdf.setFillColor(26, 58, 92);
+  pdf.setFillColor(30, 41, 59);
   pdf.roundedRect(cX, cY, cW, 9, 4, 4, 'F');
   pdf.rect(cX, cY + 5, cW, 4, 'F');
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8);
@@ -6207,15 +6209,15 @@ function pdfTurnsCard(pdf, entries, mInfo, startY) {
   const cY = startY;
 
   // Card shadow + background
-  pdf.setFillColor(240, 242, 245);
+  pdf.setFillColor(235, 238, 244);
   pdf.roundedRect(cX + 0.5, cY + 0.5, cW, cH, 4, 4, 'F');
   pdf.setFillColor(255, 255, 255);
   pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'F');
-  pdf.setDrawColor(26, 58, 92); pdf.setLineWidth(0.6);
+  pdf.setDrawColor(51, 65, 85); pdf.setLineWidth(0.4);
   pdf.roundedRect(cX, cY, cW, cH, 4, 4, 'S');
 
   // Title bar
-  pdf.setFillColor(26, 58, 92);
+  pdf.setFillColor(30, 41, 59);
   pdf.roundedRect(cX, cY, cW, 9, 4, 4, 'F');
   pdf.rect(cX, cY + 5, cW, 4, 'F');
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8);
@@ -6240,7 +6242,7 @@ function pdfTurnsCard(pdf, entries, mInfo, startY) {
 
   // Total
   pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7);
-  pdf.setTextColor(26, 58, 92);
+  pdf.setTextColor(30, 41, 59);
   pdf.text('Total', cX + 4, iy + 2);
   pdf.text(String(totalTurns), cX + cW - 6, iy + 2, { align: 'right' });
 
