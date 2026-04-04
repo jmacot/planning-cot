@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Planning">
-  <meta name="theme-color" id="meta-theme" content="#1a3a5c">
+  <meta name="theme-color" id="meta-theme" content="#0f2240">
   <meta name="description" content="Analizador de planning COT — Visualiza guardias, turnos, quirofanos y cargas de trabajo del servicio de traumatologia." />
   <!-- Open Graph -->
   <meta property="og:title" content="Planning COT" />
@@ -20,7 +20,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
   // SheetJS CDN fallback chain — corporate proxies may block some CDNs (ERR_CERT_AUTHORITY_INVALID)
@@ -66,17 +66,25 @@
   </script>
   <style>
     :root {
-      --bg: #e5eaf2; --surface: #ffffff; --surface2: #dbe2ec;
-      --border: #e2e8f0; --border-light: #e5e7eb;
-      --accent: #1a3a5c; --accent-light: #eef2f7; --accent-hover: #14304f;
-      --text: #222222; --text-muted: #555555; --text-light: #888888;
-      --green: #16a34a; --green-light: #dcfce7;
-      --amber: #c0540a; --amber-light: #fef3c7;
-      --red: #dc2626; --red-light: #fee2e2;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08);
-      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-      --radius-sm: 8px; --radius: 16px; --radius-lg: 24px;
+      --bg: #e8edf4;
+      --surface: rgba(255, 255, 255, 0.55);
+      --surface-solid: #ffffff;
+      --surface2: rgba(255, 255, 255, 0.35);
+      --border: rgba(255, 255, 255, 0.5);
+      --border-light: rgba(255, 255, 255, 0.6);
+      --accent: #0284c7; --accent-light: rgba(224, 242, 254, 0.6); --accent-hover: #0369a1;
+      --text: #1a1a2e; --text-muted: #555666; --text-light: #8890a4;
+      --sky: #0284c7; --sky-light: rgba(224, 242, 254, 0.6);
+      --violet: #7c3aed; --violet-light: rgba(237, 233, 254, 0.6);
+      --emerald: #10b981; --emerald-light: rgba(209, 250, 229, 0.6);
+      --green: #10b981; --green-light: rgba(209, 250, 229, 0.6);
+      --amber: #f59e0b; --amber-light: rgba(254, 243, 199, 0.6);
+      --red: #ef4444; --red-light: rgba(254, 226, 226, 0.6);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+      --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.08);
+      --radius-sm: 10px; --radius: 16px; --radius-lg: 24px;
+      --glass-blur: 16px;
       --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
       --c-diferida: #64748b;
@@ -102,17 +110,23 @@
     }
 
     [data-theme="dark"] {
-      --bg: #111827; --surface: #1f2937; --surface2: #283244;
-      --border: #374151; --border-light: #4b5563;
+      --bg: #111827;
+      --surface: rgba(31, 41, 55, 0.6);
+      --surface-solid: #1f2937;
+      --surface2: rgba(40, 50, 68, 0.5);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-light: rgba(255, 255, 255, 0.1);
+      --accent: #38bdf8; --accent-light: rgba(2, 132, 199, 0.15); --accent-hover: #7dd3fc;
       --text: #f1f5f9; --text-muted: #a8b8cc; --text-light: #64748b;
-      --accent: #93c5fd; --accent-hover: #bae0ff;
-      --accent-light: #1e3a5f;
-      --green: #4ade80; --green-light: #14352a;
-      --amber: #fbbf24; --amber-light: #3b2a10;
-      --red: #f87171; --red-light: #3b1010;
+      --sky: #38bdf8; --sky-light: rgba(2, 132, 199, 0.15);
+      --violet: #a78bfa; --violet-light: rgba(124, 58, 237, 0.15);
+      --emerald: #6ee7b7; --emerald-light: rgba(16, 185, 129, 0.15);
+      --green: #6ee7b7; --green-light: rgba(16, 185, 129, 0.15);
+      --amber: #fbbf24; --amber-light: rgba(245, 158, 11, 0.15);
+      --red: #f87171; --red-light: rgba(239, 68, 68, 0.15);
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.15);
-      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.2);
-      --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.3);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.3);
 
       --c-qui-m: #38bdf8;
       --c-diferida-light: #334155;
@@ -139,7 +153,7 @@
 
 
     body {
-      font-family: 'Inter', Arial, sans-serif; background: var(--bg);
+      font-family: 'Source Sans 3', Arial, sans-serif; background: var(--bg);
       color: var(--text); min-height: 100vh; padding: 30px 20px;
       -webkit-tap-highlight-color: transparent;
     }
@@ -150,33 +164,34 @@
     /* ── MESH GRADIENT ANIMADO ── */
     .mesh-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: var(--bg); }
     .mesh-orb { position: absolute; border-radius: 50%; filter: blur(80px); will-change: transform; }
-    .mesh-orb-1 { width: 50vw; height: 50vw; top: 10%; left: -10%; background: rgba(14,165,233,0.25); animation: orb1 18s ease-in-out infinite; }
-    .mesh-orb-2 { width: 45vw; height: 45vw; top: 40%; right: -15%; background: rgba(139,92,246,0.20); animation: orb2 22s ease-in-out infinite; }
-    .mesh-orb-3 { width: 40vw; height: 40vw; bottom: -5%; left: 30%; background: rgba(13,148,136,0.18); animation: orb3 20s ease-in-out infinite; }
-    .mesh-orb-4 { width: 35vw; height: 35vw; top: 60%; left: 10%; background: rgba(236,72,153,0.12); animation: orb4 24s ease-in-out infinite; }
-    .mesh-orb-5 { width: 30vw; height: 30vw; top: 5%; right: 20%; background: rgba(245,158,11,0.12); animation: orb5 19s ease-in-out infinite; }
+    .mesh-orb-1 { width: 50vw; height: 50vw; top: 10%; left: -10%; background: rgba(2,132,199,0.22); animation: orb1 18s ease-in-out infinite; }
+    .mesh-orb-2 { width: 45vw; height: 45vw; top: 40%; right: -15%; background: rgba(124,58,237,0.18); animation: orb2 22s ease-in-out infinite; }
+    .mesh-orb-3 { width: 40vw; height: 40vw; bottom: -5%; left: 30%; background: rgba(16,185,129,0.15); animation: orb3 20s ease-in-out infinite; }
+    .mesh-orb-4 { width: 35vw; height: 35vw; top: 60%; left: 10%; background: rgba(245,158,11,0.10); animation: orb4 24s ease-in-out infinite; }
+    .mesh-orb-5 { width: 30vw; height: 30vw; top: 5%; right: 20%; background: rgba(239,68,68,0.08); animation: orb5 19s ease-in-out infinite; }
     @keyframes orb1 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(15vw,10vh) scale(1.1); } 66% { transform: translate(-5vw,20vh) scale(0.95); } }
     @keyframes orb2 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(-20vw,-10vh) scale(1.05); } 66% { transform: translate(5vw,15vh) scale(1.1); } }
     @keyframes orb3 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(10vw,-15vh) scale(1.08); } 66% { transform: translate(-15vw,-5vh) scale(0.92); } }
     @keyframes orb4 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20vw,-10vh) scale(1.15); } }
     @keyframes orb5 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-15vw,15vh) scale(1.1); } }
-    .mesh-dots { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(circle, var(--text-light, #888) 0.5px, transparent 0.5px); background-size: 32px 32px; opacity: 0.06; }
-    [data-theme="dark"] .mesh-orb-1 { background: rgba(14,165,233,0.12); }
-    [data-theme="dark"] .mesh-orb-2 { background: rgba(139,92,246,0.10); }
-    [data-theme="dark"] .mesh-orb-3 { background: rgba(13,148,136,0.08); }
-    [data-theme="dark"] .mesh-orb-4 { background: rgba(236,72,153,0.06); }
-    [data-theme="dark"] .mesh-orb-5 { background: rgba(245,158,11,0.06); }
-    [data-theme="dark"] .mesh-dots { opacity: 0.03; }
+    .mesh-dots { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-image: radial-gradient(circle, var(--text-light, #888) 0.5px, transparent 0.5px); background-size: 28px 28px; opacity: 0.05; }
+    [data-theme="dark"] .mesh-orb-1 { background: rgba(2,132,199,0.11); }
+    [data-theme="dark"] .mesh-orb-2 { background: rgba(124,58,237,0.09); }
+    [data-theme="dark"] .mesh-orb-3 { background: rgba(16,185,129,0.07); }
+    [data-theme="dark"] .mesh-orb-4 { background: rgba(245,158,11,0.05); }
+    [data-theme="dark"] .mesh-orb-5 { background: rgba(239,68,68,0.04); }
+    [data-theme="dark"] .mesh-dots { opacity: 0.02; }
 
     .app-container { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
 
     .back-home {
       position: fixed; top: 10px; left: 10px;
       display: inline-flex; align-items: center; gap: 4px;
-      font-family: 'SF Mono', 'Consolas', monospace; font-size: 11px; letter-spacing: 0.05em;
+      font-family: 'Source Code Pro', monospace; font-size: 11px; letter-spacing: 0.05em;
       color: var(--text-muted); text-decoration: none;
       padding: 6px 12px; border-radius: 999px;
       border: 1.5px solid var(--border); background: var(--surface);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
       transition: border-color 0.2s, color 0.2s; z-index: 100;
     }
@@ -186,15 +201,15 @@
     /* ── DOT GRID + GLOWS ── */
     .hero-dot-grid {
       position: absolute; inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
-      background-size: 28px 28px; z-index: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.8) 0.5px, transparent 0.5px);
+      background-size: 24px 24px; z-index: 0;
     }
     [data-theme="dark"] .hero-dot-grid {
-      background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-image: radial-gradient(circle, rgba(255,255,255,0.5) 0.5px, transparent 0.5px);
     }
-    .hero-glow { position: absolute; border-radius: 50%; filter: blur(80px); z-index: 0; animation: glowPulse 6s ease-in-out infinite; }
-    .hero-glow-1 { top: -80px; right: -30px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%); }
-    .hero-glow-2 { bottom: -60px; left: 15%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%); animation-delay: 3s; }
+    .hero-glow { position: absolute; border-radius: 50%; filter: blur(50px); z-index: 0; animation: glowPulse 6s ease-in-out infinite; }
+    .hero-glow-1 { top: -80px; right: -30px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(2,132,199,0.15) 0%, transparent 70%); }
+    .hero-glow-2 { bottom: -60px; left: 15%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(124,58,237,0.10) 0%, transparent 70%); animation-delay: 3s; }
     @keyframes glowPulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
 
     /* ── SKY TOGGLE ── */
@@ -222,25 +237,25 @@
     .app-header {
       text-align: center; margin-bottom: 28px; position: relative;
       background: linear-gradient(135deg, #0f2240 0%, #1a3a5c 50%, #234e77 100%);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       color: white; padding: 40px 32px 32px;
-      border-radius: var(--radius-lg); overflow: hidden;
+      border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
       box-shadow: 0 8px 32px rgba(15,34,64,0.25);
       animation: fadeInUp 0.6s ease-out;
     }
     .app-header::before {
-      content: ''; position: absolute; top: -80px; right: -30px;
-      width: 250px; height: 250px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%);
-      filter: blur(40px);
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px; background: linear-gradient(90deg, var(--sky, #0284c7), var(--violet, #7c3aed));
+      z-index: 1;
     }
     .app-header::after {
       content: ''; position: absolute; bottom: -60px; left: 15%;
       width: 200px; height: 200px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(139,92,246,0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(124,58,237,0.10) 0%, transparent 70%);
       filter: blur(40px);
     }
     .app-header h1 {
-      font-family: 'Lora', serif; color: white; position: relative;
+      font-family: 'Source Serif 4', serif; color: white; position: relative;
       font-size: clamp(1.3rem, 3vw, 1.7rem); font-weight: 700;
     }
     [data-theme="dark"] .app-header {
@@ -262,14 +277,14 @@
       to { opacity: 1; transform: scale(1); }
     }
     @keyframes focusPulse {
-      0% { box-shadow: 0 0 0 0 rgba(26,58,92,0.25); }
-      70% { box-shadow: 0 0 0 6px rgba(26,58,92,0); }
-      100% { box-shadow: 0 0 0 0 rgba(26,58,92,0); }
+      0% { box-shadow: 0 0 0 0 rgba(2,132,199,0.25); }
+      70% { box-shadow: 0 0 0 6px rgba(2,132,199,0); }
+      100% { box-shadow: 0 0 0 0 rgba(2,132,199,0); }
     }
     @keyframes focusPulseDark {
-      0% { box-shadow: 0 0 0 0 rgba(147,197,253,0.3); }
-      70% { box-shadow: 0 0 0 6px rgba(147,197,253,0); }
-      100% { box-shadow: 0 0 0 0 rgba(147,197,253,0); }
+      0% { box-shadow: 0 0 0 0 rgba(56,189,248,0.3); }
+      70% { box-shadow: 0 0 0 6px rgba(56,189,248,0); }
+      100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
     }
 
 
@@ -343,7 +358,7 @@
       100% { scale: 1; }
     }
     .upload-label {
-      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+      font-family: 'Source Sans 3', sans-serif; font-size: 14px; font-weight: 700;
       color: var(--text); letter-spacing: 0.01em; text-align: center; line-height: 1.5;
       margin: 2px auto 14px;
     }
@@ -368,7 +383,7 @@
       position: relative; display: none; flex-direction: column;
       align-items: center; justify-content: center;
       width: 140px; height: 140px;
-      font-family: 'Inter', sans-serif; font-size: 1.1em; font-weight: 300;
+      font-family: 'Source Sans 3', sans-serif; font-size: 1.1em; font-weight: 300;
       color: white; border-radius: 50%; background-color: transparent;
       user-select: none; margin: 0 auto 20px;
     }
@@ -427,7 +442,7 @@
       color: var(--accent);
     }
     .select-prompt-text {
-      font-family: 'Lora', serif; font-size: 1.1rem; font-weight: 700;
+      font-family: 'Source Serif 4', serif; font-size: 1.1rem; font-weight: 700;
       color: var(--text); margin-bottom: 6px;
     }
     .select-prompt-sub {
@@ -495,7 +510,7 @@
     }
     .controls select {
       border: 1.5px solid var(--border); border-radius: 8px;
-      padding: 10px 14px; font-size: 14px; font-family: 'Inter', Arial, sans-serif;
+      padding: 10px 14px; font-size: 14px; font-family: 'Source Sans 3', Arial, sans-serif;
       color: var(--text); background: var(--surface);
       transition: border-color 0.2s, box-shadow 0.2s; min-width: 200px; max-width: 320px;
     }
@@ -505,7 +520,7 @@
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 11px; font-weight: 600;
       border-radius: 6px; padding: 5px 12px; cursor: pointer;
-      transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+      transition: all 0.2s; font-family: 'Source Sans 3', Arial, sans-serif;
     }
     .export-btn svg { flex-shrink: 0; }
     .export-btn-ics, .export-btn-pdf {
@@ -549,7 +564,7 @@
       display: flex; align-items: center; justify-content: space-between;
     }
     .gcal-modal-header h3 {
-      font-family: 'Lora', serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0;
+      font-family: 'Source Serif 4', serif; font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0;
     }
     .gcal-modal-close {
       background: none; border: none; font-size: 20px; color: var(--text-muted);
@@ -607,7 +622,7 @@
       flex: 1; font-size: 12px; font-weight: 600; color: var(--text-muted);
       background: transparent; border: none; border-radius: 6px;
       padding: 6px 8px; cursor: pointer; transition: all 0.2s;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: 'Source Sans 3', Arial, sans-serif;
     }
     .cal-scope-btn.active {
       background: var(--surface); color: var(--text);
@@ -618,7 +633,7 @@
       display: flex; align-items: center; gap: 8px;
       width: 100%; padding: 10px 12px; border-radius: 8px;
       font-size: 13px; font-weight: 600; cursor: pointer;
-      transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+      transition: all 0.2s; font-family: 'Source Sans 3', Arial, sans-serif;
       border: 1.5px solid var(--border); background: var(--surface);
       color: var(--text);
     }
@@ -643,7 +658,7 @@
     .custom-select-btn {
       width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
       border: 1.5px solid var(--border); border-radius: 8px;
-      padding: 10px 14px; font-size: 14px; font-family: 'Inter', Arial, sans-serif;
+      padding: 10px 14px; font-size: 14px; font-family: 'Source Sans 3', Arial, sans-serif;
       color: var(--text); background: var(--surface); cursor: pointer;
       transition: border-color 0.2s, box-shadow 0.2s; text-align: left;
     }
@@ -686,11 +701,12 @@
     .calendar-section {
       background: var(--surface); border: 1px solid var(--border-light);
       border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
+      backdrop-filter: blur(var(--glass-blur, 16px)); -webkit-backdrop-filter: blur(var(--glass-blur, 16px));
       display: flex; align-items: flex-start;
     }
     .cal-main { flex: 1; min-width: 0; }
     .calendar-section h2 {
-      font-family: 'Lora', serif; font-size: 1rem; color: var(--accent);
+      font-family: 'Source Serif 4', serif; font-size: 1rem; color: var(--accent);
       margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
       justify-content: center;
     }
@@ -702,7 +718,7 @@
       flex-shrink: 0; padding: 6px 14px;
       border-radius: 999px; border: 1.5px solid transparent;
       background: transparent; color: var(--text-light); opacity: 0.55;
-      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      font-family: 'Source Sans 3', sans-serif; font-size: 12px; font-weight: 600;
       cursor: pointer; transition: all 0.2s; white-space: nowrap;
     }
     .month-pill:hover { opacity: 0.85; color: var(--text); }
@@ -818,7 +834,7 @@
       border-radius: var(--radius); box-shadow: var(--shadow); padding: 10px 14px;
       display: flex; flex-direction: column; gap: 4px;
     }
-    .retrib-section h2 { font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent); margin-bottom: 8px; text-align: center; }
+    .retrib-section h2 { font-family: 'Source Serif 4', serif; font-size: 0.95rem; color: var(--accent); margin-bottom: 8px; text-align: center; }
     .retrib-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .retrib-table th { text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 8px 8px; color: var(--text-muted); border-bottom: 2px solid var(--border); }
     .retrib-table th:not(:first-child) { text-align: center; }
@@ -856,7 +872,7 @@
       display: flex; flex-direction: column; gap: 4px;
     }
     .summary-section h2 {
-      font-family: 'Lora', serif; font-size: 0.95rem; color: var(--accent);
+      font-family: 'Source Serif 4', serif; font-size: 0.95rem; color: var(--accent);
       margin-bottom: 0; text-align: center;
     }
     .summary-toggle {
@@ -867,7 +883,7 @@
       border: 1.5px solid var(--border); background: var(--surface);
       font-size: 11px; font-weight: 600; cursor: pointer;
       transition: all 0.2s; color: var(--text-muted);
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: 'Source Sans 3', Arial, sans-serif;
     }
     .summary-toggle button:hover { border-color: var(--accent); color: var(--accent); }
     .summary-toggle button.active {
@@ -902,7 +918,7 @@
       border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px;
     }
     .turns-section h2 {
-      font-family: 'Lora', serif; font-size: 1rem; color: var(--accent);
+      font-family: 'Source Serif 4', serif; font-size: 1rem; color: var(--accent);
       margin-bottom: 10px; text-align: center;
     }
     .turn-row {
@@ -952,7 +968,7 @@
       padding: 4px 12px; border-radius: 7px;
       border: none; background: transparent;
       font-size: 10px; font-weight: 600; cursor: pointer;
-      color: var(--text-muted); font-family: 'Inter', Arial, sans-serif;
+      color: var(--text-muted); font-family: 'Source Sans 3', Arial, sans-serif;
       transition: all 0.25s ease;
     }
     .toggle-btns button:hover { color: var(--text); }
@@ -984,7 +1000,7 @@
     .lat-switch > span {
       display: grid; place-content: center;
       padding: 8px 14px;
-      font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 600; font-family: 'Source Sans 3', sans-serif;
       color: var(--accent, #3b82f6); white-space: nowrap;
       transition: opacity 0.3s ease-in-out 0.15s;
     }
@@ -1036,7 +1052,7 @@
     }
     .charts-header:hover { background: var(--surface2); }
     .charts-header h2 {
-      font-family: 'Lora', serif; font-size: 1rem; color: var(--accent); margin: 0;
+      font-family: 'Source Serif 4', serif; font-size: 1rem; color: var(--accent); margin: 0;
     }
     .charts-collapse-btn {
       position: absolute; right: 16px;
@@ -1059,6 +1075,7 @@
     .chart-card {
       background: var(--surface2); border: 1px solid var(--border-light);
       border-radius: var(--radius-sm); padding: 14px;
+      backdrop-filter: blur(var(--glass-blur, 16px)); -webkit-backdrop-filter: blur(var(--glass-blur, 16px));
       display: flex; flex-direction: column; gap: 6px;
     }
     .chart-card-title {
@@ -1079,7 +1096,7 @@
       position: fixed; pointer-events: none;
       background: var(--surface); color: var(--text);
       border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 12px; font-size: 11px; font-family: 'Inter', sans-serif;
+      padding: 8px 12px; font-size: 11px; font-family: 'Source Sans 3', sans-serif;
       box-shadow: var(--shadow); z-index: 9999;
       opacity: 0; transition: opacity 0.15s;
       max-width: 220px; line-height: 1.5;
@@ -1169,7 +1186,7 @@
       padding: 5px 12px; border-radius: 999px; border: 1.5px solid var(--border);
       background: var(--surface); color: var(--text-muted);
       font-size: 11px; font-weight: 600; cursor: pointer;
-      transition: all 0.2s; font-family: 'Inter', Arial, sans-serif;
+      transition: all 0.2s; font-family: 'Source Sans 3', Arial, sans-serif;
     }
     .icomp-surgeon-pill:hover { border-color: var(--accent); color: var(--accent); }
     .icomp-surgeon-pill.active { border-color: transparent; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
@@ -1249,7 +1266,7 @@
       background: #7c3aed; color: white;
       padding: 12px 28px; border-radius: 10px;
       font-size: 0.95rem; font-weight: 600;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: 'Source Sans 3', Arial, sans-serif;
       box-shadow: 0 8px 32px rgba(124,58,237,0.30);
       z-index: 9999; opacity: 0;
       transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s;
@@ -1265,8 +1282,8 @@
     @media (max-width: 600px) {
       body { padding: 20px 12px; }
       .back-home { padding: 4px 8px; font-size: 10px; top: 6px; left: 6px; }
-      .app-header { padding: 56px 20px 24px; border-radius: var(--radius); }
-      .app-header::before, .app-header::after { display: none; }
+      .app-header { padding: 52px 20px 28px; border-radius: 0 0 12px 12px; }
+      .app-header::after { display: none; }
       .sky-toggle { --toggle-size: 13px; top: 8px; right: 8px; }
       .hero-glow { display: none; }
       .upload-zone { width: 6em; height: 6em; font-size: 14px; }
@@ -1357,7 +1374,7 @@
     .btn-v2 {
       background: none; border: 1.5px solid var(--amber); color: var(--amber);
       border-radius: 6px; padding: 4px 12px; font-size: 11px; font-weight: 600;
-      font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+      font-family: 'Source Sans 3', sans-serif; cursor: pointer; transition: all 0.2s;
       white-space: nowrap;
     }
     .btn-v2:hover { background: var(--amber); color: white; }
@@ -1372,7 +1389,7 @@
       display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
       margin-bottom: 12px;
     }
-    .diff-header-row h2 { font-family: 'Lora', serif; font-size: 1.1rem; font-weight: 700; margin: 0; }
+    .diff-header-row h2 { font-family: 'Source Serif 4', serif; font-size: 1.1rem; font-weight: 700; margin: 0; }
     .diff-summary {
       display: flex; gap: 8px; align-items: center;
       font-size: 12px; font-weight: 600;
@@ -1480,7 +1497,7 @@
     .diff-surgeon-stats { display: flex; gap: 4px; }
     .diff-surgeon-block .diff-table { border: none; border-radius: 0; }
     /* Accesibilidad — focus visible para navegacion por teclado */
-    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    :focus-visible { outline: 2px solid var(--sky, var(--accent)); outline-offset: 2px; }
     input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1975,9 +1992,9 @@ function applyTheme(dark) {
   } else {
     document.documentElement.removeAttribute('data-theme');
         skyCheck.checked = false;
-    
-    
-    if (metaTheme) metaTheme.setAttribute('content', '#1a3a5c');
+
+
+    if (metaTheme) metaTheme.setAttribute('content', '#0f2240');
   }
   // Refresh charts with new theme colors
   if (chartsExpanded && parsedData) {
@@ -3655,7 +3672,7 @@ function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, lab
   g.append('g').attr('transform', `translate(0,${innerH})`)
     .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d')))
     .call(g2 => g2.select('.domain').remove())
-    .call(g2 => g2.selectAll('text').attr('fill', theme.textColor).style('font-size', '10px').style('font-family', "'Inter',sans-serif"));
+    .call(g2 => g2.selectAll('text').attr('fill', theme.textColor).style('font-size', '10px').style('font-family', "'Source Sans 3',sans-serif"));
 
   // Bars — all bars get gradients; highlighted surgeon uses accent, others use a lighter tint
   const accentD3 = d3.color(accentColor);
@@ -3687,7 +3704,7 @@ function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, lab
     .attr('y', d => y(d.label) + y.bandwidth() / 2)
     .attr('dy', '0.35em')
     .attr('fill', theme.textColor).style('font-size', '10px').style('font-weight', '600')
-    .style('font-family', "'Inter',sans-serif")
+    .style('font-family', "'Source Sans 3',sans-serif")
     .style('opacity', 0)
     .text(d => d.value)
     .transition().duration(400).delay((d, i) => i * 35 + 300)
@@ -3700,7 +3717,7 @@ function d3HorizontalBar({ containerId, data, theme, surgeonId, accentColor, lab
     .attr('fill', d => d.id === surgeonId ? accentColor : theme.textColor)
     .style('font-size', '10px')
     .style('font-weight', d => d.id === surgeonId ? '700' : '400')
-    .style('font-family', "'Inter',sans-serif")
+    .style('font-family', "'Source Sans 3',sans-serif")
     .text(d => d.label);
 }
 
@@ -3798,14 +3815,14 @@ function renderTreemapChart(container, info) {
         .attr('x', w / 2).attr('y', h / 2 - 5)
         .attr('text-anchor', 'middle').attr('fill', '#fff')
         .attr('font-size', fontSize).attr('font-weight', '700')
-        .attr('font-family', "'Inter',sans-serif")
+        .attr('font-family', "'Source Sans 3',sans-serif")
         .text(d.data.label)
         .attr('opacity', 0).transition().delay(400).duration(300).attr('opacity', 1);
       g.append('text')
         .attr('x', w / 2).attr('y', h / 2 + 11)
         .attr('text-anchor', 'middle').attr('fill', 'rgba(255,255,255,0.75)')
         .attr('font-size', w > 55 ? '11px' : '8px').attr('font-weight', '600')
-        .attr('font-family', "'Inter',sans-serif")
+        .attr('font-family', "'Source Sans 3',sans-serif")
         .text(`${Math.round(d.data.pct)}%`)
         .attr('opacity', 0).transition().delay(450).duration(300).attr('opacity', 1);
     } else if (w > 20 && h > 14) {
@@ -3815,7 +3832,7 @@ function renderTreemapChart(container, info) {
         .attr('x', w / 2).attr('y', h / 2 + 3)
         .attr('text-anchor', 'middle').attr('fill', '#fff')
         .attr('font-size', '7px').attr('font-weight', '700')
-        .attr('font-family', "'Inter',sans-serif")
+        .attr('font-family', "'Source Sans 3',sans-serif")
         .text(txt)
         .attr('opacity', 0).transition().delay(400).duration(300).attr('opacity', 1);
     }
@@ -3868,13 +3885,13 @@ function renderDonutChart(container, info) {
     .attr('x', cx).attr('y', cy - 6)
     .attr('text-anchor', 'middle').attr('fill', theme.textColor)
     .attr('font-size', '22px').attr('font-weight', '700')
-    .attr('font-family', "'Inter',sans-serif")
+    .attr('font-family', "'Source Sans 3',sans-serif")
     .text(total);
   svg.append('text')
     .attr('x', cx).attr('y', cy + 12)
     .attr('text-anchor', 'middle').attr('fill', theme.textColor)
     .attr('font-size', '10px').attr('font-weight', '400').attr('opacity', 0.6)
-    .attr('font-family', "'Inter',sans-serif")
+    .attr('font-family', "'Source Sans 3',sans-serif")
     .text('turnos');
 
   // Legend on the right
@@ -3885,11 +3902,11 @@ function renderDonutChart(container, info) {
   lg.append('rect').attr('width', 12).attr('height', 12).attr('rx', 3)
     .attr('fill', d => d.color).attr('opacity', 0.88);
   lg.append('text').attr('x', 18).attr('y', 10)
-    .attr('fill', theme.textColor).attr('font-size', '11px').attr('font-family', "'Inter',sans-serif")
+    .attr('fill', theme.textColor).attr('font-size', '11px').attr('font-family', "'Source Sans 3',sans-serif")
     .text(d => `${d.label}`);
   lg.append('text').attr('x', 18).attr('y', 10)
     .attr('fill', theme.textColor).attr('font-size', '11px').attr('font-weight', '700')
-    .attr('font-family', "'Inter',sans-serif")
+    .attr('font-family', "'Source Sans 3',sans-serif")
     .attr('text-anchor', 'end').attr('dx', 190)
     .text(d => `${d.count} (${Math.round(d.pct)}%)`);
 }
@@ -3997,7 +4014,7 @@ function d3Radar({ containerId, labels, surgeonVals, avgVals, surgeonName, theme
     g.append('text').attr('x', lbx).attr('y', lby)
       .attr('text-anchor', 'middle').attr('dy', '0.35em')
       .attr('fill', theme.textColor).style('font-size', '9px').style('font-weight', '500')
-      .style('font-family', "'Inter',sans-serif").text(lbl);
+      .style('font-family', "'Source Sans 3',sans-serif").text(lbl);
   });
 
   // Path generator
@@ -4041,7 +4058,7 @@ function d3Radar({ containerId, labels, surgeonVals, avgVals, surgeonName, theme
     const gx = i * 100;
     lg.append('circle').attr('cx', gx).attr('cy', 0).attr('r', 4).attr('fill', c);
     lg.append('text').attr('x', gx + 8).attr('y', 0).attr('dy', '0.35em')
-      .attr('fill', theme.textColor).style('font-size', '10px').style('font-family', "'Inter',sans-serif").text(txt);
+      .attr('fill', theme.textColor).style('font-size', '10px').style('font-family', "'Source Sans 3',sans-serif").text(txt);
   });
 }
 
@@ -4080,7 +4097,7 @@ function d3SlopeChart({ containerId, labels, datasets, theme }) {
     g.append('text').attr('x', x).attr('y', -28)
       .attr('text-anchor', 'middle').attr('fill', theme.textColor)
       .style('font-size', n >= 7 ? '8px' : '9px').style('font-weight', '700')
-      .style('font-family', "'Inter',sans-serif")
+      .style('font-family', "'Source Sans 3',sans-serif")
       .style('text-transform', 'uppercase').style('letter-spacing', '0.3px')
       .text(shortLbl);
 
@@ -4090,7 +4107,7 @@ function d3SlopeChart({ containerId, labels, datasets, theme }) {
     g.append('text').attr('x', x).attr('y', -16)
       .attr('text-anchor', 'middle').attr('fill', theme.textColor)
       .style('font-size', '8px').style('opacity', 0.4)
-      .style('font-family', "'Inter',sans-serif").text('max ' + maxDisplay);
+      .style('font-family', "'Source Sans 3',sans-serif").text('max ' + maxDisplay);
   });
 
   // Draw lines + dots for each dataset
@@ -4131,7 +4148,7 @@ function d3SlopeChart({ containerId, labels, datasets, theme }) {
         .attr('text-anchor', 'middle').attr('dy', '0.35em')
         .attr('fill', ds.color)
         .style('font-size', '9px').style('font-weight', '700')
-        .style('font-family', "'Inter',sans-serif")
+        .style('font-family', "'Source Sans 3',sans-serif")
         .text(v);
       textG.transition().delay(di * 200 + 700).duration(300).style('opacity', 1);
 
@@ -4158,7 +4175,7 @@ function d3SlopeChart({ containerId, labels, datasets, theme }) {
     lg.append('circle').attr('cx', gx + 8).attr('cy', 0).attr('r', 3.5).attr('fill', ds.color);
     lg.append('text').attr('x', gx + 22).attr('y', 0).attr('dy', '0.35em')
       .attr('fill', theme.textColor).style('font-size', '10px')
-      .style('font-family', "'Inter',sans-serif").text(ds.name);
+      .style('font-family', "'Source Sans 3',sans-serif").text(ds.name);
   });
 }
 
@@ -4214,7 +4231,7 @@ function d3GroupedHorizontalBar({ containerId, metricLabels, datasets, theme }) 
         .attr('y', yGroup(metric) + yBar(di) + yBar.bandwidth() / 2)
         .attr('dy', '0.35em')
         .attr('fill', theme.textColor).style('font-size', '9px').style('font-weight', '600')
-        .style('font-family', "'Inter',sans-serif").style('opacity', 0)
+        .style('font-family', "'Source Sans 3',sans-serif").style('opacity', 0)
         .text(val)
         .transition().duration(300).delay(mi * 40 + di * 80 + 300).style('opacity', 1);
     });
@@ -4227,7 +4244,7 @@ function d3GroupedHorizontalBar({ containerId, metricLabels, datasets, theme }) 
     .attr('dy', '0.35em').attr('text-anchor', 'end')
     .attr('fill', theme.textColor)
     .style('font-size', '10px').style('font-weight', '600')
-    .style('font-family', "'Inter',sans-serif")
+    .style('font-family', "'Source Sans 3',sans-serif")
     .text(m => m);
 
   // Legend
@@ -4237,7 +4254,7 @@ function d3GroupedHorizontalBar({ containerId, metricLabels, datasets, theme }) 
     lg.append('circle').attr('cx', lx + 5).attr('cy', 0).attr('r', 4).attr('fill', ds.color);
     lg.append('text').attr('x', lx + 14).attr('y', 0).attr('dy', '0.35em')
       .attr('fill', theme.textColor).style('font-size', '10px')
-      .style('font-family', "'Inter',sans-serif").text(ds.name);
+      .style('font-family', "'Source Sans 3',sans-serif").text(ds.name);
     lx += ds.name.length * 7 + 28;
   });
 }
@@ -4342,7 +4359,7 @@ function renderUnitComparisonChart(surgeonId) {
         if (bw > 18) {
           g.append('text').attr('x', xScale(cx) + bw/2).attr('y', yScale(name) + yScale.bandwidth()/2).attr('dy','0.35em')
             .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size', bw > 32 ? '12px' : '10px').style('font-weight','700')
-            .style('font-family',"'Inter',sans-serif").style('opacity',0).text(val)
+            .style('font-family',"'Source Sans 3',sans-serif").style('opacity',0).text(val)
             .transition().delay(idx*35+400).duration(200).style('opacity',1);
         }
         cx += val;
@@ -4352,7 +4369,7 @@ function renderUnitComparisonChart(surgeonId) {
     g.selectAll('.y-lbl').data(unitSurgeons).enter().append('text')
       .attr('x', -6).attr('y', id => yScale(getSurnameOf(id)) + yScale.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
       .attr('fill', id => id === surgeonId ? theme.accentColor : theme.textColor)
-      .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+      .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Source Sans 3',sans-serif")
       .text(id => getSurnameOf(id));
 
     const lg = svg.append('g').attr('transform', `translate(${margin.left},${height - 18})`);
@@ -4360,7 +4377,7 @@ function renderUnitComparisonChart(surgeonId) {
     usedGL.forEach(grp => {
       lg.append('rect').attr('x', lx).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', glColors[grp]);
       lg.append('text').attr('x', lx + 14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor)
-        .style('font-size','9px').style('font-family',"'Inter',sans-serif").text(glLabels[grp]);
+        .style('font-size','9px').style('font-family',"'Source Sans 3',sans-serif").text(glLabels[grp]);
       lx += (glLabels[grp].length * 5.5) + 24;
     });
   } else {
@@ -4413,7 +4430,7 @@ function renderUnitComparisonChart(surgeonId) {
           const fs = bw > 32 ? '9px' : '7px';
           g.append('text').attr('x', x(cx) + bw/2).attr('y', y(name) + y.bandwidth()/2).attr('dy','0.35em')
             .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size',fs).style('font-weight','700')
-            .style('font-family',"'Inter',sans-serif").style('opacity',0).text(`${pct}%`)
+            .style('font-family',"'Source Sans 3',sans-serif").style('opacity',0).text(`${pct}%`)
             .transition().delay(idx*35+400).duration(200).style('opacity',1);
         }
         cx += val;
@@ -4424,7 +4441,7 @@ function renderUnitComparisonChart(surgeonId) {
     g.selectAll('.y-lbl').data(unitSurgeons).enter().append('text')
       .attr('x', -6).attr('y', id => y(getSurnameOf(id)) + y.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
       .attr('fill', id => id === surgeonId ? theme.accentColor : theme.textColor)
-      .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+      .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Source Sans 3',sans-serif")
       .text(id => getSurnameOf(id));
 
     // Legend — wraps into rows if many groups
@@ -4436,7 +4453,7 @@ function renderUnitComparisonChart(surgeonId) {
       if (lx + itemW > maxLegendW && lx > 0) { lx = 0; ly += 16; }
       lg.append('rect').attr('x', lx).attr('y', ly - 5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', groupColors[grp]);
       lg.append('text').attr('x', lx + 14).attr('y', ly).attr('dy','0.35em').attr('fill', theme.textColor)
-        .style('font-size','9px').style('font-family',"'Inter',sans-serif").text(groupLabels[grp]);
+        .style('font-size','9px').style('font-family',"'Source Sans 3',sans-serif").text(groupLabels[grp]);
       lx += itemW;
     });
   }
@@ -4474,8 +4491,8 @@ function renderQxUnitChart(surgeonId) {
 
   // Grid
   g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-innerW).tickFormat('')).call(g2 => { g2.select('.domain').remove(); g2.selectAll('.tick line').attr('stroke', theme.gridColor); });
-  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Inter',sans-serif"); });
-  g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).tickSize(0)).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-weight','600').style('font-family',"'Inter',sans-serif"); });
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('d'))).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Source Sans 3',sans-serif"); });
+  g.append('g').attr('transform', `translate(0,${innerH})`).call(d3.axisBottom(x).tickSize(0)).call(g2 => { g2.select('.domain').remove(); g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-weight','600').style('font-family',"'Source Sans 3',sans-serif"); });
 
   const accentQx = d3.color(theme.accentColor);
   const mutedQx = theme.isDark
@@ -4494,7 +4511,7 @@ function renderQxUnitChart(surgeonId) {
     // Value label
     g.append('text').attr('x', x(unit) + x.bandwidth()/2).attr('y', y(unitCounts[unit]) - 6)
       .attr('text-anchor','middle').attr('fill', theme.textColor).style('font-size','10px').style('font-weight','700')
-      .style('font-family',"'Inter',sans-serif").style('opacity',0).text(unitCounts[unit])
+      .style('font-family',"'Source Sans 3',sans-serif").style('opacity',0).text(unitCounts[unit])
       .transition().delay(i*60+400).duration(200).style('opacity',1);
   });
 }
@@ -4549,7 +4566,7 @@ function renderAyudantiasChart(surgeonId) {
   g.append('g').attr('transform',`translate(0,${innerH})`)
     .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format('d')))
     .call(g2 => g2.select('.domain').remove())
-    .call(g2 => g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Inter',sans-serif"));
+    .call(g2 => g2.selectAll('text').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Source Sans 3',sans-serif"));
 
   const bars = g.selectAll('.bar').data(data).enter().append('g');
   bars.each(function(d, i) {
@@ -4565,12 +4582,12 @@ function renderAyudantiasChart(surgeonId) {
   });
   bars.append('text').attr('x',d=>x(d.value)+5).attr('y',d=>y(d.label)+y.bandwidth()/2)
     .attr('dy','0.35em').attr('fill',theme.textColor).style('font-size','10px').style('font-weight','600')
-    .style('font-family',"'Inter',sans-serif").style('opacity',0).text(d=>d.value)
+    .style('font-family',"'Source Sans 3',sans-serif").style('opacity',0).text(d=>d.value)
     .transition().duration(400).delay((d,i)=>i*35+300).style('opacity',1);
   g.selectAll('.y-label').data(data).enter().append('text')
     .attr('x',-6).attr('y',d=>y(d.label)+y.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
     .attr('fill',(d)=>d.color).style('font-size','10px').style('font-weight','600')
-    .style('font-family',"'Inter',sans-serif").text(d=>d.label);
+    .style('font-family',"'Source Sans 3',sans-serif").text(d=>d.label);
 }
 
 function updateAyudantiasPeriodLabels() {
@@ -4727,13 +4744,13 @@ function renderMorningAfternoonChart(surgeonId) {
     if (mPct >= 15 && x(mPct) > 28) {
       g.append('text').attr('x', x(mPct) / 2).attr('y', y(name) + y.bandwidth()/2).attr('dy','0.35em')
         .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size','9px').style('font-weight','700')
-        .style('font-family',"'Inter',sans-serif").style('opacity',0).text(`${mPct}%`)
+        .style('font-family',"'Source Sans 3',sans-serif").style('opacity',0).text(`${mPct}%`)
         .transition().delay(i*25+400).duration(200).style('opacity',1);
     }
     if (tPct >= 15 && x(tPct) > 28) {
       g.append('text').attr('x', x(mPct) + x(tPct)/2).attr('y', y(name) + y.bandwidth()/2).attr('dy','0.35em')
         .attr('text-anchor','middle').attr('fill','rgba(255,255,255,0.9)').style('font-size','9px').style('font-weight','700')
-        .style('font-family',"'Inter',sans-serif").style('opacity',0).text(`${tPct}%`)
+        .style('font-family',"'Source Sans 3',sans-serif").style('opacity',0).text(`${tPct}%`)
         .transition().delay(i*25+400).duration(200).style('opacity',1);
     }
   });
@@ -4742,14 +4759,14 @@ function renderMorningAfternoonChart(surgeonId) {
   g.selectAll('.y-lbl').data(sorted).enter().append('text')
     .attr('x', -6).attr('y', id => y(getSurnameOf(id)) + y.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
     .attr('fill', id => id === surgeonId ? mColor : theme.textColor)
-    .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+    .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Source Sans 3',sans-serif")
     .text(id => getSurnameOf(id));
 
   // Legend
   const lg = svg.append('g').attr('transform', `translate(${margin.left + innerW/2 - 70},10)`);
   [[mColor, 'Mañana %'], [tColor, 'Tarde %']].forEach(([c, txt], i) => {
     lg.append('rect').attr('x', i*80).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', c);
-    lg.append('text').attr('x', i*80+14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Inter',sans-serif").text(txt);
+    lg.append('text').attr('x', i*80+14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Source Sans 3',sans-serif").text(txt);
   });
 }
 
@@ -4835,14 +4852,14 @@ function renderFestivosChart(surgeonId) {
   g.selectAll('.y-lbl').data(sorted).enter().append('text')
     .attr('x', -6).attr('y', id => y(getSurnameOf(id)) + y.bandwidth()/2).attr('dy','0.35em').attr('text-anchor','end')
     .attr('fill', id => id === surgeonId ? festColor : theme.textColor)
-    .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Inter',sans-serif")
+    .style('font-size','10px').style('font-weight', id => id === surgeonId ? '700':'400').style('font-family',"'Source Sans 3',sans-serif")
     .text(id => getSurnameOf(id));
 
   // Legend
   const lg = svg.append('g').attr('transform', `translate(${margin.left + innerW/2 - 90},10)`);
   [[festColor, 'Festivos'], [fineColor, 'Fines de semana']].forEach(([c, txt], i) => {
     lg.append('rect').attr('x', i*110).attr('y', -5).attr('width', 10).attr('height', 10).attr('rx', 2).attr('fill', c);
-    lg.append('text').attr('x', i*110+14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Inter',sans-serif").text(txt);
+    lg.append('text').attr('x', i*110+14).attr('y', 0).attr('dy','0.35em').attr('fill', theme.textColor).style('font-size','10px').style('font-family',"'Source Sans 3',sans-serif").text(txt);
   });
 }
 
