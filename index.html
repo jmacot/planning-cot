@@ -1059,7 +1059,7 @@
                   padding 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       padding: 0 16px;
     }
-    .charts-body.expanded { max-height: 5500px; padding: 0 16px 16px; }
+    .charts-body.expanded { max-height: 12000px; padding: 0 16px 16px; }
     .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .dash-wide { grid-column: 1 / -1; }
     .chart-card {
@@ -1080,8 +1080,8 @@
     }
 
     /* D3 charts */
-    .d3-chart-wrap { width: 100%; overflow: visible; }
-    .d3-chart-wrap svg { display: block; width: 100%; height: auto; max-width: 100%; }
+    .d3-chart-wrap { width: 100%; overflow: visible; min-height: 40px; }
+    .d3-chart-wrap svg { display: block; width: 100%; height: auto; max-width: 100%; min-height: 40px; }
     .d3-tooltip {
       position: fixed; pointer-events: none;
       background: var(--surface); color: var(--text);
@@ -1821,7 +1821,7 @@
           <div class="chart-card dash-wide" id="card-trend">
             <div class="chart-card-title">Tendencia Mensual</div>
             <div class="trend-legend" id="trend-legend"></div>
-            <div id="chart-trend" class="d3-chart-wrap"></div>
+            <div id="chart-trend" class="d3-chart-wrap" style="min-height:200px"></div>
           </div>
         </div>
       </div>
