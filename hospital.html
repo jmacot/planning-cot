@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hospital COT — Vista Pixel Art</title>
-  <link rel="icon" type="image/png" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Hospital COT">
   <meta name="theme-color" id="meta-theme" content="#1a3a5c">
@@ -110,9 +110,7 @@
       letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;
     }
 
-    .mini-cal-nav {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
-    }
+    .mini-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
     .mini-cal-nav span { font-size: 13px; font-weight: 700; color: var(--text); }
     .mini-cal-nav button {
       background: none; border: 1px solid var(--border); border-radius: 6px;
@@ -121,23 +119,14 @@
       transition: all 0.2s;
     }
     .mini-cal-nav button:hover { border-color: var(--accent); color: var(--accent); }
-    .mini-cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center;
-    }
-    .mini-cal-hdr {
-      font-size: 9px; font-weight: 700; color: var(--text-light);
-      text-transform: uppercase; padding: 2px 0;
-    }
+    .mini-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+    .mini-cal-hdr { font-size: 9px; font-weight: 700; color: var(--text-light); text-transform: uppercase; padding: 2px 0; }
     .mini-cal-day {
       font-size: 11px; padding: 4px 0; border-radius: 6px; cursor: pointer;
-      transition: all 0.15s; color: var(--text); border: 1.5px solid transparent;
-      font-weight: 500;
+      transition: all 0.15s; color: var(--text); border: 1.5px solid transparent; font-weight: 500;
     }
     .mini-cal-day:hover { background: var(--accent-light); }
-    .mini-cal-day.selected {
-      background: var(--accent); color: white; font-weight: 700;
-      box-shadow: 0 2px 8px rgba(26,58,92,0.25);
-    }
+    .mini-cal-day.selected { background: var(--accent); color: white; font-weight: 700; box-shadow: 0 2px 8px rgba(26,58,92,0.25); }
     [data-theme="dark"] .mini-cal-day.selected { background: #3b82f6; }
     .mini-cal-day.empty { visibility: hidden; }
     .mini-cal-day.no-data { color: var(--text-light); opacity: 0.4; cursor: default; }
@@ -149,11 +138,41 @@
     .day-info .day-count { font-size: 22px; font-weight: 700; color: var(--accent); }
     .day-info .day-label { color: var(--text-muted); }
     .floor-counts { margin-top: 8px; }
-    .floor-count-row {
-      display: flex; align-items: center; gap: 6px; margin-bottom: 3px;
-      font-size: 11px; color: var(--text-muted);
-    }
+    .floor-count-row { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; font-size: 11px; color: var(--text-muted); }
     .floor-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+    .shift-toggle {
+      display: flex; border-radius: 10px; overflow: hidden;
+      border: 1.5px solid var(--border); background: var(--surface2);
+    }
+    .shift-btn {
+      flex: 1; padding: 8px 0; border: none; background: none;
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); cursor: pointer; transition: all 0.25s;
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .shift-btn.active {
+      background: var(--accent); color: white;
+      box-shadow: 0 2px 8px rgba(26,58,92,0.3);
+    }
+    .shift-btn svg { width: 14px; height: 14px; }
+
+    .zone-nav { display: flex; flex-direction: column; gap: 6px; }
+    .zone-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 10px;
+      border: 1.5px solid var(--border); background: var(--surface);
+      font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+      color: var(--text); cursor: pointer; transition: all 0.2s;
+    }
+    .zone-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+    .zone-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
+    .zone-btn .zdot { width: 8px; height: 8px; border-radius: 3px; flex-shrink: 0; }
+    .zone-btn .zcount {
+      margin-left: auto; background: var(--surface2); color: var(--text-muted);
+      font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 999px;
+    }
+    .zone-btn.active .zcount { background: rgba(255,255,255,0.2); color: white; }
 
     .canvas-wrap {
       background: var(--surface); border: 1px solid var(--border-light);
@@ -164,16 +183,28 @@
       display: block; width: 100%; height: auto;
       image-rendering: pixelated; image-rendering: crisp-edges;
     }
+    .zone-back-btn {
+      position: absolute; top: 12px; left: 12px;
+      padding: 7px 16px; border-radius: 999px;
+      border: 1.5px solid rgba(255,255,255,0.5); background: rgba(0,0,0,0.5);
+      color: white; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700;
+      cursor: pointer; z-index: 10; transition: all 0.2s; backdrop-filter: blur(4px);
+    }
+    .zone-back-btn:hover { background: rgba(0,0,0,0.7); border-color: white; }
+    .zone-label-el {
+      position: absolute; top: 12px; right: 12px;
+      padding: 5px 14px; border-radius: 999px;
+      background: rgba(0,0,0,0.5); color: white; backdrop-filter: blur(4px);
+      font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.5px; text-transform: uppercase; z-index: 10;
+    }
 
     .legend {
       display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px;
       border: 1px solid var(--border-light); border-top: none;
       background: var(--surface); border-radius: 0 0 var(--radius) var(--radius);
     }
-    .legend-item {
-      display: flex; align-items: center; gap: 5px; font-size: 10px;
-      font-weight: 600; color: var(--text-muted);
-    }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; color: var(--text-muted); }
     .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 
     .pixel-tooltip {
@@ -190,10 +221,7 @@
     .pixel-tooltip .tt-act { margin-top: 3px; }
     .pixel-tooltip .tt-comp { font-size: 10px; color: var(--text-light); margin-top: 2px; }
 
-    .no-data-msg {
-      text-align: center; padding: 80px 32px;
-      animation: fadeInUp 0.6s ease-out 0.1s both;
-    }
+    .no-data-msg { text-align: center; padding: 80px 32px; animation: fadeInUp 0.6s ease-out 0.1s both; }
     .no-data-msg h2 { font-family: 'Lora', serif; font-size: 1.3rem; margin-bottom: 12px; }
     .no-data-msg p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
     .no-data-msg a {
@@ -220,10 +248,7 @@
       .theme-toggle { width: 36px; height: 36px; font-size: 1.1rem; top: 8px; right: 8px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     }
   </style>
 </head>
@@ -232,7 +257,7 @@
   <a class="back-home" href="index.html" title="Volver a Planning">&#8592; Planning</a>
   <div class="app-header">
     <button class="theme-toggle" id="btn-theme" title="Cambiar tema" aria-label="Cambiar a modo oscuro"></button>
-    <h1>&#127963; Hospital COT</h1>
+    <h1>Hospital COT</h1>
     <p>Vista Pixel Art &mdash; Actividad diaria de cirujanos</p>
   </div>
 
@@ -262,25 +287,52 @@
             <div class="floor-counts" id="floor-counts"></div>
           </div>
         </div>
+        <div class="sidebar-card">
+          <h3>Turno</h3>
+          <div class="shift-toggle">
+            <button class="shift-btn active" data-shift="M" id="btn-shift-m">
+              <svg viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 2v2m0 12v2m8-8h-2M4 10H2m13.07-5.07l-1.42 1.42M6.34 13.66l-1.42 1.42m11.31 0l-1.42-1.42M6.34 6.34L4.93 4.93" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+              Manana
+            </button>
+            <button class="shift-btn" data-shift="T" id="btn-shift-t">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.002 8.002 0 1010.586 10.586z"/></svg>
+              Tarde
+            </button>
+          </div>
+        </div>
+        <div class="sidebar-card">
+          <h3>Zonas</h3>
+          <div class="zone-nav" id="zone-nav">
+            <button class="zone-btn" data-zone="quirofanos">
+              <span class="zdot" style="background:#1a3a5c"></span>Quirofanos<span class="zcount" id="count-quirofanos">0</span>
+            </button>
+            <button class="zone-btn" data-zone="consultas">
+              <span class="zdot" style="background:#16a34a"></span>Consultas<span class="zcount" id="count-consultas">0</span>
+            </button>
+            <button class="zone-btn" data-zone="urgencias">
+              <span class="zdot" style="background:#dc2626"></span>Urgencias<span class="zcount" id="count-urgencias">0</span>
+            </button>
+            <button class="zone-btn" data-zone="planta">
+              <span class="zdot" style="background:#64748b"></span>Planta<span class="zcount" id="count-planta">0</span>
+            </button>
+          </div>
+        </div>
         <div class="sidebar-card" id="selected-panel" style="display:none">
           <h3>Cirujano seleccionado</h3>
           <div id="selected-info" style="font-size:12px;line-height:1.8"></div>
-        </div>
-        <div class="sidebar-card" style="text-align:center">
-          <button id="btn-calibrate" onclick="toggleCalibration()" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--accent);background:var(--accent);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;width:100%">Calibrar posiciones</button>
-          <div id="calib-log" style="font-size:10px;color:var(--text-muted);margin-top:6px;text-align:left;max-height:120px;overflow-y:auto;line-height:1.5"></div>
         </div>
       </div>
       <div>
         <div class="canvas-wrap">
           <canvas id="hospital-canvas" width="960" height="886"></canvas>
+          <button id="btn-back" class="zone-back-btn" style="display:none">&#8592; Volver</button>
+          <div id="zone-label" class="zone-label-el" style="display:none"></div>
         </div>
         <div class="legend" id="legend"></div>
       </div>
     </div>
   </div>
-
-  <div class="app-footer"><span>COT &mdash; Hospital Pixel Art v3.0</span></div>
+  <div class="app-footer"><span>COT &mdash; Hospital Pixel Art v4.0</span></div>
 </div>
 <div class="pixel-tooltip" id="tooltip"></div>
 
@@ -320,10 +372,6 @@ btnTheme.addEventListener('click', function() {
   localStorage.setItem('planning-theme', isDark ? 'dark' : 'light');
   localStorage.setItem('planning-theme-date', new Date().toDateString());
 });
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
-  var s = localStorage.getItem('planning-theme');
-  if (!s || localStorage.getItem('planning-theme-date') !== new Date().toDateString()) applyTheme(getAutoTheme() === 'dark');
-});
 
 // ─────────────────────────────────────────────
 //  DATA LOADING
@@ -351,12 +399,6 @@ var MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Ago
 var DAY_NAMES_SHORT = ['L','M','X','J','V','S','D'];
 var DAY_NAMES_FULL = ['Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo'];
 
-var FLOOR_MAP = {
-  qui_m: 2, qui_t: 2,
-  cons_m: 1, cons_t: 1, diferida: 1, diferida_t: 1, rucot: 1, gestion: 1,
-  guardia: 0, saliente: 0, localizado: 0
-};
-
 var ACTIVITY_LABELS = {
   qui_m: 'Quirofano M', qui_t: 'Quirofano T',
   cons_m: 'Consulta M', cons_t: 'Consulta T',
@@ -364,7 +406,6 @@ var ACTIVITY_LABELS = {
   rucot: 'RUCOT', gestion: 'Gestion',
   guardia: 'Guardia', saliente: 'Saliente', localizado: 'Localizado'
 };
-
 var ACTIVITY_COLORS = {
   qui_m: '#1a3a5c', qui_t: '#2563eb',
   cons_m: '#16a34a', cons_t: '#0d9488',
@@ -372,72 +413,180 @@ var ACTIVITY_COLORS = {
   rucot: '#e11d48', gestion: '#ca8a04',
   guardia: '#dc2626', saliente: '#f59e0b', localizado: '#7c3aed'
 };
-
-var FLOOR_COLORS = ['#dc2626', '#16a34a', '#1a3a5c'];
-var FLOOR_NAMES = ['Urgencias', 'Consultas', 'Quirofanos'];
+var ACTIVITY_ZONE = {
+  qui_m: 'quirofanos', qui_t: 'quirofanos',
+  cons_m: 'consultas', cons_t: 'consultas',
+  rucot: 'consultas', gestion: 'consultas',
+  diferida: 'planta', diferida_t: 'planta',
+  guardia: 'urgencias', saliente: 'urgencias', localizado: 'urgencias'
+};
+var FLOOR_MAP = {
+  qui_m: 2, qui_t: 2,
+  cons_m: 1, cons_t: 1, diferida: 1, diferida_t: 1, rucot: 1, gestion: 1,
+  guardia: 0, saliente: 0, localizado: 0
+};
+var FLOOR_COLORS = ['#dc2626','#16a34a','#1a3a5c'];
+var FLOOR_NAMES = ['Urgencias','Consultas','Quirofanos'];
+var BUBBLE_TEXTS = {
+  qui_m:'Operando...', qui_t:'Operando...',
+  cons_m:'En consulta', cons_t:'En consulta',
+  diferida:'Planta', diferida_t:'Planta',
+  rucot:'RUCOT', gestion:'Gestion',
+  guardia:'De guardia', saliente:'Saliente', localizado:'Localizado'
+};
 
 // ─────────────────────────────────────────────
-//  CANVAS DIMENSIONS & FLOOR ZONES
-//  Mapped to hospital-bg.png (2150x1984)
-//  Canvas: 960x886 (same aspect ratio)
+//  CANVAS
 // ─────────────────────────────────────────────
-var PX = 4;
 var CW = 960, CH = 886;
-
-// Fixed slot positions from calibration (x, y per slot)
-var FLOOR_SLOTS = [
-  // Floor 0 — Urgencias (2 slots)
-  [{ x: 332, y: 797 }, { x: 689, y: 799 }],
-  // Floor 1 — Consultas (6 slots)
-  [{ x: 157, y: 587 }, { x: 255, y: 595 }, { x: 382, y: 580 }, { x: 695, y: 586 }, { x: 770, y: 580 }, { x: 906, y: 580 }],
-  // Floor 2 — Quirofanos (10 slots)
-  [{ x: 115, y: 423 }, { x: 220, y: 429 }, { x: 275, y: 436 }, { x: 368, y: 432 }, { x: 453, y: 430 }, { x: 563, y: 433 }, { x: 647, y: 440 }, { x: 730, y: 434 }, { x: 795, y: 436 }, { x: 890, y: 433 }]
-];
-
-// Reference values for calibration overlay
-var FLOOR_GROUND = [798, 587, 432];
-var SLOT_LEFT = 90;
-var SLOT_RIGHT = 910;
-var SLOT_WIDTH = SLOT_RIGHT - SLOT_LEFT;
-
-// ─────────────────────────────────────────────
-//  CANVAS & STATE
-// ─────────────────────────────────────────────
 var canvas = document.getElementById('hospital-canvas');
 var ctx = canvas.getContext('2d');
 var tooltipEl = document.getElementById('tooltip');
 
-var sprites = [];
-var lastTime = 0;
+// ─────────────────────────────────────────────
+//  IMAGE LOADING
+// ─────────────────────────────────────────────
+function loadImg(src) { var img = new Image(); img.src = src; return img; }
+
+var bgImage = loadImg('hospital-bg.png');
+var bodyImg = loadImg('assets/characters/body.png');
+var hairImg = loadImg('assets/characters/hairs.png');
+var outfitImgs = {
+  quirofanos: loadImg('assets/characters/outfit5.png'),
+  consultas: loadImg('assets/characters/outfit1.png'),
+  urgencias: loadImg('assets/characters/outfit6.png'),
+  planta: loadImg('assets/characters/outfit4.png')
+};
+var zoneGifs = {
+  quirofanos: loadImg('assets/zones/quirofanos.gif'),
+  consultas: loadImg('assets/zones/consultas.gif'),
+  urgencias: loadImg('assets/zones/urgencias.gif'),
+  planta: loadImg('assets/zones/planta.gif')
+};
+
+// ─────────────────────────────────────────────
+//  ZONE DEFINITIONS
+// ─────────────────────────────────────────────
+// Sprite scale relative to GIF pixels (characters in GIFs are ~32px tall)
+var SPRITE_SCALE = 1.6;
+
+var ZONE_DATA = {
+  quirofanos: {
+    label:'Quirofanos', color:'#1a3a5c', gifW:764, gifH:588,
+    region:{x:50,y:285,w:860,h:175},
+    slots:[
+      {x:120,y:100},{x:200,y:110},{x:280,y:100},{x:350,y:115},
+      {x:600,y:195},{x:670,y:180},{x:720,y:200},
+      {x:620,y:470},{x:690,y:485},{x:720,y:460},
+      {x:300,y:340},{x:400,y:340},{x:480,y:330}
+    ],
+    // Entry paths — surgeons walk one of these on spawn
+    paths:[
+      // Rojo: entra por abajo-izq, sube pasillo izquierdo, curva al quirofano
+      [{x:350,y:580},{x:250,y:510},{x:180,y:450},{x:175,y:370},{x:175,y:300},{x:160,y:230},{x:140,y:170},{x:140,y:120}],
+      // Verde: entra por abajo-centro (escaleras), sube recto
+      [{x:440,y:580},{x:440,y:500},{x:440,y:420},{x:440,y:340},{x:460,y:280},{x:500,y:220}]
+    ],
+    walkable:[
+      {x:130,y:230,w:410,h:160},
+      {x:130,y:340,w:120,h:120},
+      {x:400,y:240,w:140,h:200},
+      {x:550,y:120,w:200,h:160},
+      {x:550,y:380,w:200,h:150},
+      {x:30,y:50,w:380,h:150}
+    ]
+  },
+  consultas: {
+    label:'Consultas', color:'#16a34a', gifW:764, gifH:416,
+    region:{x:50,y:470,w:860,h:190},
+    slots:[
+      {x:340,y:75},{x:420,y:75},{x:500,y:75},
+      {x:200,y:195},{x:350,y:195},{x:500,y:195},{x:620,y:195},
+      {x:100,y:340},{x:250,y:350},{x:440,y:340},{x:600,y:350},{x:720,y:340}
+    ],
+    paths:[
+      [{x:370,y:130},{x:300,y:170},{x:250,y:195}],
+      [{x:370,y:130},{x:450,y:170},{x:520,y:195}]
+    ],
+    walkable:[
+      {x:80,y:55,w:640,h:55},
+      {x:80,y:150,w:640,h:65},
+      {x:30,y:270,w:730,h:120}
+    ]
+  },
+  urgencias: {
+    label:'Urgencias', color:'#dc2626', gifW:604, gifH:640,
+    region:{x:50,y:670,w:530,h:190},
+    slots:[
+      {x:100,y:95},{x:300,y:95},{x:480,y:95},
+      {x:280,y:280},{x:350,y:330},{x:280,y:380},
+      {x:130,y:290},{x:130,y:360},
+      {x:150,y:530},{x:300,y:540},{x:450,y:530},{x:530,y:550}
+    ],
+    paths:[
+      [{x:300,y:630},{x:300,y:560},{x:280,y:480},{x:280,y:380}],
+      [{x:300,y:630},{x:350,y:560},{x:400,y:480},{x:350,y:380}]
+    ],
+    walkable:[
+      {x:30,y:50,w:540,h:110},
+      {x:220,y:170,w:180,h:270},
+      {x:30,y:170,w:200,h:210},
+      {x:390,y:170,w:180,h:210},
+      {x:30,y:460,w:540,h:140}
+    ]
+  },
+  planta: {
+    label:'Planta', color:'#64748b', gifW:476, gifH:300,
+    region:{x:590,y:670,w:320,h:190},
+    slots:[
+      {x:120,y:100},{x:250,y:90},{x:380,y:100},
+      {x:100,y:200},{x:200,y:210},{x:300,y:200},{x:400,y:210},
+      {x:230,y:155},{x:350,y:155}
+    ],
+    paths:[
+      [{x:240,y:290},{x:240,y:220},{x:200,y:160}],
+      [{x:240,y:290},{x:300,y:220},{x:350,y:160}]
+    ],
+    walkable:[
+      {x:30,y:60,w:430,h:80},
+      {x:30,y:150,w:430,h:80},
+      {x:190,y:60,w:90,h:180}
+    ]
+  }
+};
+
+// General view floor slots
+var FLOOR_SLOTS = [
+  [{x:332,y:797},{x:689,y:799}],
+  [{x:157,y:587},{x:255,y:595},{x:382,y:580},{x:695,y:586},{x:770,y:580},{x:906,y:580}],
+  [{x:115,y:423},{x:220,y:429},{x:275,y:436},{x:368,y:432},{x:453,y:430},{x:563,y:433},{x:647,y:440},{x:730,y:434},{x:795,y:436},{x:890,y:433}]
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+var viewMode = 'general';
+var currentZone = null;
+var transitionProgress = 0;
+var transitionStart = 0;
+var TRANSITION_DURATION = 600;
+var timeShift = 'M';
+
+var generalSprites = [];
+var zoneSprites = [];
 var hoveredSprite = null;
 var selectedSprite = null;
-
-// Short bubble labels for activities
-var BUBBLE_TEXTS = {
-  qui_m: 'Operando...', qui_t: 'Operando...',
-  cons_m: 'En consulta', cons_t: 'En consulta',
-  diferida: 'Planta', diferida_t: 'Planta',
-  rucot: 'RUCOT', gestion: 'Gestion',
-  guardia: 'De guardia', saliente: 'Saliente', localizado: 'Localizado'
-};
-var BUBBLE_EMOJIS = {
-  qui_m: '\u2702', qui_t: '\u2702',
-  cons_m: '\uD83D\uDCCB', cons_t: '\uD83D\uDCCB',
-  diferida: '\uD83C\uDFE5', diferida_t: '\uD83C\uDFE5',
-  rucot: '\uD83D\uDCC5', gestion: '\uD83D\uDCCA',
-  guardia: '\uD83D\uDEA8', saliente: '\u2600\uFE0F', localizado: '\uD83D\uDCF1'
-};
-
-// Background image
-var bgImage = new Image();
-var bgLoaded = false;
-bgImage.onload = function() { bgLoaded = true; };
-bgImage.src = 'hospital-bg.png';
+var hoveredZone = null;
+var lastTime = 0;
 
 // ─────────────────────────────────────────────
-//  SURGEON HUE
+//  M/T FILTER
 // ─────────────────────────────────────────────
-function surgeonHue(id) { return (id * 137 + 30) % 360; }
+function isActivityVisible(activity, shift) {
+  if (activity.endsWith('_m')) return shift === 'M';
+  if (activity.endsWith('_t')) return shift === 'T';
+  return true;
+}
 
 // ─────────────────────────────────────────────
 //  GET DAY DATA
@@ -456,7 +605,7 @@ function getDayActivities(day, month, year) {
           });
           if (hasGuardia) continue;
         }
-        result.push({ surgeonId: Number(sid), activity: e.activity, companions: e.companions || [] });
+        result.push({surgeonId:Number(sid), activity:e.activity, companions:e.companions||[]});
       }
     }
   }
@@ -464,509 +613,694 @@ function getDayActivities(day, month, year) {
 }
 
 // ─────────────────────────────────────────────
-//  SLOT ASSIGNMENT
+//  SPRITE CREATION
 // ─────────────────────────────────────────────
-function assignSlots(activities) {
-  var floors = [[], [], []];
+var PX = 4;
+var SW = 32, SH = 32;
+var WALK_CYCLE = [1, 0, 2, 0];
+
+function surgeonHue(id) { return (id * 137 + 30) % 360; }
+
+function createZoneSprite(a, zone, slotIdx) {
+  var zd = ZONE_DATA[zone];
+  var slot = zd.slots[slotIdx % zd.slots.length];
+  var ox = (Math.random()-0.5)*16, oy = (Math.random()-0.5)*8;
+
+  // Pick a random entry path
+  var pathIdx = Math.floor(Math.random() * zd.paths.length);
+  var path = zd.paths[pathIdx];
+  var startPt = path[0];
+
+  return {
+    id:a.surgeonId, name:SURGEONS[a.surgeonId]||'Cirujano '+a.surgeonId,
+    zone:zone, activity:a.activity, companions:a.companions,
+    unit:SURGEON_UNITS?SURGEON_UNITS[a.surgeonId]:null,
+    hue:surgeonHue(a.surgeonId),
+    skinRow:a.surgeonId%6, hairRow:(a.surgeonId*3+1)%8,
+    x:startPt.x, y:startPt.y,
+    homeX:slot.x+ox, homeY:slot.y+oy,
+    targetX:path[1]?path[1].x:slot.x+ox,
+    targetY:path[1]?path[1].y:slot.y+oy,
+    direction:0, animStep:0, frameTimer:0,
+    state:'entering',           // entering → walk → idle
+    entryPath:path,             // waypoints to follow
+    entryStep:1,                // current waypoint index (0 = start pos)
+    wanderTimer:5000+Math.random()*5000, isWandering:false,
+    bubbleTimer:5000+Math.random()*8000, bubbleVisible:false, bubbleAlpha:0
+  };
+}
+
+// Map floor index to zone name for outfit selection in general view
+var FLOOR_ZONE = ['urgencias','consultas','quirofanos'];
+
+function createGeneralSprite(a, floor, slotIdx) {
+  var slots = FLOOR_SLOTS[floor];
+  var slot = slotIdx < slots.length ? slots[slotIdx] :
+    {x:slots[slots.length-1].x+(slotIdx-slots.length+1)*50, y:slots[slots.length-1].y};
+  var zone = ACTIVITY_ZONE[a.activity] || FLOOR_ZONE[floor];
+  return {
+    id:a.surgeonId, name:SURGEONS[a.surgeonId]||'Cirujano '+a.surgeonId,
+    floor:floor, activity:a.activity, companions:a.companions,
+    unit:SURGEON_UNITS?SURGEON_UNITS[a.surgeonId]:null,
+    hue:surgeonHue(a.surgeonId),
+    zone:zone,
+    skinRow:a.surgeonId%6, hairRow:(a.surgeonId*3+1)%8,
+    homeX:slot.x, homeY:slot.y, targetX:slot.x, targetY:slot.y,
+    x:-30-Math.random()*120, y:slot.y,
+    direction:2, animStep:0,  // facing right, walking in
+    frame:Math.floor(Math.random()*8), state:'walk', facing:1, frameTimer:0,
+    wanderTimer:3000+Math.random()*5000, isWandering:false,
+    bubbleTimer:2000+Math.random()*8000, bubbleVisible:false, bubbleAlpha:0,
+    idleActionTimer:2000+Math.random()*4000
+  };
+}
+
+function buildSprites(activities) {
+  // Filter visible activities once — same list feeds both views
+  var visible = [];
   for (var i = 0; i < activities.length; i++) {
-    var f = FLOOR_MAP[activities[i].activity];
-    if (f !== undefined) floors[f].push(activities[i]);
+    if (isActivityVisible(activities[i].activity, timeShift)) visible.push(activities[i]);
   }
 
-  var placed = [];
+  // General view sprites by floor
+  var floors = [[],[],[]];
+  for (var i = 0; i < visible.length; i++) {
+    var f = FLOOR_MAP[visible[i].activity];
+    if (f !== undefined) floors[f].push(visible[i]);
+  }
+  generalSprites = [];
   for (var fi = 0; fi < 3; fi++) {
-    var list = floors[fi];
-    var slots = FLOOR_SLOTS[fi];
-
-    for (var j = 0; j < list.length; j++) {
-      var a = list[j];
-      // Use fixed slot if available, otherwise offset from last slot
-      var slot;
-      if (j < slots.length) {
-        slot = slots[j];
-      } else {
-        var lastSlot = slots[slots.length - 1];
-        slot = { x: lastSlot.x + (j - slots.length + 1) * 50, y: lastSlot.y };
-      }
-      placed.push({
-        id: a.surgeonId,
-        name: SURGEONS[a.surgeonId] || 'Cirujano ' + a.surgeonId,
-        floor: fi,
-        activity: a.activity,
-        companions: a.companions,
-        unit: SURGEON_UNITS[a.surgeonId] || null,
-        hue: surgeonHue(a.surgeonId),
-        homeX: slot.x, homeY: slot.y,
-        targetX: slot.x,
-        targetY: slot.y,
-        x: -30 - Math.random() * 120,
-        y: slot.y,
-        frame: Math.floor(Math.random() * 8),
-        state: 'walk',
-        facing: 1,
-        frameTimer: 0,
-        // Wandering
-        wanderTimer: 3000 + Math.random() * 5000,
-        isWandering: false,
-        // Speech bubble
-        bubbleTimer: 2000 + Math.random() * 8000,
-        bubbleVisible: false,
-        bubbleAlpha: 0,
-        // Idle variety
-        idleAction: 'stand', // stand, lookAround, turnBack
-        idleActionTimer: 2000 + Math.random() * 4000
-      });
+    for (var j = 0; j < floors[fi].length; j++) {
+      generalSprites.push(createGeneralSprite(floors[fi][j], fi, j));
     }
   }
-  return placed;
+
+  // Zone sprites — same visible list, same surgeon IDs
+  var groups = {quirofanos:[],consultas:[],urgencias:[],planta:[]};
+  for (var i = 0; i < visible.length; i++) {
+    var z = ACTIVITY_ZONE[visible[i].activity];
+    if (z) groups[z].push(visible[i]);
+  }
+  zoneSprites = [];
+  for (var z in groups) {
+    for (var j = 0; j < groups[z].length; j++) zoneSprites.push(createZoneSprite(groups[z][j], z, j));
+  }
+
+  updateZoneCounts(activities);
+}
+
+function updateZoneCounts(activities) {
+  var c = {quirofanos:0,consultas:0,urgencias:0,planta:0};
+  for (var i = 0; i < activities.length; i++) {
+    var z = ACTIVITY_ZONE[activities[i].activity];
+    if (z && isActivityVisible(activities[i].activity, timeShift)) c[z]++;
+  }
+  for (var z in c) {
+    var el = document.getElementById('count-'+z);
+    if (el) el.textContent = c[z];
+  }
 }
 
 // ─────────────────────────────────────────────
-//  DRAW SURGEON SPRITE
+//  DRAW PROCEDURAL SURGEON (general view)
 // ─────────────────────────────────────────────
-function drawSurgeon(x, y, hue, frame, state, facing, isDark) {
+function drawSurgeon(x, y, hue, frame, state, facing) {
   var s = PX;
-  var skin = '#FFDAB9';
-  var skinShadow = '#E8967A';
-  var coat = '#ffffff';
-  var coatShadow = '#e2e8f0';
-  var capColor = 'hsl(' + hue + ', 60%, 38%)';
-  var scrubColor = 'hsl(' + hue + ', 65%, 45%)';
-  var eyes = '#333';
-  var shoes = '#444';
-  var pants = '#4b5563';
-  var f = facing;
+  var skin='#FFDAB9',skinShadow='#E8967A',coat='#ffffff',coatShadow='#e2e8f0';
+  var capColor='hsl('+hue+',60%,38%)', scrubColor='hsl('+hue+',65%,45%)';
+  var shoes='#444',pants='#4b5563',f=facing;
+  var legOff=(state==='walk')?Math.sin(frame*Math.PI*0.5)*1.5*s:0;
+  var armAnim=(state==='work')?Math.sin(frame*Math.PI*0.5)*s:0;
+  var breathe=(state==='idle')?Math.sin(frame*0.8)*0.3*s:0;
 
-  var legOff = (state === 'walk') ? Math.sin(frame * Math.PI * 0.5) * 1.5 * s : 0;
-  var armAnim = (state === 'work') ? Math.sin(frame * Math.PI * 0.5) * s : 0;
-  var breathe = (state === 'idle') ? Math.sin(frame * 0.8) * 0.3 * s : 0;
+  ctx.fillStyle='rgba(0,0,0,0.18)';
+  ctx.beginPath();ctx.ellipse(x,y+11.5*s,5*s,1.5*s,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=shoes;
+  ctx.fillRect(x-3*s,y+10*s+legOff,3*s,s);ctx.fillRect(x+1*s,y+10*s-legOff,3*s,s);
+  ctx.fillStyle=pants;
+  ctx.fillRect(x-2*s,y+8*s+legOff,2*s,2*s);ctx.fillRect(x+1*s,y+8*s-legOff,2*s,2*s);
+  ctx.fillStyle=coat;ctx.fillRect(x-3*s,y+2*s+breathe,8*s,6*s);
+  ctx.fillStyle=coatShadow;ctx.fillRect(x+(f>0?4:-3)*s,y+3*s+breathe,s,4*s);
+  ctx.fillStyle='#cbd5e1';ctx.fillRect(x+0.5*s,y+4*s+breathe,s,s);ctx.fillRect(x+0.5*s,y+6*s+breathe,s,s);
+  ctx.fillStyle=scrubColor;ctx.fillRect(x-2*s,y+1.5*s+breathe,6*s,2*s);
+  ctx.fillStyle=coat;
+  ctx.fillRect(x-4*s,y+3*s+breathe+armAnim,2*s,4*s);ctx.fillRect(x+4*s,y+3*s+breathe-armAnim,2*s,4*s);
+  ctx.fillStyle=skin;
+  ctx.fillRect(x-4*s,y+7*s+breathe+armAnim,2*s,s);ctx.fillRect(x+4*s,y+7*s+breathe-armAnim,2*s,s);
+  ctx.fillStyle=skin;ctx.fillRect(x-2*s,y-3*s,6*s,4*s);
+  ctx.fillStyle=skinShadow;ctx.fillRect(x+(f>0?3:-2)*s,y-2*s,s,2*s);
+  ctx.fillStyle=capColor;ctx.fillRect(x-1*s,y-5*s,4*s,s);ctx.fillRect(x-2*s,y-4*s,6*s,s);
+  ctx.fillStyle='hsl('+hue+',50%,28%)';ctx.fillRect(x-2*s,y-3*s,6*s,s);
+  ctx.fillStyle='#333';
+  var blink=frame%10===0;
+  if(!blink){var ex=f>0?0:-1;ctx.fillRect(x+ex*s,y-2*s,s,s);ctx.fillRect(x+(ex+3)*s,y-2*s,s,s);ctx.fillStyle='#fff';ctx.fillRect(x+(ex+(f>0?0:1))*s,y-2*s,0.5*s,0.5*s);}
+  else{ctx.fillRect(x-s,y-1.5*s,4*s,0.5*s);}
+  ctx.fillStyle='#E8967A';ctx.fillRect(x,y-0.5*s,2*s,0.5*s);
+  ctx.fillStyle=scrubColor;ctx.globalAlpha=0.8;ctx.fillRect(x+2*s,y+3*s+breathe,2*s,2*s);ctx.globalAlpha=1;
+}
+
+// ─────────────────────────────────────────────
+//  DRAW SPRITE-SHEET CHARACTER (zone view)
+// ─────────────────────────────────────────────
+function drawSpriteCharacter(sp, scale, offX, offY) {
+  var step = WALK_CYCLE[sp.animStep % WALK_CYCLE.length];
+  var col = sp.direction * 6 + step;
+  var ss = scale * SPRITE_SCALE;
+  var dw = SW*ss, dh = SH*ss;
+  var feetX = offX + sp.x*scale;
+  var feetY = offY + sp.y*scale;
+  var dx = feetX - dw/2;
+  var dy = feetY - dh;
 
   // Shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.18)';
-  ctx.beginPath();
-  ctx.ellipse(x, y + 11.5 * s, 5 * s, 1.5 * s, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.save();ctx.globalAlpha=0.25;ctx.fillStyle='#000';
+  ctx.beginPath();ctx.ellipse(feetX, feetY+2, 8*ss, 3*ss, 0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
 
-  // Shoes
-  ctx.fillStyle = shoes;
-  ctx.fillRect(x - 3 * s, y + 10 * s + legOff, 3 * s, s);
-  ctx.fillRect(x + 1 * s, y + 10 * s - legOff, 3 * s, s);
+  if (bodyImg.complete) ctx.drawImage(bodyImg, col*SW, sp.skinRow*SH, SW, SH, dx, dy, dw, dh);
+  var outfit = outfitImgs[sp.zone];
+  if (outfit && outfit.complete) ctx.drawImage(outfit, col*SW, 0, SW, SH, dx, dy, dw, dh);
+  if (hairImg.complete) ctx.drawImage(hairImg, col*SW, sp.hairRow*SH, SW, SH, dx, dy, dw, dh);
+}
 
-  // Legs
-  ctx.fillStyle = pants;
-  ctx.fillRect(x - 2 * s, y + 8 * s + legOff, 2 * s, 2 * s);
-  ctx.fillRect(x + 1 * s, y + 8 * s - legOff, 2 * s, 2 * s);
-
-  // Body (coat)
-  ctx.fillStyle = coat;
-  ctx.fillRect(x - 3 * s, y + 2 * s + breathe, 8 * s, 6 * s);
-  ctx.fillStyle = coatShadow;
-  ctx.fillRect(x + (f > 0 ? 4 : -3) * s, y + 3 * s + breathe, s, 4 * s);
-  // Buttons
-  ctx.fillStyle = '#cbd5e1';
-  ctx.fillRect(x + 0.5 * s, y + 4 * s + breathe, s, s);
-  ctx.fillRect(x + 0.5 * s, y + 6 * s + breathe, s, s);
-
-  // Collar/Scrubs
-  ctx.fillStyle = scrubColor;
-  ctx.fillRect(x - 2 * s, y + 1.5 * s + breathe, 6 * s, 2 * s);
-
-  // Arms
-  ctx.fillStyle = coat;
-  ctx.fillRect(x - 4 * s, y + 3 * s + breathe + armAnim, 2 * s, 4 * s);
-  ctx.fillRect(x + 4 * s, y + 3 * s + breathe - armAnim, 2 * s, 4 * s);
-  ctx.fillStyle = skin;
-  ctx.fillRect(x - 4 * s, y + 7 * s + breathe + armAnim, 2 * s, s);
-  ctx.fillRect(x + 4 * s, y + 7 * s + breathe - armAnim, 2 * s, s);
-
-  // Stethoscope (work state)
-  if (state === 'work') {
-    ctx.fillStyle = '#3b82f6';
-    ctx.fillRect(x - s, y + 2 * s + breathe, s, 4 * s);
-    ctx.fillRect(x - s, y + 5 * s + breathe, 3 * s, s);
-    ctx.fillRect(x - 2 * s, y + s + breathe, s, s);
-    ctx.fillRect(x, y + s + breathe, s, s);
+// Check if a point is inside any walkable rect of a zone
+function isWalkable(zone, px, py) {
+  var rects = ZONE_DATA[zone].walkable;
+  if (!rects) return true;
+  for (var i = 0; i < rects.length; i++) {
+    var r = rects[i];
+    if (px >= r.x && px <= r.x+r.w && py >= r.y && py <= r.y+r.h) return true;
   }
+  return false;
+}
 
-  // Head
-  ctx.fillStyle = skin;
-  ctx.fillRect(x - 2 * s, y - 3 * s, 6 * s, 4 * s);
-  ctx.fillStyle = skinShadow;
-  ctx.fillRect(x + (f > 0 ? 3 : -2) * s, y - 2 * s, s, 2 * s);
-
-  // Surgical cap
-  ctx.fillStyle = capColor;
-  ctx.fillRect(x - 1 * s, y - 5 * s, 4 * s, s);
-  ctx.fillRect(x - 2 * s, y - 4 * s, 6 * s, s);
-  ctx.fillStyle = 'hsl(' + hue + ', 50%, 28%)';
-  ctx.fillRect(x - 2 * s, y - 3 * s, 6 * s, s);
-
-  // Eyes
-  ctx.fillStyle = eyes;
-  var blink = frame % 10 === 0;
-  if (!blink) {
-    var ex = f > 0 ? 0 : -1;
-    ctx.fillRect(x + ex * s, y - 2 * s, s, s);
-    ctx.fillRect(x + (ex + 3) * s, y - 2 * s, s, s);
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(x + (ex + (f > 0 ? 0 : 1)) * s, y - 2 * s, 0.5 * s, 0.5 * s);
-  } else {
-    ctx.fillRect(x - s, y - 1.5 * s, 4 * s, 0.5 * s);
-  }
-
-  // Mouth
-  ctx.fillStyle = '#E8967A';
-  ctx.fillRect(x, y - 0.5 * s, 2 * s, 0.5 * s);
-
-  // Activity badge
-  ctx.fillStyle = scrubColor;
-  ctx.globalAlpha = 0.8;
-  ctx.fillRect(x + 2 * s, y + 3 * s + breathe, 2 * s, 2 * s);
-  ctx.globalAlpha = 1;
+// Pick a random walkable point in a zone
+function randomWalkablePoint(zone) {
+  var rects = ZONE_DATA[zone].walkable;
+  if (!rects || rects.length === 0) return {x:200,y:200};
+  var r = rects[Math.floor(Math.random() * rects.length)];
+  return {
+    x: r.x + 10 + Math.random() * (r.w - 20),
+    y: r.y + 10 + Math.random() * (r.h - 20)
+  };
 }
 
 // ─────────────────────────────────────────────
-//  NAME TAG
+//  NAME TAG & BUBBLE
 // ─────────────────────────────────────────────
-function drawNameTag(x, y, name) {
+function drawNameTag(x, y, name, yOff) {
   var lastName = name.split(' ').pop();
-  ctx.font = 'bold 10px Inter, sans-serif';
-  ctx.textAlign = 'center';
+  ctx.font = 'bold 10px Inter, sans-serif'; ctx.textAlign = 'center';
   var tw = ctx.measureText(lastName).width;
-  var tagY = y - 7 * PX;
-  var rx = x - tw / 2 - 6, ry = tagY - 11, rw = tw + 12, rh = 15;
-  // Pill background
+  var tagY = y - yOff, rx = x-tw/2-6, ry = tagY-11, rw = tw+12, rh = 15;
   ctx.beginPath();
-  ctx.moveTo(rx + 4, ry); ctx.lineTo(rx + rw - 4, ry);
-  ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + 4);
-  ctx.lineTo(rx + rw, ry + rh - 4);
-  ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - 4, ry + rh);
-  ctx.lineTo(rx + 4, ry + rh);
-  ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - 4);
-  ctx.lineTo(rx, ry + 4);
-  ctx.quadraticCurveTo(rx, ry, rx + 4, ry);
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(255,255,255,0.92)';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  // Text
-  ctx.fillStyle = '#1e293b';
-  ctx.fillText(lastName, x, tagY);
+  ctx.moveTo(rx+4,ry);ctx.lineTo(rx+rw-4,ry);ctx.quadraticCurveTo(rx+rw,ry,rx+rw,ry+4);
+  ctx.lineTo(rx+rw,ry+rh-4);ctx.quadraticCurveTo(rx+rw,ry+rh,rx+rw-4,ry+rh);
+  ctx.lineTo(rx+4,ry+rh);ctx.quadraticCurveTo(rx,ry+rh,rx,ry+rh-4);
+  ctx.lineTo(rx,ry+4);ctx.quadraticCurveTo(rx,ry,rx+4,ry);ctx.closePath();
+  ctx.fillStyle='rgba(255,255,255,0.92)';ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='#1e293b';ctx.fillText(lastName,x,tagY);
+}
+
+function drawBubble(x, y, text, alpha) {
+  if (alpha<=0) return;
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.font='10px Inter, sans-serif';
+  var tw=ctx.measureText(text).width, bw=tw+16, bh=20, bx=x-bw/2, by=y;
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath();ctx.moveTo(bx+6,by);ctx.lineTo(bx+bw-6,by);ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+6);
+  ctx.lineTo(bx+bw,by+bh-6);ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-6,by+bh);
+  ctx.lineTo(bx+6,by+bh);ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-6);
+  ctx.lineTo(bx,by+6);ctx.quadraticCurveTo(bx,by,bx+6,by);ctx.closePath();
+  ctx.fill();ctx.strokeStyle='rgba(0,0,0,0.12)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.95)';
+  ctx.beginPath();ctx.moveTo(x-4,by+bh);ctx.lineTo(x,by+bh+6);ctx.lineTo(x+4,by+bh);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#1e293b';ctx.textAlign='center';ctx.fillText(text,x,by+14);
+  ctx.restore();
+}
+
+function drawGlow(x, y, hue, intensity, rx, ry) {
+  ctx.save();ctx.globalAlpha=intensity*0.4;
+  ctx.fillStyle='hsl('+hue+',80%,60%)';
+  ctx.beginPath();ctx.ellipse(x,y+(ry||2*PX),rx||10*PX,ry||14*PX,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+// Draw sprite-sheet character at direct canvas coordinates (for general view)
+var GENERAL_SPRITE_SCALE = 2.2; // scale for general hospital view
+function drawSpriteGeneral(sp) {
+  var step = WALK_CYCLE[sp.animStep % WALK_CYCLE.length];
+  var dir = sp.direction;
+  var col = dir * 6 + step;
+  var sc = GENERAL_SPRITE_SCALE;
+  var dw = SW*sc, dh = SH*sc;
+  var dx = sp.x - dw/2, dy = sp.y - dh + 8;
+
+  // Shadow
+  ctx.save();ctx.globalAlpha=0.2;ctx.fillStyle='#000';
+  ctx.beginPath();ctx.ellipse(sp.x, sp.y+8, 10*sc, 3*sc, 0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+
+  if (bodyImg.complete) ctx.drawImage(bodyImg, col*SW, sp.skinRow*SH, SW, SH, dx, dy, dw, dh);
+  var outfit = outfitImgs[sp.zone];
+  if (outfit && outfit.complete) ctx.drawImage(outfit, col*SW, 0, SW, SH, dx, dy, dw, dh);
+  if (hairImg.complete) ctx.drawImage(hairImg, col*SW, sp.hairRow*SH, SW, SH, dx, dy, dw, dh);
 }
 
 // ─────────────────────────────────────────────
-//  SPEECH BUBBLE
+//  EASING
 // ─────────────────────────────────────────────
-function drawBubble(x, y, text, emoji, alpha) {
-  if (alpha <= 0) return;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  var fullText = emoji + ' ' + text;
-  ctx.font = '10px Inter, sans-serif';
-  var tw = ctx.measureText(fullText).width;
-  var bw = tw + 16, bh = 20;
-  var bx = x - bw / 2, by = y - 14 * PX;
+function easeInOut(t) { return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; }
 
-  // Bubble body
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.beginPath();
-  ctx.moveTo(bx + 6, by); ctx.lineTo(bx + bw - 6, by);
-  ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + 6);
-  ctx.lineTo(bx + bw, by + bh - 6);
-  ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - 6, by + bh);
-  ctx.lineTo(bx + 6, by + bh);
-  ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - 6);
-  ctx.lineTo(bx, by + 6);
-  ctx.quadraticCurveTo(bx, by, bx + 6, by);
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
+// ─────────────────────────────────────────────
+//  RENDER GENERAL VIEW
+// ─────────────────────────────────────────────
+function renderGeneral(zoomProgress) {
+  var p = zoomProgress||0, ep = easeInOut(p);
+  var vx=0,vy=0,vw=CW,vh=CH;
+  if (p>0 && currentZone) {
+    var r=ZONE_DATA[currentZone].region;
+    vx=r.x*ep; vy=r.y*ep; vw=CW-(CW-r.w)*ep; vh=CH-(CH-r.h)*ep;
+  }
+  if (bgImage.complete) {
+    var sx=vx*(2150/CW),sy=vy*(1984/CH),sw=vw*(2150/CW),sh=vh*(1984/CH);
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(bgImage,sx,sy,sw,sh,0,0,CW,CH);
+  } else { ctx.fillStyle='#87ceeb';ctx.fillRect(0,0,CW,CH); }
 
-  // Tail
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
-  ctx.beginPath();
-  ctx.moveTo(x - 4, by + bh);
-  ctx.lineTo(x, by + bh + 6);
-  ctx.lineTo(x + 4, by + bh);
-  ctx.closePath();
-  ctx.fill();
+  if (document.documentElement.getAttribute('data-theme')==='dark') {
+    ctx.fillStyle='rgba(10,15,30,0.55)';ctx.fillRect(0,0,CW,CH);
+  }
 
-  // Text
-  ctx.fillStyle = '#1e293b';
-  ctx.textAlign = 'center';
-  ctx.fillText(fullText, x, by + 14);
+  if (p===0 && hoveredZone && ZONE_DATA[hoveredZone]) {
+    var hr=ZONE_DATA[hoveredZone].region;
+    ctx.fillStyle='rgba(255,255,255,0.12)';ctx.fillRect(hr.x,hr.y,hr.w,hr.h);
+    ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=2;ctx.strokeRect(hr.x,hr.y,hr.w,hr.h);
+    ctx.font='bold 14px Inter, sans-serif';ctx.textAlign='center';
+    ctx.fillStyle='rgba(255,255,255,0.9)';
+    ctx.fillText('Entrar a '+ZONE_DATA[hoveredZone].label, hr.x+hr.w/2, hr.y+hr.h/2+5);
+  }
+
+  if (p<0.6) {
+    ctx.globalAlpha=1-p*1.6;
+    for (var i=0;i<generalSprites.length;i++) {
+      var sp=generalSprites[i];
+      var gs=GENERAL_SPRITE_SCALE;
+      if (sp===selectedSprite) drawGlow(sp.x,sp.y,sp.hue,0.8,12*gs,4*gs);
+      else if (sp===hoveredSprite) drawGlow(sp.x,sp.y,sp.hue,0.4,12*gs,4*gs);
+      drawSpriteGeneral(sp);
+      drawNameTag(sp.x, sp.y-SH*gs+4, sp.name, 0);
+      if (sp.bubbleVisible && sp.bubbleAlpha>0) drawBubble(sp.x, sp.y-SH*gs-16, BUBBLE_TEXTS[sp.activity]||'', sp.bubbleAlpha);
+    }
+    ctx.globalAlpha=1;
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RENDER ZONE VIEW
+// ─────────────────────────────────────────────
+function getZoneTransform(zoneName) {
+  var zd=ZONE_DATA[zoneName];
+  var scX=CW/zd.gifW, scY=CH/zd.gifH, sc=Math.min(scX,scY);
+  return {scale:sc, offX:(CW-zd.gifW*sc)/2, offY:(CH-zd.gifH*sc)/2};
+}
+
+function renderZone(alpha) {
+  if (!currentZone) return;
+  var gif=zoneGifs[currentZone], t=getZoneTransform(currentZone);
+  ctx.save(); ctx.globalAlpha=alpha;
+
+  var isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  ctx.fillStyle=isDark?'#0a0f1a':'#c8cdd6'; ctx.fillRect(0,0,CW,CH);
+  if (gif&&gif.complete) {
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(gif, t.offX, t.offY, ZONE_DATA[currentZone].gifW*t.scale, ZONE_DATA[currentZone].gifH*t.scale);
+  }
+  if (isDark) { ctx.fillStyle='rgba(10,15,30,0.4)';ctx.fillRect(0,0,CW,CH); }
+
+  var zoneSps=zoneSprites.filter(function(s){return s.zone===currentZone;});
+  zoneSps.sort(function(a,b){return a.y-b.y;});
+
+  var ss=t.scale*SPRITE_SCALE;
+  for (var i=0;i<zoneSps.length;i++) {
+    var sp=zoneSps[i];
+    var sx=t.offX+sp.x*t.scale, sy=t.offY+sp.y*t.scale;
+    if (sp===selectedSprite) {
+      ctx.save();ctx.globalAlpha=0.4;ctx.fillStyle='hsl('+sp.hue+',80%,60%)';
+      ctx.beginPath();ctx.ellipse(sx,sy,14*ss,6*ss,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    } else if (sp===hoveredSprite) {
+      ctx.save();ctx.globalAlpha=0.25;ctx.fillStyle='hsl('+sp.hue+',80%,60%)';
+      ctx.beginPath();ctx.ellipse(sx,sy,14*ss,6*ss,0,0,Math.PI*2);ctx.fill();ctx.restore();
+    }
+    drawSpriteCharacter(sp,t.scale,t.offX,t.offY);
+    drawNameTag(sx, sy-SH*ss-2, sp.name, 0);
+    if (sp.bubbleVisible && sp.bubbleAlpha>0) drawBubble(sx, sy-SH*ss-22, BUBBLE_TEXTS[sp.activity]||'', sp.bubbleAlpha);
+  }
   ctx.restore();
 }
 
 // ─────────────────────────────────────────────
-//  SELECTION GLOW
-// ─────────────────────────────────────────────
-function drawGlow(x, y, hue, intensity) {
-  ctx.save();
-  ctx.globalAlpha = intensity * 0.4;
-  ctx.fillStyle = 'hsl(' + hue + ', 80%, 60%)';
-  ctx.beginPath();
-  ctx.ellipse(x, y + 2 * PX, 10 * PX, 14 * PX, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-}
-
-// ─────────────────────────────────────────────
-//  RENDER ALL
+//  MAIN RENDER
 // ─────────────────────────────────────────────
 function renderAll() {
-  ctx.clearRect(0, 0, CW, CH);
-
-  // Draw background image
-  if (bgLoaded) {
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(bgImage, 0, 0, CW, CH);
-  } else {
-    // Fallback while loading
-    ctx.fillStyle = '#87ceeb';
-    ctx.fillRect(0, 0, CW, CH);
-    ctx.fillStyle = '#555';
-    ctx.font = 'bold 16px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Cargando imagen del hospital...', CW / 2, CH / 2);
+  ctx.clearRect(0,0,CW,CH);
+  if (viewMode==='general') { renderGeneral(0); }
+  else if (viewMode==='transition-in') {
+    renderGeneral(transitionProgress);
+    if (transitionProgress>0.4) renderZone((transitionProgress-0.4)/0.6);
   }
-
-  // Dark mode overlay
-  if (document.documentElement.getAttribute('data-theme') === 'dark') {
-    ctx.fillStyle = 'rgba(10, 15, 30, 0.55)';
-    ctx.fillRect(0, 0, CW, CH);
-  }
-
-  // Draw sprites
-  for (var i = 0; i < sprites.length; i++) {
-    var sp = sprites[i];
-    // Hover/selection glow
-    if (sp === selectedSprite) {
-      drawGlow(sp.x, sp.y, sp.hue, 0.8);
-    } else if (sp === hoveredSprite) {
-      drawGlow(sp.x, sp.y, sp.hue, 0.4);
-    }
-    drawSurgeon(sp.x, sp.y, sp.hue, Math.floor(sp.frame), sp.state, sp.facing);
-    drawNameTag(sp.x, sp.y, sp.name);
-    // Speech bubble
-    if (sp.bubbleVisible && sp.bubbleAlpha > 0) {
-      drawBubble(sp.x, sp.y, BUBBLE_TEXTS[sp.activity] || '', BUBBLE_EMOJIS[sp.activity] || '', sp.bubbleAlpha);
-    }
-  }
-
-  // Calibration overlay
-  if (calibrationMode) {
-    // Draw crosshairs at stored clicks
-    for (var ci = 0; ci < calibrationClicks.length; ci++) {
-      var cc = calibrationClicks[ci];
-      ctx.save();
-      ctx.strokeStyle = '#ff0000';
-      ctx.lineWidth = 1;
-      // Horizontal line across full width
-      ctx.beginPath(); ctx.moveTo(0, cc.y); ctx.lineTo(CW, cc.y); ctx.stroke();
-      // Vertical short line
-      ctx.beginPath(); ctx.moveTo(cc.x, cc.y - 15); ctx.lineTo(cc.x, cc.y + 15); ctx.stroke();
-      // Label
-      ctx.fillStyle = '#ff0000';
-      ctx.font = 'bold 12px Inter, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('(' + cc.x + ', ' + cc.y + ')  #' + (ci + 1), cc.x + 8, cc.y - 4);
-      ctx.restore();
-    }
-    // Draw current FLOOR_GROUND lines for reference
-    var floorLabels = ['Urgencias Y=' + FLOOR_GROUND[0], 'Consultas Y=' + FLOOR_GROUND[1], 'Quirofanos Y=' + FLOOR_GROUND[2]];
-    var floorColors = ['#ff6b6b', '#51cf66', '#339af0'];
-    for (var fi = 0; fi < 3; fi++) {
-      ctx.save();
-      ctx.strokeStyle = floorColors[fi];
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      ctx.beginPath(); ctx.moveTo(0, FLOOR_GROUND[fi]); ctx.lineTo(CW, FLOOR_GROUND[fi]); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = floorColors[fi];
-      ctx.font = 'bold 11px Inter, sans-serif';
-      ctx.textAlign = 'right';
-      ctx.fillText(floorLabels[fi], CW - 10, FLOOR_GROUND[fi] - 6);
-      ctx.restore();
-    }
-    // Draw SLOT_LEFT and SLOT_RIGHT vertical lines
-    ctx.save();
-    ctx.strokeStyle = '#ffd43b';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath(); ctx.moveTo(SLOT_LEFT, 0); ctx.lineTo(SLOT_LEFT, CH); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(SLOT_RIGHT, 0); ctx.lineTo(SLOT_RIGHT, CH); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = '#ffd43b';
-    ctx.font = 'bold 11px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('LEFT=' + SLOT_LEFT, SLOT_LEFT + 4, 20);
-    ctx.textAlign = 'right';
-    ctx.fillText('RIGHT=' + SLOT_RIGHT, SLOT_RIGHT - 4, 20);
-    ctx.restore();
+  else if (viewMode==='zone') { renderZone(1); }
+  else if (viewMode==='transition-out') {
+    var p=1-transitionProgress;
+    renderGeneral(p);
+    if (p>0.4) renderZone((p-0.4)/0.6);
   }
 }
 
 // ─────────────────────────────────────────────
-//  CALIBRATION MODE
+//  ZONE NAVIGATION
 // ─────────────────────────────────────────────
-var calibrationMode = false;
-var calibrationClicks = [];
+function enterZone(zoneName) {
+  if (viewMode!=='general'||!ZONE_DATA[zoneName]) return;
+  currentZone=zoneName; viewMode='transition-in'; transitionProgress=0; transitionStart=performance.now();
+  selectedSprite=null; hoveredSprite=null; updateSelectedPanel(null);
+  document.getElementById('btn-back').style.display='';
+  document.getElementById('zone-label').style.display='';
+  document.getElementById('zone-label').textContent=ZONE_DATA[zoneName].label;
+  var btns=document.querySelectorAll('.zone-btn');
+  for(var i=0;i<btns.length;i++) btns[i].classList.toggle('active',btns[i].getAttribute('data-zone')===zoneName);
+}
 
-canvas.addEventListener('click', function(e) {
-  var rect = canvas.getBoundingClientRect();
-  var scaleX = CW / rect.width;
-  var scaleY = CH / rect.height;
-  var cx = Math.round((e.clientX - rect.left) * scaleX);
-  var cy = Math.round((e.clientY - rect.top) * scaleY);
+function exitZone() {
+  if (viewMode!=='zone') return;
+  viewMode='transition-out'; transitionProgress=0; transitionStart=performance.now();
+  selectedSprite=null; hoveredSprite=null; updateSelectedPanel(null);
+  document.getElementById('btn-back').style.display='none';
+  document.getElementById('zone-label').style.display='none';
+  var btns=document.querySelectorAll('.zone-btn');
+  for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+}
 
-  if (calibrationMode) {
-    calibrationClicks.push({ x: cx, y: cy });
-    var log = document.getElementById('calib-log');
-    log.innerHTML += '<div>#' + calibrationClicks.length + ': <b>x=' + cx + ', y=' + cy + '</b></div>';
-    log.scrollTop = log.scrollHeight;
-    renderAll();
-    return;
-  }
+document.getElementById('btn-back').addEventListener('click', exitZone);
 
-  // Click to select/deselect surgeon
-  var hit = null;
-  for (var i = 0; i < sprites.length; i++) {
-    var sp = sprites[i];
-    if (Math.abs(cx - sp.x) < 22 && Math.abs(cy - sp.y) < 32) { hit = sp; break; }
-  }
-  if (hit && selectedSprite === hit) {
-    selectedSprite = null;
-    updateSelectedPanel(null);
-  } else if (hit) {
-    selectedSprite = hit;
-    // Make selected surgeon show bubble
-    hit.bubbleVisible = true;
-    hit.bubbleAlpha = 1;
-    hit.bubbleTimer = 4000;
-    updateSelectedPanel(hit);
-  } else {
-    selectedSprite = null;
-    updateSelectedPanel(null);
-  }
-});
-
-function toggleCalibration() {
-  calibrationMode = !calibrationMode;
-  var btn = document.getElementById('btn-calibrate');
-  if (calibrationMode) {
-    btn.textContent = 'Salir calibracion';
-    btn.style.background = '#dc2626';
-    calibrationClicks = [];
-  } else {
-    btn.textContent = 'Calibrar posiciones';
-    btn.style.background = '';
-    calibrationClicks = [];
-  }
-  renderAll();
+var zoneBtns = document.querySelectorAll('.zone-btn');
+for (var zi=0;zi<zoneBtns.length;zi++) {
+  zoneBtns[zi].addEventListener('click', function() {
+    var z=this.getAttribute('data-zone');
+    if (viewMode==='zone' && currentZone===z) { exitZone(); return; }
+    if (viewMode==='zone') { exitZone(); var target=z; setTimeout(function(){enterZone(target);}, TRANSITION_DURATION+50); return; }
+    enterZone(z);
+  });
 }
 
 // ─────────────────────────────────────────────
 //  ANIMATION LOOP
 // ─────────────────────────────────────────────
 function gameLoop(timestamp) {
-  var dt = timestamp - lastTime;
-  lastTime = timestamp;
-  if (dt > 100) { requestAnimationFrame(gameLoop); return; }
+  var dt=timestamp-lastTime; lastTime=timestamp;
+  if (dt>100) { requestAnimationFrame(gameLoop); return; }
 
-  for (var i = 0; i < sprites.length; i++) {
-    var sp = sprites[i];
-    sp.frameTimer += dt;
-
-    // Speech bubble timer
-    sp.bubbleTimer -= dt;
-    if (sp.bubbleTimer <= 0) {
-      if (!sp.bubbleVisible) {
-        sp.bubbleVisible = true;
-        sp.bubbleAlpha = 0;
-        sp.bubbleTimer = 3000 + Math.random() * 2000; // show duration
-      } else {
-        sp.bubbleVisible = false;
-        sp.bubbleAlpha = 0;
-        sp.bubbleTimer = 5000 + Math.random() * 10000; // next bubble delay
-      }
-    }
-    // Bubble fade in/out
-    if (sp.bubbleVisible && sp.bubbleAlpha < 1) {
-      sp.bubbleAlpha = Math.min(1, sp.bubbleAlpha + dt / 300);
-    }
-    if (!sp.bubbleVisible && sp.bubbleAlpha > 0) {
-      sp.bubbleAlpha = Math.max(0, sp.bubbleAlpha - dt / 200);
-    }
-
-    if (sp.state === 'walk') {
-      var speed = 1.8;
-      var dx = sp.targetX - sp.x;
-      var dy = sp.targetY - sp.y;
-      var dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist < 3) {
-        sp.x = sp.targetX; sp.y = sp.targetY;
-        if (sp.isWandering) {
-          // Returned from wandering — go back to normal
-          sp.isWandering = false;
-          sp.state = FLOOR_MAP[sp.activity] === 2 ? 'work' : 'idle';
-          sp.wanderTimer = 4000 + Math.random() * 8000;
-        } else {
-          sp.state = FLOOR_MAP[sp.activity] === 2 ? 'work' : 'idle';
-        }
-        sp.frame = 0; sp.frameTimer = 0;
-      } else {
-        sp.x += (dx / dist) * speed * (dt / 16);
-        sp.y += (dy / dist) * speed * (dt / 16);
-        sp.facing = dx > 0 ? 1 : -1;
-        if (sp.frameTimer > 100) { sp.frame = (sp.frame + 1) % 4; sp.frameTimer = 0; }
-      }
-    } else {
-      var interval = sp.state === 'work' ? 300 : 400;
-      if (sp.frameTimer > interval) { sp.frame = (sp.frame + 1) % 8; sp.frameTimer = 0; }
-
-      // Idle variety — random facing changes
-      sp.idleActionTimer -= dt;
-      if (sp.idleActionTimer <= 0 && sp.state === 'idle') {
-        var rand = Math.random();
-        if (rand < 0.3) {
-          sp.facing = sp.facing * -1; // turn around
-        }
-        sp.idleActionTimer = 2000 + Math.random() * 4000;
-      }
-
-      // Wandering — occasionally walk to a nearby position and back
-      sp.wanderTimer -= dt;
-      if (sp.wanderTimer <= 0 && !sp.isWandering && sp.state !== 'walk') {
-        sp.isWandering = true;
-        var wanderDist = 20 + Math.random() * 40;
-        var wanderDir = Math.random() < 0.5 ? -1 : 1;
-        sp.targetX = sp.homeX + wanderDist * wanderDir;
-        sp.targetY = sp.homeY;
-        sp.state = 'walk';
-        sp.frame = 0; sp.frameTimer = 0;
-        sp.wanderTimer = 1500 + Math.random() * 2000; // time before returning
-      }
-      // Return from wander
-      if (sp.isWandering && sp.state !== 'walk') {
-        sp.wanderTimer -= dt;
-        if (sp.wanderTimer <= 0) {
-          sp.targetX = sp.homeX;
-          sp.targetY = sp.homeY;
-          sp.state = 'walk';
-          sp.frame = 0; sp.frameTimer = 0;
-        }
-      }
+  if (viewMode==='transition-in'||viewMode==='transition-out') {
+    transitionProgress=Math.min(1,(timestamp-transitionStart)/TRANSITION_DURATION);
+    if (transitionProgress>=1) {
+      if (viewMode==='transition-in') viewMode='zone';
+      else { viewMode='general'; currentZone=null; }
+      transitionProgress=0;
     }
   }
 
+  if (viewMode==='general'||viewMode==='transition-out') animateGeneralSprites(dt);
+  if (viewMode==='zone'||viewMode==='transition-in') animateZoneSprites(dt);
+
   renderAll();
   requestAnimationFrame(gameLoop);
+}
+
+function animateBubble(sp, dt) {
+  sp.bubbleTimer-=dt;
+  if (sp.bubbleTimer<=0) {
+    if (!sp.bubbleVisible) { sp.bubbleVisible=true;sp.bubbleAlpha=0;sp.bubbleTimer=3000+Math.random()*2000; }
+    else { sp.bubbleVisible=false;sp.bubbleAlpha=0;sp.bubbleTimer=5000+Math.random()*10000; }
+  }
+  if (sp.bubbleVisible&&sp.bubbleAlpha<1) sp.bubbleAlpha=Math.min(1,sp.bubbleAlpha+dt/300);
+  if (!sp.bubbleVisible&&sp.bubbleAlpha>0) sp.bubbleAlpha=Math.max(0,sp.bubbleAlpha-dt/200);
+}
+
+function animateGeneralSprites(dt) {
+  for (var i=0;i<generalSprites.length;i++) {
+    var sp=generalSprites[i]; sp.frameTimer+=dt;
+    animateBubble(sp,dt);
+    if (sp.state==='walk') {
+      var speed=1.8, dx=sp.targetX-sp.x, dy=sp.targetY-sp.y, dist=Math.sqrt(dx*dx+dy*dy);
+      if (dist<3) {
+        sp.x=sp.targetX;sp.y=sp.targetY;
+        sp.state='idle'; sp.direction=0; sp.animStep=0;
+        if (sp.isWandering){sp.isWandering=false;sp.wanderTimer=4000+Math.random()*8000;}
+        sp.frameTimer=0;
+      } else {
+        sp.x+=(dx/dist)*speed*(dt/16);sp.y+=(dy/dist)*speed*(dt/16);
+        // Set sprite sheet direction based on movement
+        sp.direction = Math.abs(dx)>Math.abs(dy) ? (dx>0?2:1) : (dy>0?0:3);
+        if (sp.frameTimer>120){sp.animStep=(sp.animStep+1)%4;sp.frameTimer=0;}
+      }
+    } else {
+      // Idle
+      sp.animStep=0;
+      sp.idleActionTimer-=dt;
+      if (sp.idleActionTimer<=0&&sp.state==='idle') {
+        // Random direction change
+        sp.direction = Math.floor(Math.random()*4);
+        sp.idleActionTimer=2000+Math.random()*4000;
+      }
+      sp.wanderTimer-=dt;
+      if (sp.wanderTimer<=0&&!sp.isWandering&&sp.state!=='walk') {
+        sp.isWandering=true;
+        sp.targetX=sp.homeX+(20+Math.random()*40)*(Math.random()<0.5?-1:1);
+        sp.targetY=sp.homeY;sp.state='walk';sp.frameTimer=0;
+        sp.wanderTimer=1500+Math.random()*2000;
+      }
+      if (sp.isWandering&&sp.state!=='walk') {
+        sp.wanderTimer-=dt;
+        if (sp.wanderTimer<=0){sp.targetX=sp.homeX;sp.targetY=sp.homeY;sp.state='walk';sp.frameTimer=0;}
+      }
+    }
+  }
+}
+
+function moveTowards(sp, dt, speed) {
+  var dx=sp.targetX-sp.x, dy=sp.targetY-sp.y, dist=Math.sqrt(dx*dx+dy*dy);
+  if (dist<3) { sp.x=sp.targetX; sp.y=sp.targetY; return true; }
+  sp.x+=(dx/dist)*speed*(dt/16); sp.y+=(dy/dist)*speed*(dt/16);
+  sp.direction=Math.abs(dx)>Math.abs(dy)?(dx>0?2:1):(dy>0?0:3);
+  if (sp.frameTimer>140){sp.animStep=(sp.animStep+1)%4;sp.frameTimer=0;}
+  return false;
+}
+
+function animateZoneSprites(dt) {
+  for (var i=0;i<zoneSprites.length;i++) {
+    var sp=zoneSprites[i]; sp.frameTimer+=dt;
+    animateBubble(sp,dt);
+
+    if (sp.state==='entering') {
+      // Follow entry path waypoints
+      var arrived = moveTowards(sp, dt, 0.7);
+      if (arrived) {
+        sp.entryStep++;
+        if (sp.entryStep < sp.entryPath.length) {
+          // Next waypoint
+          sp.targetX=sp.entryPath[sp.entryStep].x;
+          sp.targetY=sp.entryPath[sp.entryStep].y;
+        } else {
+          // Path complete — walk to assigned slot
+          sp.targetX=sp.homeX; sp.targetY=sp.homeY;
+          sp.state='walk';
+        }
+      }
+    } else if (sp.state==='walk') {
+      var arrived2 = moveTowards(sp, dt, 0.6);
+      if (arrived2) {
+        sp.state='idle';sp.direction=0;sp.animStep=0;
+        if (sp.isWandering){sp.isWandering=false;sp.wanderTimer=4000+Math.random()*6000;}
+      }
+    } else {
+      // Idle
+      sp.animStep=0;
+      sp.wanderTimer-=dt;
+      if (sp.wanderTimer<=0&&!sp.isWandering) {
+        sp.isWandering=true;
+        var dest = randomWalkablePoint(sp.zone);
+        sp.targetX=dest.x; sp.targetY=dest.y;
+        sp.state='walk';sp.frameTimer=0; sp.wanderTimer=2500+Math.random()*3000;
+      }
+      if (sp.isWandering&&sp.state!=='walk') {
+        sp.wanderTimer-=dt;
+        if (sp.wanderTimer<=0){sp.targetX=sp.homeX;sp.targetY=sp.homeY;sp.state='walk';sp.frameTimer=0;}
+      }
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  INTERACTION — CLICK
+// ─────────────────────────────────────────────
+canvas.addEventListener('click', function(e) {
+  var rect=canvas.getBoundingClientRect();
+  var scX=CW/rect.width, scY=CH/rect.height;
+  var cx=Math.round((e.clientX-rect.left)*scX), cy=Math.round((e.clientY-rect.top)*scY);
+
+  if (viewMode==='general') {
+    var hit=hitTestGeneral(cx,cy);
+    if (hit) {
+      if (selectedSprite===hit){selectedSprite=null;updateSelectedPanel(null);}
+      else {selectedSprite=hit;hit.bubbleVisible=true;hit.bubbleAlpha=1;hit.bubbleTimer=4000;updateSelectedPanel(hit);}
+      return;
+    }
+    for (var z in ZONE_DATA) {
+      var r=ZONE_DATA[z].region;
+      if (cx>=r.x&&cx<=r.x+r.w&&cy>=r.y&&cy<=r.y+r.h){enterZone(z);return;}
+    }
+    selectedSprite=null;updateSelectedPanel(null);
+  } else if (viewMode==='zone') {
+    var hit2=hitTestZone(cx,cy);
+    if (hit2) {
+      if (selectedSprite===hit2){selectedSprite=null;updateSelectedPanel(null);}
+      else {selectedSprite=hit2;hit2.bubbleVisible=true;hit2.bubbleAlpha=1;hit2.bubbleTimer=4000;updateSelectedPanel(hit2);}
+    } else {selectedSprite=null;updateSelectedPanel(null);}
+  }
+});
+
+function hitTestGeneral(cx,cy) {
+  var gs=GENERAL_SPRITE_SCALE;
+  for (var i=0;i<generalSprites.length;i++) {
+    var sp=generalSprites[i];
+    if (Math.abs(cx-sp.x)<16*gs&&Math.abs(cy-sp.y)<20*gs) return sp;
+  }
+  return null;
+}
+
+function hitTestZone(cx,cy) {
+  if (!currentZone) return null;
+  var t=getZoneTransform(currentZone);
+  var ss=t.scale*SPRITE_SCALE;
+  var zoneSps=zoneSprites.filter(function(s){return s.zone===currentZone;});
+  for (var i=0;i<zoneSps.length;i++) {
+    var sp=zoneSps[i];
+    var sx=t.offX+sp.x*t.scale, sy=t.offY+sp.y*t.scale;
+    if (Math.abs(cx-sx)<18*ss&&Math.abs(cy-sy)<34*ss) return sp;
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────
+//  INTERACTION — HOVER / TOOLTIP
+// ─────────────────────────────────────────────
+canvas.addEventListener('mousemove', function(e) {
+  var rect=canvas.getBoundingClientRect();
+  var mx=(e.clientX-rect.left)*(CW/rect.width), my=(e.clientY-rect.top)*(CH/rect.height);
+  var hit=null; hoveredZone=null;
+
+  if (viewMode==='general') {
+    hit=hitTestGeneral(mx,my);
+    if (!hit) {
+      for (var z in ZONE_DATA) {
+        var r=ZONE_DATA[z].region;
+        if (mx>=r.x&&mx<=r.x+r.w&&my>=r.y&&my<=r.y+r.h){hoveredZone=z;break;}
+      }
+    }
+  } else if (viewMode==='zone') { hit=hitTestZone(mx,my); }
+
+  hoveredSprite=hit;
+  if (hit) {
+    var unitStr=hit.unit?(Array.isArray(hit.unit)?hit.unit.join(', '):hit.unit):'';
+    tooltipEl.textContent='';
+    var frag=document.createDocumentFragment();
+    var ttN=document.createElement('div');ttN.className='tt-name';ttN.textContent=hit.name;frag.appendChild(ttN);
+    if (unitStr){var ttU=document.createElement('div');ttU.className='tt-unit';ttU.textContent=unitStr;frag.appendChild(ttU);}
+    var ttA=document.createElement('div');ttA.className='tt-act';ttA.style.color=ACTIVITY_COLORS[hit.activity];
+    ttA.textContent=ACTIVITY_LABELS[hit.activity];frag.appendChild(ttA);
+    if (hit.companions&&hit.companions.length>0) {
+      var cn=[];for(var ci=0;ci<hit.companions.length;ci++){var cid=hit.companions[ci];cn.push(SURGEONS[cid]?SURGEONS[cid].split(' ').pop():cid);}
+      var ttC=document.createElement('div');ttC.className='tt-comp';ttC.textContent='\u21B3 '+cn.join(', ');frag.appendChild(ttC);
+    }
+    tooltipEl.appendChild(frag);
+    tooltipEl.style.left=(e.clientX+14)+'px';tooltipEl.style.top=(e.clientY-10)+'px';
+    tooltipEl.classList.add('visible');canvas.style.cursor='pointer';
+  } else {
+    tooltipEl.classList.remove('visible');
+    canvas.style.cursor=hoveredZone?'pointer':'default';
+  }
+});
+
+canvas.addEventListener('mouseleave', function() {
+  hoveredSprite=null;hoveredZone=null;tooltipEl.classList.remove('visible');canvas.style.cursor='default';
+});
+
+// ─────────────────────────────────────────────
+//  SELECTED PANEL (safe DOM methods)
+// ─────────────────────────────────────────────
+function updateSelectedPanel(sp) {
+  var panel=document.getElementById('selected-panel');
+  var info=document.getElementById('selected-info');
+  if (!sp) {panel.style.display='none';return;}
+  panel.style.display='';
+  panel.style.animation='none';panel.offsetHeight;panel.style.animation='fadeInUp 0.3s ease-out';
+
+  // Clear and rebuild with DOM methods
+  while(info.firstChild) info.removeChild(info.firstChild);
+
+  var nameDiv=document.createElement('div');
+  nameDiv.style.cssText='font-size:14px;font-weight:700;color:var(--text)';
+  nameDiv.textContent=sp.name;
+  info.appendChild(nameDiv);
+
+  var unitStr=sp.unit?(Array.isArray(sp.unit)?sp.unit.join(', '):sp.unit):'';
+  if (unitStr) {
+    var unitDiv=document.createElement('div');
+    unitDiv.style.cssText='font-size:11px;color:var(--text-muted)';
+    unitDiv.textContent=unitStr;
+    info.appendChild(unitDiv);
+  }
+
+  var actDiv=document.createElement('div');
+  actDiv.style.marginTop='4px';
+  var actBadge=document.createElement('span');
+  var actColor=ACTIVITY_COLORS[sp.activity]||'var(--text)';
+  actBadge.style.cssText='display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:white;background:'+actColor;
+  actBadge.textContent=ACTIVITY_LABELS[sp.activity]||sp.activity;
+  actDiv.appendChild(actBadge);
+  info.appendChild(actDiv);
+
+  var zoneName=sp.zone?ZONE_DATA[sp.zone].label:(FLOOR_NAMES[sp.floor]||'');
+  var zoneDiv=document.createElement('div');
+  zoneDiv.style.cssText='font-size:11px;color:var(--text-muted);margin-top:4px';
+  zoneDiv.textContent='Zona: '+zoneName;
+  info.appendChild(zoneDiv);
+
+  if (sp.companions&&sp.companions.length>0) {
+    var cn=[];
+    for(var ci=0;ci<sp.companions.length;ci++){var cid=sp.companions[ci];cn.push(SURGEONS[cid]?SURGEONS[cid].split(' ').pop():cid);}
+    var compDiv=document.createElement('div');
+    compDiv.style.cssText='font-size:11px;color:var(--text-muted);margin-top:2px';
+    compDiv.textContent='Con: '+cn.join(', ');
+    info.appendChild(compDiv);
+  }
+}
+
+// ─────────────────────────────────────────────
+//  M/T TOGGLE
+// ─────────────────────────────────────────────
+document.getElementById('btn-shift-m').addEventListener('click',function(){setShift('M');});
+document.getElementById('btn-shift-t').addEventListener('click',function(){setShift('T');});
+
+function setShift(s) {
+  timeShift=s;
+  document.getElementById('btn-shift-m').classList.toggle('active',s==='M');
+  document.getElementById('btn-shift-t').classList.toggle('active',s==='T');
+  if (selectedDay) {
+    var activities=getDayActivities(selectedDay,currentMonth,currentYear);
+    buildSprites(activities);
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -974,38 +1308,48 @@ function gameLoop(timestamp) {
 // ─────────────────────────────────────────────
 function selectDay(day) {
   if (!day) return;
-  selectedDay = day;
-  var activities = getDayActivities(day, currentMonth, currentYear);
-  sprites = assignSlots(activities);
-
-  var floorCounts = [0, 0, 0];
-  for (var i = 0; i < activities.length; i++) {
-    var f = FLOOR_MAP[activities[i].activity];
-    if (f !== undefined) floorCounts[f]++;
+  selectedDay=day;
+  if (viewMode==='zone') {
+    viewMode='general';currentZone=null;
+    document.getElementById('btn-back').style.display='none';
+    document.getElementById('zone-label').style.display='none';
+    var btns=document.querySelectorAll('.zone-btn');
+    for(var i=0;i<btns.length;i++) btns[i].classList.remove('active');
   }
 
-  var dow = new Date(currentYear, currentMonth, day).getDay();
-  var dowIdx = dow === 0 ? 6 : dow - 1;
-  document.getElementById('day-title').textContent =
-    DAY_NAMES_FULL[dowIdx] + ' ' + day + ' ' + MONTH_NAMES[currentMonth];
-  document.getElementById('day-count').textContent = activities.length;
+  var activities=getDayActivities(day,currentMonth,currentYear);
+  buildSprites(activities);
 
-  var fcEl = document.getElementById('floor-counts');
-  fcEl.textContent = '';
-  for (var fi = 2; fi >= 0; fi--) {
-    var row = document.createElement('div');
-    row.className = 'floor-count-row';
-    var dot = document.createElement('div');
-    dot.className = 'floor-dot';
-    dot.style.background = FLOOR_COLORS[fi];
+  var zoneCounts={quirofanos:0,consultas:0,urgencias:0,planta:0};
+  var totalVisible=0;
+  for(var i=0;i<activities.length;i++){
+    if(isActivityVisible(activities[i].activity,timeShift)){
+      totalVisible++;
+      var z=ACTIVITY_ZONE[activities[i].activity];
+      if(z) zoneCounts[z]++;
+    }
+  }
+
+  var dow=new Date(currentYear,currentMonth,day).getDay();
+  var dowIdx=dow===0?6:dow-1;
+  document.getElementById('day-title').textContent=DAY_NAMES_FULL[dowIdx]+' '+day+' '+MONTH_NAMES[currentMonth];
+  document.getElementById('day-count').textContent=totalVisible;
+
+  var fcEl=document.getElementById('floor-counts');
+  while(fcEl.firstChild) fcEl.removeChild(fcEl.firstChild);
+  var zoneOrder=['quirofanos','consultas','urgencias','planta'];
+  for(var zi=0;zi<zoneOrder.length;zi++){
+    var zk=zoneOrder[zi];
+    var row=document.createElement('div');row.className='floor-count-row';
+    var dot=document.createElement('div');dot.className='floor-dot';dot.style.background=ZONE_DATA[zk].color;
     row.appendChild(dot);
-    row.appendChild(document.createTextNode(FLOOR_NAMES[fi] + ': ' + floorCounts[fi]));
+    row.appendChild(document.createTextNode(ZONE_DATA[zk].label+': '+zoneCounts[zk]));
     fcEl.appendChild(row);
   }
 
-  var prev = document.querySelectorAll('.mini-cal-day.selected');
-  for (var i = 0; i < prev.length; i++) prev[i].classList.remove('selected');
-  var dayEl = document.querySelector('.mini-cal-day[data-day="' + day + '"]');
+  var prev=document.querySelectorAll('.mini-cal-day.selected');
+  for(var pi=0;pi<prev.length;pi++) prev[pi].classList.remove('selected');
+  var dayEl=document.querySelector('.mini-cal-day[data-day="'+day+'"]');
   if (dayEl) dayEl.classList.add('selected');
 }
 
@@ -1013,68 +1357,56 @@ function selectDay(day) {
 //  MINI CALENDAR
 // ─────────────────────────────────────────────
 function renderMiniCal() {
-  var grid = document.getElementById('mini-cal');
-  grid.textContent = '';
-  document.getElementById('cal-month-label').textContent =
-    MONTH_NAMES[currentMonth] + ' ' + currentYear;
+  var grid=document.getElementById('mini-cal');
+  grid.textContent='';
+  document.getElementById('cal-month-label').textContent=MONTH_NAMES[currentMonth]+' '+currentYear;
 
-  for (var di = 0; di < DAY_NAMES_SHORT.length; di++) {
-    var hdr = document.createElement('div');
-    hdr.className = 'mini-cal-hdr';
-    hdr.textContent = DAY_NAMES_SHORT[di];
-    grid.appendChild(hdr);
+  for(var di=0;di<DAY_NAMES_SHORT.length;di++){
+    var hdr=document.createElement('div');hdr.className='mini-cal-hdr';
+    hdr.textContent=DAY_NAMES_SHORT[di];grid.appendChild(hdr);
   }
 
-  var firstDay = new Date(currentYear, currentMonth, 1).getDay();
-  var startOffset = firstDay === 0 ? 6 : firstDay - 1;
-  var daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  var today = new Date();
-
-  var daysWithData = {};
+  var firstDay=new Date(currentYear,currentMonth,1).getDay();
+  var startOffset=firstDay===0?6:firstDay-1;
+  var daysInMonth=new Date(currentYear,currentMonth+1,0).getDate();
+  var today=new Date();
+  var daysWithData={};
   if (parsedData) {
-    for (var sid in parsedData) {
-      for (var i = 0; i < parsedData[sid].length; i++) {
-        var e = parsedData[sid][i];
-        if (e.month === currentMonth && e.year === currentYear) daysWithData[e.day] = true;
+    for(var sid in parsedData){
+      for(var i=0;i<parsedData[sid].length;i++){
+        var e=parsedData[sid][i];
+        if(e.month===currentMonth&&e.year===currentYear) daysWithData[e.day]=true;
       }
     }
   }
-
-  for (var i = 0; i < startOffset; i++) {
-    var empty = document.createElement('div');
-    empty.className = 'mini-cal-day empty';
-    grid.appendChild(empty);
-  }
-
-  for (var d = 1; d <= daysInMonth; d++) {
-    var cell = document.createElement('div');
-    cell.className = 'mini-cal-day';
-    cell.textContent = d;
-    cell.setAttribute('data-day', d);
-    var dow = new Date(currentYear, currentMonth, d).getDay();
-    if (dow === 0 || dow === 6) cell.classList.add('weekend');
-    if (d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) cell.classList.add('today');
-    if (!daysWithData[d]) cell.classList.add('no-data');
-    else cell.addEventListener('click', (function(dd) { return function() { selectDay(dd); }; })(d));
-    if (d === selectedDay) cell.classList.add('selected');
+  for(var i=0;i<startOffset;i++){var empty=document.createElement('div');empty.className='mini-cal-day empty';grid.appendChild(empty);}
+  for(var d=1;d<=daysInMonth;d++){
+    var cell=document.createElement('div');cell.className='mini-cal-day';
+    cell.textContent=d;cell.setAttribute('data-day',d);
+    var dow=new Date(currentYear,currentMonth,d).getDay();
+    if(dow===0||dow===6)cell.classList.add('weekend');
+    if(d===today.getDate()&&currentMonth===today.getMonth()&&currentYear===today.getFullYear())cell.classList.add('today');
+    if(!daysWithData[d])cell.classList.add('no-data');
+    else cell.addEventListener('click',(function(dd){return function(){selectDay(dd);};})(d));
+    if(d===selectedDay)cell.classList.add('selected');
     grid.appendChild(cell);
   }
 }
 
 function navigateMonth(delta) {
-  var idx = -1;
-  for (var i = 0; i < availableMonths.length; i++) {
-    if (availableMonths[i].month === currentMonth && availableMonths[i].year === currentYear) { idx = i; break; }
+  var idx=-1;
+  for(var i=0;i<availableMonths.length;i++){
+    if(availableMonths[i].month===currentMonth&&availableMonths[i].year===currentYear){idx=i;break;}
   }
-  var newIdx = idx + delta;
-  if (newIdx >= 0 && newIdx < availableMonths.length) {
-    currentMonth = availableMonths[newIdx].month;
-    currentYear = availableMonths[newIdx].year;
-    selectedDay = null; sprites = [];
-    renderMiniCal(); renderAll();
-    document.getElementById('day-title').textContent = '\u2014';
-    document.getElementById('day-count').textContent = '0';
-    document.getElementById('floor-counts').textContent = '';
+  var newIdx=idx+delta;
+  if(newIdx>=0&&newIdx<availableMonths.length){
+    currentMonth=availableMonths[newIdx].month;currentYear=availableMonths[newIdx].year;
+    selectedDay=null;generalSprites=[];zoneSprites=[];
+    renderMiniCal();renderAll();
+    document.getElementById('day-title').textContent='\u2014';
+    document.getElementById('day-count').textContent='0';
+    document.getElementById('floor-counts').textContent='';
+    for(var z in ZONE_DATA){var el=document.getElementById('count-'+z);if(el)el.textContent='0';}
   }
 }
 
@@ -1082,117 +1414,15 @@ function navigateMonth(delta) {
 //  LEGEND
 // ─────────────────────────────────────────────
 function renderLegend() {
-  var legend = document.getElementById('legend');
-  legend.textContent = '';
-  var keys = Object.keys(ACTIVITY_LABELS);
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    var item = document.createElement('div');
-    item.className = 'legend-item';
-    var dot = document.createElement('div');
-    dot.className = 'legend-dot';
-    dot.style.background = ACTIVITY_COLORS[key];
-    item.appendChild(dot);
-    item.appendChild(document.createTextNode(ACTIVITY_LABELS[key]));
+  var legend=document.getElementById('legend');legend.textContent='';
+  var keys=Object.keys(ACTIVITY_LABELS);
+  for(var i=0;i<keys.length;i++){
+    var key=keys[i];
+    var item=document.createElement('div');item.className='legend-item';
+    var dot=document.createElement('div');dot.className='legend-dot';dot.style.background=ACTIVITY_COLORS[key];
+    item.appendChild(dot);item.appendChild(document.createTextNode(ACTIVITY_LABELS[key]));
     legend.appendChild(item);
   }
-}
-
-// ─────────────────────────────────────────────
-//  TOOLTIP
-// ─────────────────────────────────────────────
-canvas.addEventListener('mousemove', function(e) {
-  var rect = canvas.getBoundingClientRect();
-  var scaleX = CW / rect.width;
-  var scaleY = CH / rect.height;
-  var mx = (e.clientX - rect.left) * scaleX;
-  var my = (e.clientY - rect.top) * scaleY;
-
-  var hit = null;
-  for (var i = 0; i < sprites.length; i++) {
-    var sp = sprites[i];
-    if (Math.abs(mx - sp.x) < 22 && Math.abs(my - sp.y) < 32) { hit = sp; break; }
-  }
-
-  hoveredSprite = hit;
-
-  if (hit) {
-    var unitStr = hit.unit ? (Array.isArray(hit.unit) ? hit.unit.join(', ') : hit.unit) : '';
-    var ttName = document.createElement('div'); ttName.className = 'tt-name'; ttName.textContent = hit.name;
-    var ttContent = document.createDocumentFragment();
-    ttContent.appendChild(ttName);
-    if (unitStr) {
-      var ttUnit = document.createElement('div'); ttUnit.className = 'tt-unit'; ttUnit.textContent = unitStr;
-      ttContent.appendChild(ttUnit);
-    }
-    var ttAct = document.createElement('div'); ttAct.className = 'tt-act';
-    ttAct.style.color = ACTIVITY_COLORS[hit.activity];
-    ttAct.textContent = ACTIVITY_LABELS[hit.activity];
-    ttContent.appendChild(ttAct);
-    if (hit.companions && hit.companions.length > 0) {
-      var compNames = [];
-      for (var ci = 0; ci < hit.companions.length; ci++) {
-        var cid = hit.companions[ci];
-        compNames.push(SURGEONS[cid] ? SURGEONS[cid].split(' ').pop() : cid);
-      }
-      var ttComp = document.createElement('div'); ttComp.className = 'tt-comp';
-      ttComp.textContent = '\u21B3 ' + compNames.join(', ');
-      ttContent.appendChild(ttComp);
-    }
-    tooltipEl.textContent = '';
-    tooltipEl.appendChild(ttContent);
-    tooltipEl.style.left = (e.clientX + 14) + 'px';
-    tooltipEl.style.top = (e.clientY - 10) + 'px';
-    tooltipEl.classList.add('visible');
-    canvas.style.cursor = 'pointer';
-  } else {
-    tooltipEl.classList.remove('visible');
-    canvas.style.cursor = 'default';
-  }
-});
-
-canvas.addEventListener('mouseleave', function() {
-  hoveredSprite = null;
-  tooltipEl.classList.remove('visible');
-  canvas.style.cursor = 'default';
-});
-
-// ─────────────────────────────────────────────
-//  SELECTED PANEL
-// ─────────────────────────────────────────────
-function updateSelectedPanel(sp) {
-  var panel = document.getElementById('selected-panel');
-  var info = document.getElementById('selected-info');
-  if (!sp) {
-    panel.style.display = 'none';
-    return;
-  }
-  panel.style.display = '';
-  panel.style.animation = 'none';
-  panel.offsetHeight;
-  panel.style.animation = 'fadeInUp 0.3s ease-out';
-
-  var unitStr = sp.unit ? (Array.isArray(sp.unit) ? sp.unit.join(', ') : sp.unit) : '';
-  var actColor = ACTIVITY_COLORS[sp.activity] || 'var(--text)';
-  var floorName = FLOOR_NAMES[sp.floor] || '';
-
-  var html = '<div style="font-size:14px;font-weight:700;color:var(--text)">' + sp.name + '</div>';
-  if (unitStr) html += '<div style="font-size:11px;color:var(--text-muted)">' + unitStr + '</div>';
-  html += '<div style="margin-top:4px">';
-  html += '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:white;background:' + actColor + '">' + (ACTIVITY_LABELS[sp.activity] || sp.activity) + '</span>';
-  html += '</div>';
-  html += '<div style="font-size:11px;color:var(--text-muted);margin-top:4px">Planta: ' + floorName + '</div>';
-
-  if (sp.companions && sp.companions.length > 0) {
-    var compNames = [];
-    for (var ci = 0; ci < sp.companions.length; ci++) {
-      var cid = sp.companions[ci];
-      compNames.push(SURGEONS[cid] ? SURGEONS[cid].split(' ').pop() : cid);
-    }
-    html += '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">Con: ' + compNames.join(', ') + '</div>';
-  }
-
-  info.innerHTML = html;
 }
 
 // ─────────────────────────────────────────────
@@ -1201,34 +1431,26 @@ function updateSelectedPanel(sp) {
 initTheme();
 
 if (loadData()) {
-  document.getElementById('main-content').style.display = '';
+  document.getElementById('main-content').style.display='';
+  var now=new Date();
+  var todayInData=availableMonths.some(function(m){return m.month===now.getMonth()&&m.year===now.getFullYear();});
+  if(todayInData){currentMonth=now.getMonth();currentYear=now.getFullYear();}
+  else if(availableMonths.length>0){currentMonth=availableMonths[0].month;currentYear=availableMonths[0].year;}
 
-  var now = new Date();
-  var todayInData = availableMonths.some(function(m) { return m.month === now.getMonth() && m.year === now.getFullYear(); });
-  if (todayInData) { currentMonth = now.getMonth(); currentYear = now.getFullYear(); }
-  else if (availableMonths.length > 0) { currentMonth = availableMonths[0].month; currentYear = availableMonths[0].year; }
+  renderMiniCal();renderLegend();renderAll();
+  if(todayInData) selectDay(now.getDate());
 
-  renderMiniCal();
-  renderLegend();
-  renderAll();
-
-  if (todayInData) selectDay(now.getDate());
-
-  document.getElementById('cal-prev').addEventListener('click', function() { navigateMonth(-1); });
-  document.getElementById('cal-next').addEventListener('click', function() { navigateMonth(1); });
+  document.getElementById('cal-prev').addEventListener('click',function(){navigateMonth(-1);});
+  document.getElementById('cal-next').addEventListener('click',function(){navigateMonth(1);});
 
   requestAnimationFrame(gameLoop);
 } else {
-  document.getElementById('no-data').style.display = '';
+  document.getElementById('no-data').style.display='';
 }
 
-if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-  var extLinks = document.querySelectorAll('a[href^="https://jmacot.github.io"]');
-  for (var eli = 0; eli < extLinks.length; eli++) {
-    extLinks[eli].removeAttribute('href');
-    extLinks[eli].style.opacity = '0.4';
-    extLinks[eli].style.pointerEvents = 'none';
-  }
+if (location.hostname==='localhost'||location.hostname==='127.0.0.1') {
+  var extLinks=document.querySelectorAll('a[href^="https://jmacot.github.io"]');
+  for(var eli=0;eli<extLinks.length;eli++){extLinks[eli].removeAttribute('href');extLinks[eli].style.opacity='0.4';extLinks[eli].style.pointerEvents='none';}
 }
 </script>
 </body>
