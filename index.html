@@ -9,7 +9,7 @@
   <link rel="apple-touch-icon" href="icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Planning">
-  <meta name="theme-color" id="meta-theme" content="#0f2240">
+  <meta name="theme-color" id="meta-theme" content="#1e293b">
   <meta name="description" content="Analizador de planning COT — Visualiza guardias, turnos, quirofanos y cargas de trabajo del servicio de traumatologia." />
   <!-- Open Graph -->
   <meta property="og:title" content="Planning COT" />
@@ -201,8 +201,8 @@
     /* ── DOT GRID + GLOWS ── */
     .hero-dot-grid { display: none; }
     .hero-glow { position: absolute; border-radius: 50%; filter: blur(50px); z-index: 0; animation: glowPulse 6s ease-in-out infinite; }
-    .hero-glow-1 { top: -80px; right: -30px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(2,132,199,0.15) 0%, transparent 70%); }
-    .hero-glow-2 { bottom: -60px; left: 15%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(124,58,237,0.10) 0%, transparent 70%); animation-delay: 3s; }
+    .hero-glow-1 { top: -80px; right: -30px; width: 250px; height: 250px; background: radial-gradient(circle, rgba(56,189,248,0.35) 0%, transparent 70%); }
+    .hero-glow-2 { bottom: -60px; left: 15%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(167,139,250,0.25) 0%, transparent 70%); animation-delay: 3s; }
     @keyframes glowPulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.08); } }
 
     /* ── SKY TOGGLE ── */
@@ -229,15 +229,15 @@
 
     .app-header {
       text-align: center; margin-bottom: 28px; position: relative;
-      background: linear-gradient(135deg, #0f2240 0%, #1a3a5c 50%, #234e77 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
       color: white; padding: 40px 32px 32px;
       border-radius: 0 0 var(--radius) var(--radius); overflow: hidden;
-      box-shadow: 0 8px 32px rgba(15,34,64,0.25);
+      box-shadow: 0 8px 32px rgba(30,41,59,0.25);
       animation: fadeInUp 0.6s ease-out;
     }
     .app-header::before {
       content: ''; position: absolute; bottom: 0; left: 0; right: 0;
-      height: 2px; background: linear-gradient(90deg, var(--sky, #0284c7), var(--violet, #7c3aed));
+      height: 2px; background: linear-gradient(90deg, var(--sky, #38bdf8), var(--violet, #a78bfa));
       z-index: 1;
     }
     .app-header::after {
@@ -248,7 +248,7 @@
       font-size: clamp(1.4rem, 3.5vw, 1.8rem); font-weight: 600;
     }
     [data-theme="dark"] .app-header {
-      background: linear-gradient(135deg, #152238 0%, #1c2f4a 50%, #213656 100%);
+      background: linear-gradient(135deg, #111827 0%, #1e293b 50%, #2d3748 100%);
       border-bottom: 1px solid rgba(255,255,255,0.06);
       box-shadow: 0 4px 24px rgba(0,0,0,0.3);
     }
@@ -1983,7 +1983,7 @@ function applyTheme(dark) {
         skyCheck.checked = false;
 
 
-    if (metaTheme) metaTheme.setAttribute('content', '#0f2240');
+    if (metaTheme) metaTheme.setAttribute('content', '#1e293b');
   }
   // Refresh charts with new theme colors
   if (chartsExpanded && parsedData) {
