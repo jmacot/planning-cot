@@ -467,28 +467,12 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .file-toggle:hover { border-color: var(--accent); box-shadow: var(--shadow); }
-    .file-toggle .file-version {
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
-      color: white; background: var(--accent); padding: 2px 7px; border-radius: 4px;
-    }
-    .file-toggle .file-version.v2 { background: var(--amber); }
     .file-toggle .file-name { font-weight: 600; color: var(--text); font-size: 12px; }
     .file-toggle .file-change {
       font-size: 10px; color: var(--text-light); text-decoration: underline;
       cursor: pointer; margin-left: 2px;
     }
     .file-toggle .file-change:hover { color: var(--accent); }
-    .file-toggle .v2-remove {
-      background: none; border: none; color: var(--red); cursor: pointer;
-      font-size: 14px; font-weight: 700; line-height: 1; padding: 0 2px;
-      transition: color 0.2s; margin-left: -2px;
-    }
-    .file-toggle .v2-remove:hover { opacity: 0.7; }
-    .vs-label {
-      font-size: 11px; font-weight: 800; color: var(--text-light);
-      letter-spacing: 0.5px; text-transform: uppercase;
-    }
-
     /* Surgeon selector */
     .controls {
       display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
@@ -1319,154 +1303,8 @@
 
       .radar-grid { grid-template-columns: 1fr; }
 
-      /* Diff mobile */
-      .diff-card { padding: 14px; }
-      .diff-header-row { gap: 8px; }
-      .diff-header-row h2 { font-size: 0.95rem; }
-      .diff-table { font-size: 11px; }
-      .diff-table th, .diff-table td { padding: 6px 6px; }
-      .diff-tag { font-size: 9px; padding: 2px 6px; }
-      .diff-summary { flex-wrap: wrap; gap: 4px; }
-      .diff-global-desc { font-size: 11px; }
-
-      /* Stacked layout for global diff on mobile (not cirujano table) */
-      #diff-content > .diff-table thead { display: none; }
-      #diff-content > .diff-table > tbody > tr { display: block; border-bottom: 1px solid var(--border-light); padding: 8px 0; }
-      #diff-content > .diff-table > tbody > tr:last-child { border-bottom: none; }
-      #diff-content > .diff-table > tbody > tr > td { display: block; padding: 2px 8px; border-bottom: none; }
-      #diff-content > .diff-table > tbody > tr > td.diff-day {
-        font-size: 12px; font-weight: 700; color: var(--accent);
-        padding-bottom: 4px; margin-bottom: 2px;
-        border-bottom: 1px solid var(--border-light);
-      }
     }
 
-    /* ── V2 Comparison ── */
-    .btn-v2 {
-      background: none; border: 1.5px solid var(--amber); color: var(--amber);
-      border-radius: 6px; padding: 4px 12px; font-size: 11px; font-weight: 600;
-      font-family: 'Source Sans 3', sans-serif; cursor: pointer; transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .btn-v2:hover { background: var(--amber); color: white; }
-
-    .diff-card {
-      background: var(--surface); border: 1px solid var(--border-light);
-      border-radius: var(--radius); box-shadow: var(--shadow);
-      padding: 20px; margin-bottom: 14px;
-      animation: fadeInUp 0.6s ease-out 0.15s both;
-    }
-    .diff-header-row {
-      display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .diff-header-row h2 { font-family: 'Source Serif 4', serif; font-size: 1.1rem; font-weight: 700; margin: 0; }
-    .diff-summary {
-      display: flex; gap: 8px; align-items: center;
-      font-size: 12px; font-weight: 600;
-    }
-    .diff-stat {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700;
-    }
-    .diff-stat.stat-changes { background: var(--amber-light); color: var(--amber); }
-    .diff-stat.stat-added { background: var(--green-light); color: var(--green); }
-    .diff-stat.stat-removed { background: var(--red-light); color: var(--red); }
-
-    #diff-toggle { margin-bottom: 14px; }
-
-    .diff-table {
-      width: 100%; border-collapse: collapse; font-size: 12px;
-      background: var(--surface); border-radius: var(--radius-sm); overflow: hidden;
-      border: 1px solid var(--border-light);
-    }
-    .diff-table th {
-      text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);
-      background: var(--surface2); border-bottom: 1px solid var(--border);
-    }
-    .diff-table td {
-      padding: 8px 12px; border-bottom: 1px solid var(--border-light);
-      vertical-align: top;
-    }
-    .diff-table tr:last-child td { border-bottom: none; }
-    .diff-day {
-      font-weight: 700; white-space: nowrap; color: var(--text);
-      min-width: 90px;
-    }
-    .diff-day-dow { font-weight: 400; color: var(--text-muted); font-size: 11px; }
-    .diff-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-    .diff-tag {
-      display: inline-block; padding: 2px 8px; border-radius: 4px;
-      font-size: 10px; font-weight: 600; white-space: nowrap;
-    }
-    .diff-tag.added {
-      background: var(--green-light); color: var(--green);
-      border: 1px solid var(--green);
-    }
-    .diff-tag.removed {
-      background: var(--red-light); color: var(--red);
-      border: 1px solid var(--red); text-decoration: line-through;
-    }
-    .diff-no-changes {
-      text-align: center; padding: 24px; color: var(--text-muted);
-      font-size: 13px; font-style: italic;
-    }
-    .diff-month-removed {
-      text-align: center; padding: 28px 20px; color: var(--amber);
-      font-size: 13px; line-height: 1.6;
-      background: var(--amber-light); border-radius: var(--radius-sm);
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-    }
-    .diff-month-added {
-      text-align: center; padding: 28px 20px; color: var(--green);
-      font-size: 13px; line-height: 1.6;
-      background: var(--green-light); border-radius: var(--radius-sm);
-      display: flex; flex-direction: column; align-items: center; gap: 6px;
-    }
-    .diff-month-sub {
-      display: block; font-size: 11px; opacity: 0.7; font-weight: 400;
-    }
-    .diff-months-banner {
-      display: flex; align-items: center; justify-content: center;
-      gap: 6px; flex-wrap: wrap; margin-bottom: 10px;
-    }
-    .diff-month-pill {
-      display: inline-block; padding: 3px 10px; border-radius: 999px;
-      font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
-    }
-    .diff-month-pill.pill-removed {
-      background: var(--amber-light); color: var(--amber);
-      border: 1px solid var(--amber);
-    }
-    .diff-month-pill.pill-added {
-      background: var(--green-light); color: var(--green);
-      border: 1px solid var(--green);
-    }
-    /* Global diff: day-grouped rows */
-    .diff-global-desc {
-      font-size: 12px; color: var(--text); line-height: 1.7; padding: 4px 0;
-    }
-    .diff-global-desc .diff-name { font-weight: 700; color: var(--accent); }
-    .diff-global-desc .diff-name.highlight { background: var(--amber-light); padding: 1px 5px; border-radius: 4px; }
-    .diff-global-desc .diff-act-out { color: var(--red); font-weight: 600; }
-    .diff-global-desc .diff-act-in { color: var(--green); font-weight: 600; }
-    .diff-global-desc .diff-arrow { color: var(--text-muted); margin: 0 2px; }
-    /* Cirujano tab: single surgeon block */
-    .diff-surgeon-block {
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-light); overflow: hidden;
-    }
-    .diff-surgeon-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px; background: var(--accent-light);
-      border-bottom: 1px solid var(--accent);
-    }
-    .diff-surgeon-name {
-      font-size: 13px; font-weight: 700; color: var(--accent);
-    }
-    .diff-surgeon-stats { display: flex; gap: 4px; }
-    .diff-surgeon-block .diff-table { border: none; border-radius: 0; }
     /* Accesibilidad — focus visible para navegacion por teclado */
     :focus-visible { outline: 2px solid var(--sky, var(--accent)); outline-offset: 2px; }
     input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
@@ -1523,28 +1361,17 @@
   </div>
   <div class="upload-label">Insertar archivo<br><span class="formats">.xlsx .xls .ods .csv</span></div>
 
-  <p class="upload-hint">Sube el planning mensual para analizar el desglose por cirujano.<br>Puedes subir un segundo archivo para comparar los cambios entre versiones.</p>
+  <p class="upload-hint">Sube el planning mensual para analizar el desglose por cirujano.</p>
 
   <!-- Welcome hero image (below upload) -->
   <div class="welcome-hero" id="welcome-hero">
     <img src="assets/img/portada.png" alt="Analizador de Planning" class="welcome-hero-img">
   </div>
 
-  <input type="file" id="file-input-v2" accept=".xlsx,.xls" style="display:none">
   <div class="upload-info" id="upload-info" style="display:none">
     <div class="file-toggle" id="v1-toggle" onclick="document.getElementById('file-input').click()">
-      <span class="file-version">V1</span>
       <span class="file-name" id="upload-summary"></span>
       <span class="file-change">cambiar</span>
-      <button onclick="event.stopPropagation(); removeV1()" class="v2-remove" id="v1-remove" style="display:none">&times;</button>
-    </div>
-    <button class="btn-v2" id="btn-load-v2" onclick="document.getElementById('file-input-v2').click()" style="display:none">&#8596; Comparar V2</button>
-    <span class="vs-label" id="vs-label" style="display:none">VS</span>
-    <div class="file-toggle" id="v2-toggle" style="display:none" onclick="document.getElementById('file-input-v2').click()">
-      <span class="file-version v2">V2</span>
-      <span class="file-name" id="v2-filename"></span>
-      <span class="file-change">cambiar</span>
-      <button onclick="event.stopPropagation(); removeV2()" class="v2-remove">&times;</button>
     </div>
   </div>
 
@@ -1640,19 +1467,6 @@
         <div class="retrib-footer">
           <a id="retrib-calc-link" class="retrib-calc-link" href="https://jmacot.github.io/calculadora-guardias/" target="_blank">&#129518; Abrir Calculadora</a>
         </div>
-      </div>
-    </div>
-    <!-- Diff V1 vs V2 -->
-    <div id="diff-section" style="display:none">
-      <div class="diff-card">
-        <div class="diff-header-row">
-          <h2>&#128256; Cambios V1 &rarr; V2</h2>
-        </div>
-        <div class="toggle-btns" id="diff-toggle">
-          <button class="active" data-mode="global">Global</button>
-          <button data-mode="cirujano">Cirujano</button>
-        </div>
-        <div id="diff-content"></div>
       </div>
     </div>
     <!-- Dashboard Stats -->
@@ -1932,10 +1746,6 @@ let currentJornada = 100;  // 100, 80, or 60
 let chartsExpanded = false;
 let pendingExportType = null; // 'ics' or 'pdf'
 let loadedFileName = '';
-let parsedDataV2 = null;      // V2 comparison data (same structure as parsedData)
-let v1RefStart = null;        // { month, year } reference for V2 month alignment
-let loadedFileNameV2 = '';
-let availableMonthsV2 = [];
 
 // ─────────────────────────────────────────────
 //  TOAST
@@ -2039,38 +1849,21 @@ fileInput.addEventListener('change', e => {
 
 function resetApp() {
   parsedData = null;
-  parsedDataV2 = null;
-  v1RefStart = null;
-  loadedFileNameV2 = '';
-  availableMonthsV2 = [];
   allDates = [];
   summaryMode = 'month';
   fileInput.value = '';
-  document.getElementById('file-input-v2').value = '';
   document.getElementById('upload-zone').style.display = '';
   document.getElementById('welcome-hero').style.display = '';
   const hintEl = document.querySelector('.upload-hint');
   if (hintEl) hintEl.style.display = '';
   document.getElementById('upload-info').style.display = 'none';
-  document.getElementById('btn-load-v2').style.display = 'none';
-  document.getElementById('v2-toggle').style.display = 'none';
-  document.getElementById('vs-label').style.display = 'none';
   document.getElementById('controls').style.display = 'none';
   document.getElementById('select-prompt').style.display = 'none';
   document.getElementById('results').classList.remove('visible');
-  document.getElementById('diff-section').style.display = 'none';
 }
 
 function processFile(file) {
   loadedFileName = file.name;
-  // Clear V2 state when loading new V1
-  parsedDataV2 = null;
-  loadedFileNameV2 = '';
-  availableMonthsV2 = [];
-  document.getElementById('file-input-v2').value = '';
-  document.getElementById('v2-toggle').style.display = 'none';
-  document.getElementById('vs-label').style.display = 'none';
-  document.getElementById('diff-section').style.display = 'none';
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
@@ -2084,105 +1877,6 @@ function processFile(file) {
     }
   };
   reader.readAsArrayBuffer(file);
-}
-
-// ─────────────────────────────────────────────
-//  V2 COMPARISON
-// ─────────────────────────────────────────────
-document.getElementById('file-input-v2').addEventListener('change', function(e) {
-  if (e.target.files.length) processFileV2(e.target.files[0]);
-});
-
-function processFileV2(file) {
-  loadedFileNameV2 = file.name;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const wb = XLSX.read(e.target.result, { type: 'array', cellStyles: true });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const result = parseWorksheetPure(ws, v1RefStart);
-      parsedDataV2 = result.data;
-      availableMonthsV2 = result.months;
-      showV2Loaded();
-      const sel = document.getElementById('surgeon-select');
-      if (sel.value) renderDiff(sel.value);
-      mostrarToast('&#10003; V2 cargado correctamente');
-    } catch(err) {
-      console.error(err);
-      mostrarToast('&#10060; Error al leer V2');
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function showV2Loaded() {
-  document.getElementById('btn-load-v2').style.display = 'none';
-  document.getElementById('vs-label').style.display = '';
-  document.getElementById('v2-toggle').style.display = '';
-  document.getElementById('v2-filename').textContent = loadedFileNameV2;
-  document.getElementById('v1-remove').style.display = '';
-}
-
-function removeV2() {
-  parsedDataV2 = null;
-  loadedFileNameV2 = '';
-  availableMonthsV2 = [];
-  document.getElementById('file-input-v2').value = '';
-  document.getElementById('v2-toggle').style.display = 'none';
-  document.getElementById('vs-label').style.display = 'none';
-  document.getElementById('btn-load-v2').style.display = '';
-  document.getElementById('diff-section').style.display = 'none';
-  document.getElementById('v1-remove').style.display = 'none';
-  const banner = document.getElementById('diff-months-banner');
-  if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
-}
-
-function removeV1() {
-  // Promover V2 a V1: V2 pasa a ser la versión principal
-  parsedData = parsedDataV2;
-  allDates = [];
-  // Reconstruir allDates desde parsedData
-  for (const sid of Object.keys(parsedData)) {
-    for (const entry of parsedData[sid]) {
-      allDates.push(entry);
-    }
-  }
-  availableMonths = availableMonthsV2.slice();
-  loadedFileName = loadedFileNameV2;
-  fileInput.value = '';
-
-  // Limpiar V2
-  parsedDataV2 = null;
-  loadedFileNameV2 = '';
-  availableMonthsV2 = [];
-  document.getElementById('file-input-v2').value = '';
-  document.getElementById('v2-toggle').style.display = 'none';
-  document.getElementById('vs-label').style.display = 'none';
-  document.getElementById('btn-load-v2').style.display = '';
-  document.getElementById('diff-section').style.display = 'none';
-  document.getElementById('v1-remove').style.display = 'none';
-  const banner = document.getElementById('diff-months-banner');
-  if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
-
-  // Ajustar mes actual si no existe en los nuevos datos
-  const currentValid = availableMonths.some(m => m.month === currentMonth && m.year === currentYear);
-  if (!currentValid && availableMonths.length) {
-    currentMonth = availableMonths[0].month;
-    currentYear = availableMonths[0].year;
-  }
-
-  // Reconstruir holidays
-  buildInferredHolidays();
-
-  // Actualizar UI
-  document.getElementById('upload-summary').textContent = loadedFileName;
-  populateSurgeonSelect();
-
-  // Re-renderizar si hay cirujano seleccionado
-  const sel = document.getElementById('surgeon-select');
-  if (sel.value) renderResults(sel.value);
-
-  mostrarToast('V2 promovido a V1');
 }
 
 // ─────────────────────────────────────────────
@@ -2454,7 +2148,7 @@ function adjustDayRangesForRow(ws, row, dayRanges) {
   return adjusted;
 }
 
-function parseWorksheetPure(ws, refStart) {
+function parseWorksheetPure(ws) {
   const urgRows = findURGRows(ws);
   const data = {};
   const dates = [];
@@ -2497,11 +2191,7 @@ function parseWorksheetPure(ws, refStart) {
   }
 
   let startMonth, startYear;
-  if (refStart) {
-    // Use reference start from V1 to ensure consistent month assignment
-    startMonth = refStart.month;
-    startYear = refStart.year;
-  } else {
+  {
     let febSegIndex = -1;
     for (let i = 0; i < segments.length; i++) {
       if (segments[i].maxDate === 28 || segments[i].maxDate === 29) {
@@ -2648,8 +2338,6 @@ function parseWorksheet(ws) {
   parsedData = result.data;
   allDates = result.dates;
   availableMonths = result.months;
-  v1RefStart = { month: result.startMonth, year: result.startYear };
-
   // Prefer current month if available, otherwise month with most dates
   const now = new Date();
   const todayInData = availableMonths.some(m => m.month === now.getMonth() && m.year === now.getFullYear());
@@ -2689,7 +2377,6 @@ function showUploadSuccess() {
   document.getElementById('upload-info').style.display = 'flex';
   document.getElementById('upload-summary').textContent = loadedFileName;
   document.getElementById('controls').style.display = 'flex';
-  document.getElementById('btn-load-v2').style.display = '';
   document.getElementById('select-prompt').style.display = '';
   document.getElementById('results').classList.remove('visible');
 }
@@ -2766,7 +2453,7 @@ document.getElementById('surgeon-select').addEventListener('change', function() 
 function renderMonthPills() {
   const nav = document.getElementById('cal-nav');
   nav.textContent = '';
-  const months = getNavigableMonths();
+  const months = availableMonths;
   const SHORT = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   months.forEach(m => {
     const btn = document.createElement('button');
@@ -2784,280 +2471,6 @@ function renderMonthPills() {
   });
 }
 
-// ─────────────────────────────────────────────
-//  MONTH DIFF STATUS & NAVIGABLE MONTHS
-// ─────────────────────────────────────────────
-function getMonthDiffStatus(month, year) {
-  if (!parsedDataV2) return 'no-v2';
-  const inV1 = availableMonths.some(m => m.month === month && m.year === year);
-  const inV2 = availableMonthsV2.some(m => m.month === month && m.year === year);
-  if (inV1 && inV2) return 'both';
-  if (inV1 && !inV2) return 'removed';
-  if (!inV1 && inV2) return 'added';
-  return 'neither';
-}
-
-function getNavigableMonths() {
-  if (!parsedDataV2 || !availableMonthsV2.length) return availableMonths;
-  const set = new Set(availableMonths.map(m => `${m.year}-${m.month}`));
-  for (const m of availableMonthsV2) set.add(`${m.year}-${m.month}`);
-  return [...set].map(k => { const [y, mo] = k.split('-').map(Number); return { year: y, month: mo }; })
-    .sort((a, b) => a.year - b.year || a.month - b.month);
-}
-
-// ─────────────────────────────────────────────
-//  DIFF V1 vs V2
-// ─────────────────────────────────────────────
-function computeDiffForSurgeon(sid, month, year) {
-  const v1 = (parsedData[sid] || []).filter(e => e.month === month && e.year === year);
-  const v2 = (parsedDataV2[sid] || []).filter(e => e.month === month && e.year === year);
-
-  // Si un cirujano solo tiene datos en una versión, no generar cambios día a día.
-  // El resumen de mes añadido/eliminado se muestra a nivel global en el banner.
-  if (!v1.length || !v2.length) {
-    return { changes: [], totalAdded: 0, totalRemoved: 0 };
-  }
-
-  const groupByDay = (entries) => {
-    const map = {};
-    for (const e of entries) {
-      if (!map[e.day]) map[e.day] = new Set();
-      map[e.day].add(e.activity);
-    }
-    return map;
-  };
-
-  const v1Days = groupByDay(v1);
-  const v2Days = groupByDay(v2);
-  const allDaysSet = new Set([...Object.keys(v1Days), ...Object.keys(v2Days)]);
-  const changes = [];
-  let totalAdded = 0, totalRemoved = 0;
-
-  for (const day of [...allDaysSet].map(Number).sort((a, b) => a - b)) {
-    const s1 = v1Days[day] || new Set();
-    const s2 = v2Days[day] || new Set();
-    const added = [...s2].filter(a => !s1.has(a));
-    const removed = [...s1].filter(a => !s2.has(a));
-    if (added.length || removed.length) {
-      const anyEntry = v1.find(e => e.day === day) || v2.find(e => e.day === day);
-      changes.push({ day, dayOfWeek: anyEntry ? anyEntry.dayOfWeek : '', added, removed });
-      totalAdded += added.length;
-      totalRemoved += removed.length;
-    }
-  }
-
-  return { changes, totalAdded, totalRemoved };
-}
-
-function computeAllDiffs(month, year) {
-  const allIds = new Set([...Object.keys(parsedData), ...Object.keys(parsedDataV2)]);
-  const results = [];
-  let globalAdded = 0, globalRemoved = 0, surgeonsWithChanges = 0;
-
-  for (const sid of [...allIds].map(Number).sort((a, b) => a - b)) {
-    const diff = computeDiffForSurgeon(sid, month, year);
-    if (diff.changes.length) {
-      results.push({ surgeonId: sid, ...diff });
-      globalAdded += diff.totalAdded;
-      globalRemoved += diff.totalRemoved;
-      surgeonsWithChanges++;
-    }
-  }
-
-  return { surgeons: results, globalAdded, globalRemoved, surgeonsWithChanges };
-}
-
-let _lastDiffData = null;
-let _diffMode = 'global';
-
-function renderDiff(selectedSurgeonId) {
-  const section = document.getElementById('diff-section');
-  if (!parsedDataV2) { section.style.display = 'none'; return; }
-
-  section.style.display = '';
-
-  // Update cirujano tab label with surgeon name
-  const cirBtn = document.querySelector('#diff-toggle button[data-mode="cirujano"]');
-  if (cirBtn && selectedSurgeonId) {
-    const sName = SURGEONS[selectedSurgeonId];
-    cirBtn.textContent = sName ? sName.split(' ')[0] : 'Cirujano';
-  }
-
-  // Render months banner
-  renderMonthsBanner();
-
-  const contentEl = document.getElementById('diff-content');
-  const monthStatus = getMonthDiffStatus(currentMonth, currentYear);
-
-  if (monthStatus === 'removed') {
-    contentEl.innerHTML = `<div class="diff-month-removed">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-      <strong>${MONTH_NAMES[currentMonth]} ${currentYear}</strong> ha sido eliminado en V2
-    </div>`;
-    _lastDiffData = { allDiffs: null, selectedSurgeonId };
-    return;
-  }
-
-  if (monthStatus === 'added') {
-    contentEl.innerHTML = `<div class="diff-month-added">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-      <strong>${MONTH_NAMES[currentMonth]} ${currentYear}</strong> es nuevo en V2
-      <span class="diff-month-sub">Este mes no exist&iacute;a en V1</span>
-    </div>`;
-    _lastDiffData = { allDiffs: null, selectedSurgeonId };
-    return;
-  }
-
-  const allDiffs = computeAllDiffs(currentMonth, currentYear);
-  _lastDiffData = { allDiffs, selectedSurgeonId };
-
-  if (!allDiffs.surgeons.length) {
-    contentEl.innerHTML = '<div class="diff-no-changes">&#10004; Sin cambios este mes entre V1 y V2</div>';
-    return;
-  }
-
-  if (_diffMode === 'global') {
-    renderDiffGlobal(allDiffs, Number(selectedSurgeonId), contentEl);
-  } else {
-    renderDiffCirujano(allDiffs, Number(selectedSurgeonId), contentEl);
-  }
-}
-
-function renderMonthsBanner() {
-  let banner = document.getElementById('diff-months-banner');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'diff-months-banner';
-    banner.className = 'diff-months-banner';
-    const headerRow = document.querySelector('.diff-header-row');
-    if (headerRow) headerRow.parentNode.insertBefore(banner, headerRow.nextSibling);
-  }
-
-  const allMonths = getNavigableMonths();
-  const pills = [];
-  for (const m of allMonths) {
-    const status = getMonthDiffStatus(m.month, m.year);
-    const name = MONTH_NAMES[m.month];
-    if (status === 'removed') {
-      pills.push(`<span class="diff-month-pill pill-removed">&minus;${name}</span>`);
-    } else if (status === 'added') {
-      pills.push(`<span class="diff-month-pill pill-added">+${name}</span>`);
-    }
-  }
-
-  if (pills.length) {
-    banner.innerHTML = pills.join('');
-    banner.style.display = '';
-  } else {
-    banner.style.display = 'none';
-    banner.innerHTML = '';
-  }
-}
-
-function renderDiffGlobal(allDiffs, selectedId, contentEl) {
-  // Note: innerHTML usage is safe here — all values come from internal SURGEONS/ACTIVITIES
-  // dictionaries and numeric data, never from user-supplied text input.
-
-  let html = '';
-
-  // Group day-level changes by day and surgeon
-  const dayMap = {};
-  for (const sd of allDiffs.surgeons) {
-    const name = SURGEONS[sd.surgeonId] || ('Cirujano ' + sd.surgeonId);
-    for (const ch of sd.changes) {
-      const key = ch.day;
-      if (!dayMap[key]) dayMap[key] = { day: ch.day, dayOfWeek: ch.dayOfWeek, surgeons: {} };
-      if (!dayMap[key].surgeons[sd.surgeonId]) dayMap[key].surgeons[sd.surgeonId] = { name, surgeonId: sd.surgeonId, removed: [], added: [] };
-      for (const act of ch.removed) dayMap[key].surgeons[sd.surgeonId].removed.push(act);
-      for (const act of ch.added) dayMap[key].surgeons[sd.surgeonId].added.push(act);
-    }
-  }
-
-  const sortedDays = Object.values(dayMap).sort((a, b) => a.day - b.day);
-  const getLabel = (a) => ACTIVITIES[a] ? ACTIVITIES[a].label : a;
-  const getArt = (a) => ACTIVITIES[a] && ACTIVITIES[a].art ? ACTIVITIES[a].art : '';
-
-  if (sortedDays.length) {
-    html += '<table class="diff-table"><thead><tr><th>D\u00eda</th><th>Cambios</th></tr></thead><tbody>';
-
-    for (const dayData of sortedDays) {
-      const dayLabel = dayData.day + ' ' + MONTH_NAMES[currentMonth].substring(0, 3);
-      const dowName = (typeof dayData.dayOfWeek === 'number' && DAY_NAMES[dayData.dayOfWeek]) ? DAY_NAMES[dayData.dayOfWeek] : '';
-
-      const lines = [];
-      for (const s of Object.values(dayData.surgeons)) {
-        const hl = s.surgeonId === selectedId ? ' highlight' : '';
-        const maxPairs = Math.max(s.removed.length, s.added.length);
-        for (let i = 0; i < maxPairs; i++) {
-          const rem = s.removed[i];
-          const add = s.added[i];
-          if (rem && add) {
-            lines.push('<span class="diff-name' + hl + '">' + s.name + '</span> pasa de <span class="diff-act-out">' + getLabel(rem) + '</span> <span class="diff-arrow">&rarr;</span> <span class="diff-act-in">' + getLabel(add) + '</span>');
-          } else if (rem) {
-            lines.push('<span class="diff-name' + hl + '">' + s.name + '</span> <span class="diff-act-out">hac\u00eda ' + getArt(rem) + ' ' + getLabel(rem) + '</span> y ahora <span class="diff-act-out">no tiene turno</span>');
-          } else if (add) {
-            lines.push('<span class="diff-name' + hl + '">' + s.name + '</span> no ten\u00eda turno y <span class="diff-act-in">hace ' + getArt(add) + ' ' + getLabel(add) + '</span>');
-          }
-        }
-      }
-
-      html += '<tr><td class="diff-day">' + dayLabel + ' <span class="diff-day-dow">' + dowName + '</span></td><td class="diff-global-desc">' + lines.join('<br>') + '</td></tr>';
-    }
-    html += '</tbody></table>';
-  }
-
-  if (!html) {
-    html = '<div class="diff-no-changes">&#10004; Sin cambios d\u00eda a d\u00eda este mes entre V1 y V2</div>';
-  }
-
-  contentEl.innerHTML = html;
-}
-
-function renderDiffCirujano(allDiffs, selectedId, contentEl) {
-  // Note: innerHTML usage is safe — values from internal SURGEONS/ACTIVITIES dictionaries only.
-  const sd = allDiffs.surgeons.find(s => s.surgeonId === selectedId);
-  if (!sd) {
-    contentEl.innerHTML = '<div class="diff-no-changes">Sin cambios para este cirujano</div>';
-    return;
-  }
-
-  const name = SURGEONS[sd.surgeonId] || ('Cirujano ' + sd.surgeonId);
-
-  let html = '<div class="diff-surgeon-block">';
-  html += '<div class="diff-surgeon-header"><span class="diff-surgeon-name">T' + sd.surgeonId + ' \u2014 ' + name + '</span>';
-  html += '<span class="diff-surgeon-stats">';
-  if (sd.totalAdded) html += '<span class="diff-stat stat-added" style="font-size:10px;padding:2px 6px;">+' + sd.totalAdded + '</span>';
-  if (sd.totalRemoved) html += '<span class="diff-stat stat-removed" style="font-size:10px;padding:2px 6px;">&minus;' + sd.totalRemoved + '</span>';
-  html += '</span></div>';
-
-  html += '<table class="diff-table"><thead><tr><th>D\u00eda</th><th>Eliminado (V1)</th><th>A\u00f1adido (V2)</th></tr></thead><tbody>';
-  for (const ch of sd.changes) {
-    const dayLabel = ch.day + ' ' + MONTH_NAMES[currentMonth].substring(0, 3);
-    const dowName = (typeof ch.dayOfWeek === 'number' && DAY_NAMES[ch.dayOfWeek]) ? DAY_NAMES[ch.dayOfWeek] : '';
-    const dowLabel = dowName ? ' <span class="diff-day-dow">' + dowName + '</span>' : '';
-    const removedTags = ch.removed.map(function(a) {
-      const act = ACTIVITIES[a];
-      return '<span class="diff-tag removed">' + (act ? act.tag : a) + '</span>';
-    }).join('');
-    const addedTags = ch.added.map(function(a) {
-      const act = ACTIVITIES[a];
-      return '<span class="diff-tag added">' + (act ? act.tag : a) + '</span>';
-    }).join('');
-    html += '<tr><td class="diff-day">' + dayLabel + dowLabel + '</td><td><div class="diff-tags">' + (removedTags || '\u2014') + '</div></td><td><div class="diff-tags">' + (addedTags || '\u2014') + '</div></td></tr>';
-  }
-  html += '</tbody></table></div>';
-  contentEl.innerHTML = html;
-}
-
-// Diff toggle tabs
-document.querySelectorAll('#diff-toggle button').forEach(btn => {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('#diff-toggle button').forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
-    _diffMode = this.dataset.mode;
-    if (_lastDiffData) renderDiff(_lastDiffData.selectedSurgeonId);
-  });
-});
 
 function renderResults(surgeonId) {
   document.getElementById('select-prompt').style.display = 'none';
@@ -3066,7 +2479,6 @@ function renderResults(surgeonId) {
   renderSummary(surgeonId);
   renderTurns(surgeonId);
   renderRetribution(surgeonId);
-  renderDiff(surgeonId);
   if (chartsExpanded) {
     try { renderCharts(surgeonId); } catch (e) { console.warn('D3 charts unavailable:', e.message); }
   }
