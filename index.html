@@ -1551,10 +1551,11 @@
 
   <input type="file" id="file-input-v2" accept=".xlsx,.xls" style="display:none">
   <div class="upload-info" id="upload-info" style="display:none">
-    <div class="file-toggle" onclick="document.getElementById('file-input').click()">
+    <div class="file-toggle" id="v1-toggle" onclick="document.getElementById('file-input').click()">
       <span class="file-version">V1</span>
       <span class="file-name" id="upload-summary"></span>
       <span class="file-change">cambiar</span>
+      <button onclick="event.stopPropagation(); removeV1()" class="v2-remove" id="v1-remove" style="display:none">&times;</button>
     </div>
     <button class="btn-v2" id="btn-load-v2" onclick="document.getElementById('file-input-v2').click()" style="display:none">&#8596; Comparar V2</button>
     <span class="vs-label" id="vs-label" style="display:none">VS</span>
@@ -2139,6 +2140,7 @@ function showV2Loaded() {
   document.getElementById('vs-label').style.display = '';
   document.getElementById('v2-toggle').style.display = '';
   document.getElementById('v2-filename').textContent = loadedFileNameV2;
+  document.getElementById('v1-remove').style.display = '';
 }
 
 function removeV2() {
@@ -2150,8 +2152,63 @@ function removeV2() {
   document.getElementById('vs-label').style.display = 'none';
   document.getElementById('btn-load-v2').style.display = '';
   document.getElementById('diff-section').style.display = 'none';
+  document.getElementById('v1-remove').style.display = 'none';
   const banner = document.getElementById('diff-months-banner');
   if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+}
+
+function removeV1() {
+  // Promover V2 a V1: V2 pasa a ser la versión principal
+  parsedData = parsedDataV2;
+  allDates = [];
+  // Reconstruir allDates desde parsedData
+  for (const sid of Object.keys(parsedData)) {
+    for (const entry of parsedData[sid]) {
+      allDates.push(entry);
+    }
+  }
+  availableMonths = availableMonthsV2.slice();
+  loadedFileName = loadedFileNameV2;
+  fileInput.value = '';
+
+  // Limpiar V2
+  parsedDataV2 = null;
+  loadedFileNameV2 = '';
+  availableMonthsV2 = [];
+  document.getElementById('file-input-v2').value = '';
+  document.getElementById('v2-toggle').style.display = 'none';
+  document.getElementById('vs-label').style.display = 'none';
+  document.getElementById('btn-load-v2').style.display = '';
+  document.getElementById('diff-section').style.display = 'none';
+  document.getElementById('v1-remove').style.display = 'none';
+  const banner = document.getElementById('diff-months-banner');
+  if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+
+  // Ajustar mes actual si no existe en los nuevos datos
+  const currentValid = availableMonths.some(m => m.month === currentMonth && m.year === currentYear);
+  if (!currentValid && availableMonths.length) {
+    currentMonth = availableMonths[0].month;
+    currentYear = availableMonths[0].year;
+  }
+
+  // Reconstruir holidays y localStorage
+  buildInferredHolidays();
+  try {
+    localStorage.setItem('planning-parsedData', JSON.stringify(parsedData));
+    localStorage.setItem('planning-months', JSON.stringify(availableMonths));
+    localStorage.setItem('planning-dates', JSON.stringify(allDates));
+    localStorage.setItem('planning-ts', Date.now().toString());
+  } catch (e) { console.warn('localStorage save failed:', e.message); }
+
+  // Actualizar UI
+  document.getElementById('upload-summary').textContent = loadedFileName;
+  populateSurgeonSelect();
+
+  // Re-renderizar si hay cirujano seleccionado
+  const sel = document.getElementById('surgeon-select');
+  if (sel.value) renderResults(sel.value);
+
+  mostrarToast('V2 promovido a V1');
 }
 
 // ─────────────────────────────────────────────

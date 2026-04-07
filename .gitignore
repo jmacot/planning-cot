@@ -15,6 +15,9 @@ node_modules/
 package.json
 package-lock.json
 
+# Archivos dev/test (no necesarios en Pages)
+dev/
+
 # Archivos fuente pixelart (pesados, no necesarios en Pages)
 *.rar
 *.zip
