@@ -1546,7 +1546,7 @@
 
   <!-- Welcome hero image (below upload) -->
   <div class="welcome-hero" id="welcome-hero">
-    <img src="portada.png" alt="Analizador de Planning" class="welcome-hero-img">
+    <img src="assets/img/portada.png" alt="Analizador de Planning" class="welcome-hero-img">
   </div>
 
   <input type="file" id="file-input-v2" accept=".xlsx,.xls" style="display:none">
@@ -2791,6 +2791,12 @@ function computeDiffForSurgeon(sid, month, year) {
   const v1 = (parsedData[sid] || []).filter(e => e.month === month && e.year === year);
   const v2 = (parsedDataV2[sid] || []).filter(e => e.month === month && e.year === year);
 
+  // Si un cirujano solo tiene datos en una versión, no generar cambios día a día.
+  // El resumen de mes añadido/eliminado se muestra a nivel global en el banner.
+  if (!v1.length || !v2.length) {
+    return { changes: [], totalAdded: 0, totalRemoved: 0 };
+  }
+
   const groupByDay = (entries) => {
     const map = {};
     for (const e of entries) {
@@ -2928,10 +2934,15 @@ function renderMonthsBanner() {
 }
 
 function renderDiffGlobal(allDiffs, selectedId, contentEl) {
-  // Group all changes by day and surgeon
+  // Note: innerHTML usage is safe here — all values come from internal SURGEONS/ACTIVITIES
+  // dictionaries and numeric data, never from user-supplied text input.
+
+  let html = '';
+
+  // Group day-level changes by day and surgeon
   const dayMap = {};
   for (const sd of allDiffs.surgeons) {
-    const name = SURGEONS[sd.surgeonId] || `Cirujano ${sd.surgeonId}`;
+    const name = SURGEONS[sd.surgeonId] || ('Cirujano ' + sd.surgeonId);
     for (const ch of sd.changes) {
       const key = ch.day;
       if (!dayMap[key]) dayMap[key] = { day: ch.day, dayOfWeek: ch.dayOfWeek, surgeons: {} };
@@ -2945,72 +2956,73 @@ function renderDiffGlobal(allDiffs, selectedId, contentEl) {
   const getLabel = (a) => ACTIVITIES[a] ? ACTIVITIES[a].label : a;
   const getArt = (a) => ACTIVITIES[a] && ACTIVITIES[a].art ? ACTIVITIES[a].art : '';
 
-  let html = '<table class="diff-table"><thead><tr><th>D\u00eda</th><th>Cambios</th></tr></thead><tbody>';
+  if (sortedDays.length) {
+    html += '<table class="diff-table"><thead><tr><th>D\u00eda</th><th>Cambios</th></tr></thead><tbody>';
 
-  for (const dayData of sortedDays) {
-    const dayLabel = `${dayData.day} ${MONTH_NAMES[currentMonth].substring(0, 3)}`;
-    const dowName = (typeof dayData.dayOfWeek === 'number' && DAY_NAMES[dayData.dayOfWeek]) ? DAY_NAMES[dayData.dayOfWeek] : '';
+    for (const dayData of sortedDays) {
+      const dayLabel = dayData.day + ' ' + MONTH_NAMES[currentMonth].substring(0, 3);
+      const dowName = (typeof dayData.dayOfWeek === 'number' && DAY_NAMES[dayData.dayOfWeek]) ? DAY_NAMES[dayData.dayOfWeek] : '';
 
-    // Per-surgeon: pair removed[i] with added[i] → "pasa de X a Y"
-    const lines = [];
-    for (const s of Object.values(dayData.surgeons)) {
-      const hl = s.surgeonId === selectedId ? ' highlight' : '';
-      const maxPairs = Math.max(s.removed.length, s.added.length);
-      for (let i = 0; i < maxPairs; i++) {
-        const rem = s.removed[i];
-        const add = s.added[i];
-        if (rem && add) {
-          lines.push(`<span class="diff-name${hl}">${s.name}</span> pasa de <span class="diff-act-out">${getLabel(rem)}</span> <span class="diff-arrow">&rarr;</span> <span class="diff-act-in">${getLabel(add)}</span>`);
-        } else if (rem) {
-          lines.push(`<span class="diff-name${hl}">${s.name}</span> <span class="diff-act-out">hac\u00eda ${getArt(rem)} ${getLabel(rem)}</span> y ahora <span class="diff-act-out">no tiene turno</span>`);
-        } else if (add) {
-          lines.push(`<span class="diff-name${hl}">${s.name}</span> no ten\u00eda turno y <span class="diff-act-in">hace ${getArt(add)} ${getLabel(add)}</span>`);
+      const lines = [];
+      for (const s of Object.values(dayData.surgeons)) {
+        const hl = s.surgeonId === selectedId ? ' highlight' : '';
+        const maxPairs = Math.max(s.removed.length, s.added.length);
+        for (let i = 0; i < maxPairs; i++) {
+          const rem = s.removed[i];
+          const add = s.added[i];
+          if (rem && add) {
+            lines.push('<span class="diff-name' + hl + '">' + s.name + '</span> pasa de <span class="diff-act-out">' + getLabel(rem) + '</span> <span class="diff-arrow">&rarr;</span> <span class="diff-act-in">' + getLabel(add) + '</span>');
+          } else if (rem) {
+            lines.push('<span class="diff-name' + hl + '">' + s.name + '</span> <span class="diff-act-out">hac\u00eda ' + getArt(rem) + ' ' + getLabel(rem) + '</span> y ahora <span class="diff-act-out">no tiene turno</span>');
+          } else if (add) {
+            lines.push('<span class="diff-name' + hl + '">' + s.name + '</span> no ten\u00eda turno y <span class="diff-act-in">hace ' + getArt(add) + ' ' + getLabel(add) + '</span>');
+          }
         }
       }
-    }
 
-    html += `<tr>
-      <td class="diff-day">${dayLabel} <span class="diff-day-dow">${dowName}</span></td>
-      <td class="diff-global-desc">${lines.join('<br>')}</td>
-    </tr>`;
+      html += '<tr><td class="diff-day">' + dayLabel + ' <span class="diff-day-dow">' + dowName + '</span></td><td class="diff-global-desc">' + lines.join('<br>') + '</td></tr>';
+    }
+    html += '</tbody></table>';
   }
-  html += '</tbody></table>';
+
+  if (!html) {
+    html = '<div class="diff-no-changes">&#10004; Sin cambios d\u00eda a d\u00eda este mes entre V1 y V2</div>';
+  }
+
   contentEl.innerHTML = html;
 }
 
 function renderDiffCirujano(allDiffs, selectedId, contentEl) {
+  // Note: innerHTML usage is safe — values from internal SURGEONS/ACTIVITIES dictionaries only.
   const sd = allDiffs.surgeons.find(s => s.surgeonId === selectedId);
   if (!sd) {
     contentEl.innerHTML = '<div class="diff-no-changes">Sin cambios para este cirujano</div>';
     return;
   }
 
-  const name = SURGEONS[sd.surgeonId] || `Cirujano ${sd.surgeonId}`;
-  let html = `<div class="diff-surgeon-block">`;
-  html += `<div class="diff-surgeon-header"><span class="diff-surgeon-name">T${sd.surgeonId} \u2014 ${name}</span>`;
-  html += `<span class="diff-surgeon-stats">`;
-  if (sd.totalAdded) html += `<span class="diff-stat stat-added" style="font-size:10px;padding:2px 6px;">+${sd.totalAdded}</span>`;
-  if (sd.totalRemoved) html += `<span class="diff-stat stat-removed" style="font-size:10px;padding:2px 6px;">&minus;${sd.totalRemoved}</span>`;
-  html += `</span></div>`;
+  const name = SURGEONS[sd.surgeonId] || ('Cirujano ' + sd.surgeonId);
+
+  let html = '<div class="diff-surgeon-block">';
+  html += '<div class="diff-surgeon-header"><span class="diff-surgeon-name">T' + sd.surgeonId + ' \u2014 ' + name + '</span>';
+  html += '<span class="diff-surgeon-stats">';
+  if (sd.totalAdded) html += '<span class="diff-stat stat-added" style="font-size:10px;padding:2px 6px;">+' + sd.totalAdded + '</span>';
+  if (sd.totalRemoved) html += '<span class="diff-stat stat-removed" style="font-size:10px;padding:2px 6px;">&minus;' + sd.totalRemoved + '</span>';
+  html += '</span></div>';
 
   html += '<table class="diff-table"><thead><tr><th>D\u00eda</th><th>Eliminado (V1)</th><th>A\u00f1adido (V2)</th></tr></thead><tbody>';
   for (const ch of sd.changes) {
-    const dayLabel = `${ch.day} ${MONTH_NAMES[currentMonth].substring(0, 3)}`;
+    const dayLabel = ch.day + ' ' + MONTH_NAMES[currentMonth].substring(0, 3);
     const dowName = (typeof ch.dayOfWeek === 'number' && DAY_NAMES[ch.dayOfWeek]) ? DAY_NAMES[ch.dayOfWeek] : '';
-    const dowLabel = dowName ? ` <span class="diff-day-dow">${dowName}</span>` : '';
-    const removedTags = ch.removed.map(a => {
+    const dowLabel = dowName ? ' <span class="diff-day-dow">' + dowName + '</span>' : '';
+    const removedTags = ch.removed.map(function(a) {
       const act = ACTIVITIES[a];
-      return `<span class="diff-tag removed">${act ? act.tag : a}</span>`;
+      return '<span class="diff-tag removed">' + (act ? act.tag : a) + '</span>';
     }).join('');
-    const addedTags = ch.added.map(a => {
+    const addedTags = ch.added.map(function(a) {
       const act = ACTIVITIES[a];
-      return `<span class="diff-tag added">${act ? act.tag : a}</span>`;
+      return '<span class="diff-tag added">' + (act ? act.tag : a) + '</span>';
     }).join('');
-    html += `<tr>
-      <td class="diff-day">${dayLabel}${dowLabel}</td>
-      <td><div class="diff-tags">${removedTags || '\u2014'}</div></td>
-      <td><div class="diff-tags">${addedTags || '\u2014'}</div></td>
-    </tr>`;
+    html += '<tr><td class="diff-day">' + dayLabel + dowLabel + '</td><td><div class="diff-tags">' + (removedTags || '\u2014') + '</div></td><td><div class="diff-tags">' + (addedTags || '\u2014') + '</div></td></tr>';
   }
   html += '</tbody></table></div>';
   contentEl.innerHTML = html;
