@@ -662,7 +662,7 @@
       grid-column: 1 / -1;
       font-family: 'Source Code Pro', monospace;
       font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
-      padding: 5px 12px;
+      padding: 6px 14px;
       display: flex; align-items: center; gap: 10px;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border-light);
@@ -749,7 +749,14 @@
     .gv-day-header-row .gv-cell.gv-weekend .gv-cell-num { color: #fecaca; }
     .gv-cell.gv-weekend { background: rgba(239,68,68,0.03); }
     .gv-cell.gv-weekend:hover { background: rgba(239,68,68,0.06); }
-    .gv-cell.gv-day-empty { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 5px, var(--surface2) 5px, var(--surface2) 6px); }
+    .gv-cell.gv-day-empty {
+      background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 5px, var(--surface2) 5px, var(--surface2) 6px);
+    }
+    /* Celda existente pero vacía (fin de semana sin datos): guion sutil */
+    .gv-cell:not(.gv-day-empty):empty::before {
+      content: '—'; color: rgba(148,163,184,0.55); font-size: 13px; font-weight: 600;
+      align-self: center;
+    }
     /* Nombre clicable */
     .gv-name {
       cursor: pointer; padding: 0 2px; border-radius: 3px;
@@ -868,8 +875,8 @@
       .gv-label, .gv-cell { padding: 4px 5px; min-height: 30px; font-size: 10.5px; }
       .gv-label { font-size: 9.5px; }
       .gv-label-icon { font-size: 11px; }
-      .gv-team { padding: 2px 5px; font-size: 10px; }
-      .gv-one { padding: 2px 6px; font-size: 10px; }
+      .gv-team { padding: 2px 5px; font-size: 9.5px; line-height: 1.2; }
+      .gv-one { padding: 2px 5px; font-size: 9.5px; line-height: 1.2; }
       .gv-day-header-row .gv-cell, .gv-day-header-row .gv-label { font-size: 9.5px; min-height: 26px; }
       .gv-day-header-row .gv-cell-num { font-size: 12px; }
       .gv-section { padding: 4px 10px; font-size: 9px; }
@@ -890,10 +897,11 @@
     .gv-team {
       padding: 3px 7px; border-radius: 5px;
       background: linear-gradient(180deg, rgba(56,189,248,0.12), rgba(56,189,248,0.06));
-      border-left: 2.5px solid #0284c7;
+      border-left: 3px solid #0284c7;
       font-size: 11px; font-weight: 500;
       box-shadow: inset 0 -1px 0 rgba(56,189,248,0.15);
       transition: transform 0.12s;
+      overflow-wrap: break-word;
     }
     .gv-team:hover { transform: translateX(1px); }
     .gv-team + .gv-team { margin-top: 3px; }
@@ -912,6 +920,7 @@
       background: rgba(148,163,184,0.12);
       border: 1px solid transparent;
       transition: all 0.12s;
+      max-width: 100%; overflow-wrap: break-word;
     }
     .gv-one:hover { transform: translateY(-1px); }
     .gv-one.gv-gestion {
@@ -3566,7 +3575,7 @@ function openGlobalView() {
   let nav = '<div class="gv-nav">';
   nav += '<div class="gv-search-wrap">';
   nav += '<span class="gv-search-icon">&#128269;</span>';
-  nav += '<input class="gv-search" id="gv-search" type="search" placeholder="Buscar apellido…" autocomplete="off">';
+  nav += '<input class="gv-search" id="gv-search" type="search" placeholder="Apellido…" autocomplete="off">';
   nav += '<button class="gv-search-clear" id="gv-search-clear" title="Limpiar">&times;</button>';
   nav += '</div>';
   nav += `<button class="gv-nav-today" id="gv-nav-today"${todayIdx < 0 ? ' disabled title="Hoy no está en el planning"' : ''}>HOY</button>`;
