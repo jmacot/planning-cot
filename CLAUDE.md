@@ -84,6 +84,20 @@ Line 4: checks `localStorage.getItem('cot_auth')` with 24h expiry. Redirects to 
 - **Language**: always `lang="es"`, all UI text in Spanish.
 - **Event pattern**: button groups (summary-toggle, retrib-toggle, jornada-toggle, etc.) use uniform toggle pattern — remove active from all, add to clicked, update state, re-render.
 
+## Mantenimiento recurrente
+
+- **`RETRIB_RATES`** — tarifas de guardia (GPF) y localizada (LOC) hardcodeadas. Actualizar cuando cambie el convenio del SAS.
+- **`HOLIDAYS_2026`** — festivos oficiales de Andalucía + locales de Sevilla. Requiere actualización manual cada año natural (añadir `HOLIDAYS_2027` y conmutar la referencia al pasar de año).
+- **`SURGEONS` / `SURGEON_FEMALE` / `SURGEON_UNITS`** — registro de cirujanos. Actualizar cuando entren/salgan adjuntos del servicio.
+
+## Debugging de parsing
+
+Si un cirujano no aparece o sus actividades son incorrectas:
+1. Verificar que el ID del cirujano está en `SURGEONS` y que el Excel usa la misma cadena.
+2. Revisar `parseWorksheetPure(ws)` — busca filas URG (encabezados de quirófano) y mapea actividades por offset de fila.
+3. Para actividades marcadas por color (gestion=naranja, rucot/diferida_t=verde), inspeccionar `getCellFgRGB()`: el proxy de Google Sheets preserva colores, pero un Excel guardado desde LibreOffice a veces los pierde.
+4. `groupSurgeonsAsPairs()` controla el emparejamiento de quirófano vía `companions[]`; errores de pareja suelen venir de aquí.
+
 ## Assets
 
 - **assets/img/portada.png** — Welcome hero image
