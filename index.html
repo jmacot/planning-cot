@@ -857,10 +857,11 @@
       box-shadow: 0 4px 12px rgba(239,68,68,0.5);
     }
     .gv-nav-today:disabled { opacity: 0.4; cursor: not-allowed; }
-    /* Scroll wrap del grid: sólo activa overflow en móvil (en desktop rompería
-       el position: sticky de los headers al crear un scroll-container nuevo) */
-    .gv-grid-wrap { /* transparente en desktop */ }
-    @media (max-width: 900px) {
+    /* Scroll wrap del grid: sólo activa overflow en móvil-pequeño (en pantallas
+       mayores rompería el position: sticky de los headers al crear un
+       scroll-container nuevo). 640px cubre teléfonos, tablets ya caben). */
+    .gv-grid-wrap { /* transparente en >=641px */ }
+    @media (max-width: 640px) {
       .gv-grid-wrap { overflow-x: auto; scrollbar-width: thin; }
     }
 
