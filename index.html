@@ -625,7 +625,9 @@
       color: var(--text); letter-spacing: 0.01em;
       padding: 12px 18px 10px; display: flex; align-items: baseline; gap: 10px;
       border-bottom: 1px solid var(--border-light);
-      background: linear-gradient(180deg, var(--surface), var(--surface2));
+      background: var(--surface);
+      position: sticky; top: var(--gv-nav-h, 66px); z-index: 4;
+      box-shadow: 0 2px 6px rgba(15,23,42,0.08);
     }
     .gv-week-title-num {
       font-family: 'Source Code Pro', monospace; font-size: 10px; font-weight: 700;
@@ -740,7 +742,7 @@
       font-weight: 700; font-size: 10.5px; letter-spacing: 0.08em;
       text-align: center; align-items: center; min-height: 28px;
       position: sticky;
-      top: var(--gv-nav-h, 66px);
+      top: calc(var(--gv-nav-h, 66px) + 42px); /* tras título de semana sticky */
       z-index: 5;
     }
     .gv-day-header-row .gv-cell-num {
@@ -857,10 +859,11 @@
       box-shadow: 0 4px 12px rgba(239,68,68,0.5);
     }
     .gv-nav-today:disabled { opacity: 0.4; cursor: not-allowed; }
-    /* Scroll wrap del grid: sólo activa overflow en móvil-pequeño (en pantallas
-       mayores rompería el position: sticky de los headers al crear un
-       scroll-container nuevo). 640px cubre teléfonos, tablets ya caben). */
-    .gv-grid-wrap { /* transparente en >=641px */ }
+    /* Desktop/tablet: sin scroll-container (sticky de día funciona).
+       Móvil pequeño (<640px): overflow-x: auto para que los chips no se
+       destruyan; en ese caso el sticky de día se pierde pero lo suple el
+       título de la semana también sticky. */
+    .gv-grid-wrap { /* transparente */ }
     @media (max-width: 640px) {
       .gv-grid-wrap { overflow-x: auto; scrollbar-width: thin; }
     }
@@ -891,15 +894,16 @@
       .gv-day-header-row .gv-cell, .gv-day-header-row .gv-label { font-size: 9.5px; min-height: 26px; }
       .gv-day-header-row .gv-cell-num { font-size: 12px; }
       .gv-section { padding: 4px 10px; font-size: 9px; }
-      /* Primera columna sticky para no perder referencia al hacer scroll horizontal */
+      /* En móvil el grid sí está en scroll-container → el sticky top se pierde.
+         Sólo el título de la semana (fuera del grid-wrap) permanece sticky. */
+      .gv-week-title { top: var(--gv-nav-h, 56px); }
+      .gv-day-header-row .gv-cell, .gv-day-header-row .gv-label { position: static; }
+      /* Primera columna sticky horizontal para mantener referencia del tipo de actividad */
       .gv-grid { position: relative; }
       .gv-label {
         position: sticky; left: 0; z-index: 3;
         box-shadow: 2px 0 4px rgba(0,0,0,0.06);
       }
-      /* Esquina: sticky en ambos ejes (top + left) */
-      .gv-day-header-row .gv-label { z-index: 6; }
-      .gv-day-header-row .gv-cell { z-index: 5; }
     }
     @media (max-width: 500px) {
       .gv-search { width: 110px; }
