@@ -2324,6 +2324,10 @@ function parseWorksheetPure(ws) {
             activity = actKey;
           }
 
+          // Sábado y domingo no tienen quirófano de mañana: descartar
+          // entradas espurias causadas por desbordes de columnas del viernes.
+          if (activity === 'qui_m' && (dayOfWeek === 5 || dayOfWeek === 6)) continue;
+
           const entry = { day: wd.date, month: trackMonth, year: trackYear, dayOfWeek, activity };
 
           if (isQuirofano && (activity === 'qui_m' || activity === 'qui_t' || activity === 'diferida_t') && companionMap) {
@@ -2353,6 +2357,7 @@ function parseWorksheetPure(ws) {
 }
 
 function parseWorksheet(ws) {
+  window.__debugWs = ws;
   const result = parseWorksheetPure(ws);
   parsedData = result.data;
   allDates = result.dates;
@@ -3932,7 +3937,7 @@ function renderQxUnitChart(surgeonId) {
     unitCounts[unit] = count;
   }
   const sorted = [...allUnits].sort((a, b) => unitCounts[b] - unitCounts[a]);
-  const margin = { top: 10, right: 10, bottom: 30, left: 35 };
+  const margin = { top: 22, right: 10, bottom: 30, left: 35 };
   const width = 360, height = 220;
   const innerW = width - margin.left - margin.right, innerH = height - margin.top - margin.bottom;
 
