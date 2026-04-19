@@ -736,6 +736,9 @@
       font-family: 'Source Code Pro', monospace;
       font-weight: 700; font-size: 10.5px; letter-spacing: 0.08em;
       text-align: center; align-items: center; min-height: 28px;
+      position: sticky;
+      top: var(--gv-nav-h, 66px);
+      z-index: 5;
     }
     .gv-day-header-row .gv-cell-num {
       font-family: 'Source Serif 4', serif; font-size: 13px; font-weight: 700;
@@ -886,7 +889,9 @@
         position: sticky; left: 0; z-index: 3;
         box-shadow: 2px 0 4px rgba(0,0,0,0.06);
       }
-      .gv-day-header-row .gv-label { z-index: 4; }
+      /* Esquina: sticky en ambos ejes (top + left) */
+      .gv-day-header-row .gv-label { z-index: 6; }
+      .gv-day-header-row .gv-cell { z-index: 5; }
     }
     @media (max-width: 500px) {
       .gv-search { width: 110px; }
@@ -3643,6 +3648,12 @@ function openGlobalView() {
   document.getElementById('gv-subtitle').textContent = `${weeks.length} semanas · prototipo v3`;
   document.getElementById('gv-overlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+
+  // Medir la altura real del nav y exponerla como var CSS para el sticky de los headers
+  requestAnimationFrame(() => {
+    const navEl = body.querySelector('.gv-nav');
+    if (navEl) body.style.setProperty('--gv-nav-h', navEl.offsetHeight + 'px');
+  });
 
   // Click delegado: apellido → vista individual; sección → colapsar; nav → scroll
   body.onclick = (ev) => {
