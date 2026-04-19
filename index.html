@@ -562,6 +562,393 @@
       color: var(--green); background: var(--green-light);
       border-color: var(--green); pointer-events: none;
     }
+    /* ── Vista global (prototipo v2) ── */
+    .gv-overlay {
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at top, rgba(30,41,59,0.88), rgba(15,23,42,0.95));
+      z-index: 9998; display: flex; align-items: stretch; justify-content: center;
+      padding: 18px; backdrop-filter: blur(10px);
+      animation: gv-fade 0.25s ease-out;
+    }
+    @keyframes gv-fade { from { opacity: 0; } to { opacity: 1; } }
+    .gv-modal {
+      background: var(--bg); border-radius: 16px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      width: 100%; max-width: 1700px; display: flex; flex-direction: column;
+      overflow: hidden; border: 1px solid rgba(148,163,184,0.2);
+    }
+    .gv-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 26px; border-bottom: 1px solid rgba(148,163,184,0.15);
+      background: linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      color: #f1f5f9; position: relative;
+    }
+    .gv-header::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #a78bfa);
+    }
+    .gv-header h2 {
+      font-family: 'Source Serif 4', serif; font-size: 1.2rem; font-weight: 700;
+      margin: 0; letter-spacing: 0.01em;
+    }
+    .gv-header-sub { font-size: 11px; color: #94a3b8; margin-top: 3px; font-family: 'Source Code Pro', monospace; }
+    .gv-close {
+      background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.15);
+      color: #f1f5f9; width: 34px; height: 34px; border-radius: 10px;
+      font-size: 18px; cursor: pointer; line-height: 1;
+      transition: all 0.15s;
+    }
+    .gv-close:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); transform: rotate(90deg); }
+    .gv-body {
+      overflow: auto; padding: 22px 26px; flex: 1;
+      font-family: 'Source Sans 3', sans-serif;
+      background:
+        radial-gradient(ellipse 800px 400px at 10% 0%, rgba(56,189,248,0.04), transparent 60%),
+        radial-gradient(ellipse 800px 400px at 90% 100%, rgba(167,139,250,0.04), transparent 60%);
+    }
+    .gv-week {
+      margin-bottom: 28px; background: var(--surface);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 16px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.06);
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+    .gv-week::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, #38bdf8, #a78bfa);
+    }
+    .gv-week-title {
+      font-family: 'Source Serif 4', serif; font-size: 0.95rem; font-weight: 700;
+      color: var(--text); letter-spacing: 0.01em;
+      padding: 12px 18px 10px; display: flex; align-items: baseline; gap: 10px;
+      border-bottom: 1px solid var(--border-light);
+      background: linear-gradient(180deg, var(--surface), var(--surface2));
+    }
+    .gv-week-title-num {
+      font-family: 'Source Code Pro', monospace; font-size: 10px; font-weight: 700;
+      color: #38bdf8; letter-spacing: 0.1em; text-transform: uppercase;
+      background: rgba(56,189,248,0.1); padding: 3px 8px; border-radius: 5px;
+    }
+    .gv-grid {
+      display: grid;
+      grid-template-columns: 72px repeat(7, minmax(0, 1fr));
+      background: var(--surface2);
+    }
+    .gv-row { display: contents; }
+    .gv-label, .gv-cell {
+      border-right: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+      padding: 6px 8px; min-height: 34px;
+      font-size: 11.5px; line-height: 1.3;
+      display: flex; flex-direction: column; justify-content: center; gap: 3px;
+      background: var(--surface); transition: background 0.15s;
+    }
+    .gv-cell:hover { background: var(--surface2); }
+    .gv-label {
+      font-family: 'Source Code Pro', monospace; font-weight: 700;
+      font-size: 10.5px; letter-spacing: 0.05em;
+      text-align: center; align-items: center;
+      background: linear-gradient(180deg, var(--surface), var(--surface2));
+    }
+    .gv-label-icon { font-size: 13px; line-height: 1; margin-bottom: 1px; opacity: 0.85; }
+    .gv-label-diferida { color: #ea580c; }
+    .gv-label-qui_m, .gv-label-qui_t { color: #0284c7; }
+    .gv-label-cons_m, .gv-label-cons_t { color: #7c3aed; }
+    .gv-label-saliente { color: #64748b; }
+    .gv-label-guardia { color: #dc2626; }
+    .gv-label-localizado { color: #9333ea; }
+    /* Bandas divisorias mañana/tarde/guardia */
+    .gv-section {
+      grid-column: 1 / -1;
+      font-family: 'Source Code Pro', monospace;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.2em;
+      padding: 5px 12px;
+      display: flex; align-items: center; gap: 10px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-light);
+      position: relative;
+    }
+    .gv-section span {
+      padding: 1px 8px; border-radius: 4px;
+      background: var(--surface); border: 1px solid var(--border-light);
+    }
+    .gv-section::after {
+      content: ''; flex: 1; height: 2px;
+      background: linear-gradient(90deg, currentColor 0%, transparent 100%);
+      opacity: 0.3;
+    }
+    .gv-section-morning { color: #ea580c; background: linear-gradient(180deg, rgba(251,191,36,0.08), rgba(251,191,36,0.02)); }
+    .gv-section-afternoon { color: #7c3aed; background: linear-gradient(180deg, rgba(167,139,250,0.1), rgba(167,139,250,0.02)); }
+    .gv-section-guard { color: #dc2626; background: linear-gradient(180deg, rgba(239,68,68,0.1), rgba(239,68,68,0.02)); }
+    .gv-row-saliente .gv-label, .gv-row-saliente .gv-cell { background: rgba(100,116,139,0.04); }
+    .gv-row-saliente .gv-cell:hover { background: rgba(100,116,139,0.1); }
+
+    /* Navegador semanal sticky */
+    .gv-nav {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bg);
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 4px 14px; margin: -10px -4px 16px;
+      border-bottom: 1px solid var(--border-light);
+      backdrop-filter: blur(10px);
+    }
+    .gv-nav-label {
+      font-family: 'Source Code Pro', monospace; font-size: 10px; font-weight: 700;
+      color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .gv-nav-scroll {
+      display: flex; gap: 6px; overflow-x: auto; flex: 1;
+      scrollbar-width: thin;
+      padding-bottom: 2px;
+    }
+    .gv-nav-scroll::-webkit-scrollbar { height: 4px; }
+    .gv-nav-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .gv-nav-btn {
+      flex-shrink: 0;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border-light); border-radius: 8px;
+      padding: 6px 10px; cursor: pointer;
+      font-family: 'Source Sans 3', sans-serif;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+      min-width: 86px;
+      transition: all 0.15s;
+    }
+    .gv-nav-btn:hover {
+      border-color: #38bdf8; transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(56,189,248,0.2);
+    }
+    .gv-nav-btn.active {
+      background: linear-gradient(135deg, #38bdf8, #a78bfa);
+      border-color: transparent; color: white;
+      box-shadow: 0 4px 14px rgba(56,189,248,0.4);
+    }
+    .gv-nav-num {
+      font-family: 'Source Code Pro', monospace; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.08em; opacity: 0.75;
+    }
+    .gv-nav-btn.active .gv-nav-num { opacity: 1; }
+    .gv-nav-dates { font-size: 11px; font-weight: 600; white-space: nowrap; }
+    /* Day header row */
+    .gv-day-header-row .gv-cell,
+    .gv-day-header-row .gv-label {
+      background: linear-gradient(180deg, #1e293b, #334155); color: #e2e8f0;
+      font-family: 'Source Code Pro', monospace;
+      font-weight: 700; font-size: 10.5px; letter-spacing: 0.08em;
+      text-align: center; align-items: center; min-height: 28px;
+    }
+    .gv-day-header-row .gv-cell-num {
+      font-family: 'Source Serif 4', serif; font-size: 13px; font-weight: 700;
+      color: #f8fafc; margin-top: 1px;
+    }
+    [data-theme="dark"] .gv-day-header-row .gv-cell,
+    [data-theme="dark"] .gv-day-header-row .gv-label {
+      background: linear-gradient(180deg, #020617, #0f172a);
+    }
+    .gv-day-header-row .gv-cell.gv-weekend { color: #fca5a5; background: linear-gradient(180deg, #1e1a1a, #3a2222); }
+    .gv-day-header-row .gv-cell.gv-weekend .gv-cell-num { color: #fecaca; }
+    .gv-cell.gv-weekend { background: rgba(239,68,68,0.03); }
+    .gv-cell.gv-weekend:hover { background: rgba(239,68,68,0.06); }
+    .gv-cell.gv-day-empty { background: repeating-linear-gradient(45deg, var(--surface), var(--surface) 5px, var(--surface2) 5px, var(--surface2) 6px); }
+    /* Nombre clicable */
+    .gv-name {
+      cursor: pointer; padding: 0 2px; border-radius: 3px;
+      transition: all 0.12s;
+    }
+    .gv-team .gv-name:hover {
+      background: rgba(56,189,248,0.3);
+      text-decoration: underline;
+      text-decoration-color: #0284c7;
+      text-underline-offset: 2px;
+    }
+    .gv-one.gv-name:hover {
+      filter: brightness(1.08) saturate(1.2);
+      transform: translateY(-1px) scale(1.04);
+      box-shadow: 0 3px 10px rgba(56,189,248,0.3);
+    }
+    /* Hover/búsqueda: resaltar todas las apariciones del mismo cirujano */
+    .gv-has-hl .gv-name,
+    .gv-has-search .gv-name { opacity: 0.2; transition: opacity 0.18s; }
+    .gv-has-hl .gv-name.gv-hl-match,
+    .gv-has-search .gv-name.gv-search-match {
+      opacity: 1;
+      background: linear-gradient(135deg, #fde68a, #fbbf24);
+      color: #78350f; font-weight: 700;
+      box-shadow: 0 0 0 2px #f59e0b, 0 2px 8px rgba(245,158,11,0.4);
+      animation: gv-pulse 1.4s ease-in-out infinite;
+    }
+    @keyframes gv-pulse {
+      0%, 100% { box-shadow: 0 0 0 2px #f59e0b, 0 2px 8px rgba(245,158,11,0.4); }
+      50%      { box-shadow: 0 0 0 2px #fbbf24, 0 3px 14px rgba(251,191,36,0.7); }
+    }
+    [data-theme="dark"] .gv-has-hl .gv-name.gv-hl-match,
+    [data-theme="dark"] .gv-has-search .gv-name.gv-search-match {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #451a03;
+    }
+    /* Colapso de secciones */
+    .gv-section { cursor: pointer; user-select: none; }
+    .gv-section:hover { filter: brightness(1.08); }
+    .gv-section::before {
+      content: '▾'; display: inline-block; margin-right: 6px;
+      font-size: 10px; transition: transform 0.2s;
+    }
+    .gv-collapsed-morning .gv-section-morning::before,
+    .gv-collapsed-afternoon .gv-section-afternoon::before,
+    .gv-collapsed-guard .gv-section-guard::before { transform: rotate(-90deg); }
+    .gv-collapsed-morning .gv-section-morning,
+    .gv-collapsed-afternoon .gv-section-afternoon,
+    .gv-collapsed-guard .gv-section-guard { opacity: 0.55; }
+    .gv-collapsed-morning .gv-row-diferida,
+    .gv-collapsed-morning .gv-row-qui_m,
+    .gv-collapsed-morning .gv-row-cons,
+    .gv-collapsed-afternoon .gv-row-qui_t,
+    .gv-collapsed-guard .gv-row-guardia,
+    .gv-collapsed-guard .gv-row-localizado,
+    .gv-collapsed-guard .gv-row-saliente { display: none; }
+    /* Buscador */
+    .gv-search-wrap {
+      position: relative; flex-shrink: 0;
+    }
+    .gv-search {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border-light); border-radius: 8px;
+      padding: 6px 32px 6px 32px; font-size: 12px;
+      font-family: 'Source Sans 3', sans-serif;
+      width: 180px; outline: none;
+      transition: all 0.15s;
+    }
+    .gv-search:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.15); }
+    .gv-search-icon {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); pointer-events: none; font-size: 12px;
+    }
+    .gv-search-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 16px; padding: 2px 6px; line-height: 1;
+      display: none;
+    }
+    .gv-search:not(:placeholder-shown) + .gv-search-clear { display: block; }
+    /* Botón HOY */
+    .gv-nav-today {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      color: white; border: none; border-radius: 8px;
+      padding: 6px 12px; font-family: 'Source Sans 3', sans-serif;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      cursor: pointer; transition: all 0.15s;
+      box-shadow: 0 2px 8px rgba(239,68,68,0.3);
+    }
+    .gv-nav-today:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239,68,68,0.5);
+    }
+    .gv-nav-today:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* Scroll wrap del grid (para móvil) */
+    .gv-grid-wrap { overflow-x: auto; scrollbar-width: thin; }
+
+    /* MÓVIL */
+    @media (max-width: 900px) {
+      .gv-overlay { padding: 0; }
+      .gv-modal { border-radius: 0; max-width: 100%; }
+      .gv-header { padding: 10px 14px; }
+      .gv-header h2 { font-size: 1rem; }
+      .gv-header-sub { font-size: 10px; }
+      .gv-body { padding: 10px 10px 20px; }
+      .gv-week { margin-bottom: 16px; }
+      .gv-week-title { padding: 10px 12px; font-size: 0.85rem; gap: 6px; }
+      .gv-week-title-num { font-size: 9px; padding: 2px 6px; }
+      .gv-nav { padding: 8px 2px 10px; margin: -6px -2px 12px; gap: 8px; }
+      .gv-nav-label { display: none; }
+      .gv-search { width: 130px; font-size: 11px; padding: 5px 28px 5px 26px; }
+      .gv-nav-today { padding: 5px 9px; font-size: 10px; }
+      .gv-nav-btn { min-width: 72px; padding: 5px 8px; }
+      .gv-nav-dates { font-size: 10px; }
+      .gv-grid { min-width: 680px; }
+      .gv-label, .gv-cell { padding: 4px 5px; min-height: 30px; font-size: 10.5px; }
+      .gv-label { font-size: 9.5px; }
+      .gv-label-icon { font-size: 11px; }
+      .gv-team { padding: 2px 5px; font-size: 10px; }
+      .gv-one { padding: 2px 6px; font-size: 10px; }
+      .gv-day-header-row .gv-cell, .gv-day-header-row .gv-label { font-size: 9.5px; min-height: 26px; }
+      .gv-day-header-row .gv-cell-num { font-size: 12px; }
+      .gv-section { padding: 4px 10px; font-size: 9px; }
+      /* Primera columna sticky para no perder referencia al hacer scroll horizontal */
+      .gv-grid { position: relative; }
+      .gv-label {
+        position: sticky; left: 0; z-index: 3;
+        box-shadow: 2px 0 4px rgba(0,0,0,0.06);
+      }
+      .gv-day-header-row .gv-label { z-index: 4; }
+    }
+    @media (max-width: 500px) {
+      .gv-search { width: 110px; }
+      .gv-grid { min-width: 560px; }
+    }
+
+    /* Team chips (qui pairs) */
+    .gv-team {
+      padding: 3px 7px; border-radius: 5px;
+      background: linear-gradient(180deg, rgba(56,189,248,0.12), rgba(56,189,248,0.06));
+      border-left: 2.5px solid #0284c7;
+      font-size: 11px; font-weight: 500;
+      box-shadow: inset 0 -1px 0 rgba(56,189,248,0.15);
+      transition: transform 0.12s;
+    }
+    .gv-team:hover { transform: translateX(1px); }
+    .gv-team + .gv-team { margin-top: 3px; }
+    .gv-team.gv-gestion {
+      background: linear-gradient(180deg, rgba(249,115,22,0.16), rgba(249,115,22,0.08));
+      border-left-color: #ea580c;
+    }
+    .gv-team.gv-diferida-t {
+      background: linear-gradient(180deg, rgba(34,197,94,0.16), rgba(34,197,94,0.08));
+      border-left-color: #16a34a;
+    }
+    /* Single-surgeon chips */
+    .gv-one {
+      display: inline-block; padding: 2px 7px; margin: 1px 3px 1px 0;
+      border-radius: 5px; font-size: 11px; font-weight: 500;
+      background: rgba(148,163,184,0.12);
+      border: 1px solid transparent;
+      transition: all 0.12s;
+    }
+    .gv-one:hover { transform: translateY(-1px); }
+    .gv-one.gv-gestion {
+      background: linear-gradient(180deg, #fed7aa, #fdba74);
+      color: #7c2d12; font-weight: 700; border-color: #fb923c;
+    }
+    .gv-one.gv-rucot {
+      background: linear-gradient(180deg, #bbf7d0, #86efac);
+      color: #14532d; font-weight: 700; border-color: #4ade80;
+    }
+    .gv-one.gv-guardia {
+      background: linear-gradient(180deg, #fecaca, #fca5a5);
+      color: #7f1d1d; font-weight: 700; border-color: #f87171;
+      box-shadow: 0 1px 2px rgba(239,68,68,0.2);
+    }
+    .gv-one.gv-localizado {
+      background: linear-gradient(180deg, #e9d5ff, #d8b4fe);
+      color: #581c87; font-weight: 700; border-color: #c084fc;
+    }
+    [data-theme="dark"] .gv-one { background: rgba(148,163,184,0.1); color: var(--text); }
+    [data-theme="dark"] .gv-one.gv-gestion { background: rgba(249,115,22,0.25); color: #fed7aa; border-color: rgba(251,146,60,0.4); }
+    [data-theme="dark"] .gv-one.gv-rucot { background: rgba(34,197,94,0.25); color: #bbf7d0; border-color: rgba(74,222,128,0.4); }
+    [data-theme="dark"] .gv-one.gv-guardia { background: rgba(239,68,68,0.25); color: #fecaca; border-color: rgba(248,113,113,0.4); }
+    [data-theme="dark"] .gv-one.gv-localizado { background: rgba(168,85,247,0.25); color: #e9d5ff; border-color: rgba(192,132,252,0.4); }
+    [data-theme="dark"] .gv-team { background: linear-gradient(180deg, rgba(56,189,248,0.18), rgba(56,189,248,0.08)); }
+    [data-theme="dark"] .gv-team.gv-gestion { background: linear-gradient(180deg, rgba(249,115,22,0.22), rgba(249,115,22,0.1)); }
+    [data-theme="dark"] .gv-team.gv-diferida-t { background: linear-gradient(180deg, rgba(34,197,94,0.22), rgba(34,197,94,0.1)); }
+    .toolbar-btn-global {
+      background: linear-gradient(135deg, #38bdf8, #a78bfa); color: white;
+      border: none; border-radius: 8px; padding: 8px 14px;
+      font-family: 'Source Sans 3', sans-serif; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.03em; cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: 0 2px 8px rgba(56,189,248,0.3);
+    }
+    .toolbar-btn-global:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(56,189,248,0.5); }
+
     .cal-panel {
       margin-top: 8px; background: var(--surface);
       border: 1.5px solid var(--border); border-radius: 12px;
@@ -1406,6 +1793,10 @@
     <select id="surgeon-select" style="display:none">
       <option value="">Selecciona un cirujano...</option>
     </select>
+    <button class="toolbar-btn-global" id="global-view-btn" onclick="openGlobalView()" style="display:none" title="Vista general del planning (prototipo)">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      Vista global
+    </button>
     <div class="export-group" id="export-group" style="display:none">
       <span class="export-label">Exportar:</span>
       <button class="export-btn export-btn-ics" onclick="toggleCalPanel()" title="Exportar a calendario"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="m8 3v4"/><path d="m16 3v4"/><path d="m4 11h16"/></svg> Calendario</button>
@@ -1643,6 +2034,20 @@
 
   <div class="app-footer"><span>COT &mdash; Planning Analyzer v2.0</span></div>
   <div id="toast" class="toast-banner"></div>
+
+  <!-- Vista global (prototipo) -->
+  <div class="gv-overlay" id="gv-overlay" style="display:none" onclick="if(event.target===this)closeGlobalView()">
+    <div class="gv-modal">
+      <div class="gv-header">
+        <div>
+          <h2>Vista global del planning</h2>
+          <div class="gv-header-sub" id="gv-subtitle">prototipo · estructura idéntica al Excel</div>
+        </div>
+        <button class="gv-close" onclick="closeGlobalView()" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="gv-body" id="gv-body"></div>
+    </div>
+  </div>
   <div id="d3-tooltip" class="d3-tooltip"></div>
 </div>
 
@@ -2045,14 +2450,20 @@ function adjustQuiRanges(ws, actRow, dayRanges) {
     adjusted[day] = { start: dayRanges[day].start, end: dayRanges[day].end, headerCol: dayRanges[day].headerCol };
   }
 
-  // Use date column (dateCol = headerCol + DATE_OFFSETS) as day boundary.
-  // Each day's qui_t data ends at dateCol + 1 (the column right after the date number).
-  // The next day starts at dateCol + 2. Gives 0 odd counts across all weeks.
+  // Use date column (dateCol = headerCol + DATE_OFFSETS) as day boundary para la
+  // mayoría de los días. Caso especial VIERNES: puede tener una 2ª pareja qui_m
+  // entre dateCol+1 y el header de SABADO (ej.: cols 39-40 con SABADO header en 41).
+  // Para no partir esa pareja, extendemos VIERNES hasta SABADO.headerCol-1.
   const activeDays = dayOrder.filter(d => adjusted[d]);
   for (let i = 0; i < activeDays.length; i++) {
     const day = activeDays[i];
     const dateCol = adjusted[day].headerCol + (DATE_OFFSETS[day] || 4);
-    const dayEnd = dateCol + 1;
+    let dayEnd;
+    if (day === 'VIERNES' && adjusted['SABADO']) {
+      dayEnd = adjusted['SABADO'].headerCol - 1;
+    } else {
+      dayEnd = dateCol + 1;
+    }
     adjusted[day].end = dayEnd;
     if (i + 1 < activeDays.length) {
       adjusted[activeDays[i + 1]].start = dayEnd + 1;
@@ -2328,7 +2739,7 @@ function parseWorksheetPure(ws) {
           // entradas espurias causadas por desbordes de columnas del viernes.
           if (activity === 'qui_m' && (dayOfWeek === 5 || dayOfWeek === 6)) continue;
 
-          const entry = { day: wd.date, month: trackMonth, year: trackYear, dayOfWeek, activity };
+          const entry = { day: wd.date, month: trackMonth, year: trackYear, dayOfWeek, activity, rowType: actKey };
 
           if (isQuirofano && (activity === 'qui_m' || activity === 'qui_t' || activity === 'diferida_t') && companionMap) {
             entry.companions = companionMap[col] || [];
@@ -2402,6 +2813,7 @@ function showUploadSuccess() {
   document.getElementById('upload-info').style.display = 'flex';
   document.getElementById('upload-summary').textContent = loadedFileName;
   document.getElementById('controls').style.display = 'flex';
+  document.getElementById('global-view-btn').style.display = 'inline-flex';
   document.getElementById('select-prompt').style.display = '';
   document.getElementById('results').classList.remove('visible');
 }
@@ -3023,6 +3435,321 @@ function getSurnameOf(id) {
   const name = SURGEONS[id] || `T${id}`;
   return name.split(' ').pop();
 }
+
+// ─────────────────────────────────────────────
+//  VISTA GLOBAL (prototipo)
+// ─────────────────────────────────────────────
+function buildGlobalGrid() {
+  if (!parsedData || !allDates.length) return [];
+  const sorted = [...allDates].sort((a, b) =>
+    a.year - b.year || a.month - b.month || a.day - b.day);
+  const weeks = [];
+  let cur = null;
+  for (const d of sorted) {
+    if (!cur || d.dayOfWeek === 0) {
+      if (cur) weeks.push(cur);
+      cur = { days: [] };
+    }
+    cur.days.push(d);
+  }
+  if (cur) weeks.push(cur);
+
+  const rowTypes = ['diferida','qui_m','cons_m','saliente','cons_t','qui_t','guardia','localizado'];
+  for (const w of weeks) {
+    w.cells = {};
+    for (const rt of rowTypes) w.cells[rt] = {};
+    const dateByDow = {};
+    for (const d of w.days) dateByDow[d.dayOfWeek] = d;
+    const dateSet = new Set(w.days.map(d => `${d.year}-${d.month}-${d.day}`));
+    for (const sidStr of Object.keys(parsedData)) {
+      const sid = +sidStr;
+      for (const e of parsedData[sid]) {
+        const dKey = `${e.year}-${e.month}-${e.day}`;
+        if (!dateSet.has(dKey)) continue;
+        // Relocate display rows:
+        //  · rucot → cons_t (simétrico con diferida_t en qui_t)
+        let displayRow = e.rowType;
+        if (e.activity === 'rucot') displayRow = 'cons_t';
+        if (!displayRow || !w.cells[displayRow]) continue;
+        if (!w.cells[displayRow][dKey]) w.cells[displayRow][dKey] = [];
+        w.cells[displayRow][dKey].push({ sid, activity: e.activity, companions: e.companions || [] });
+      }
+    }
+  }
+  return weeks;
+}
+
+function renderGlobalCell(rowType, entries) {
+  if (!entries.length) return '';
+  const isQui = (rowType === 'qui_m' || rowType === 'qui_t');
+  if (isQui) {
+    const teamMap = {};
+    for (const e of entries) {
+      const members = [e.sid, ...(e.companions || [])];
+      const key = [...members].sort((a, b) => a - b).join(',');
+      if (!teamMap[key]) teamMap[key] = { members: [...new Set(members)].sort((a,b)=>a-b), activities: new Set() };
+      teamMap[key].activities.add(e.activity);
+    }
+    return Object.values(teamMap).map(t => {
+      const names = t.members.map(m => `<span class="gv-name" data-sid="${m}">${getSurnameOf(m)}</span>`).join(' · ');
+      const cls = ['gv-team'];
+      if (t.activities.has('gestion')) cls.push('gv-gestion');
+      if (t.activities.has('diferida_t')) cls.push('gv-diferida-t');
+      return `<div class="${cls.join(' ')}">${names}</div>`;
+    }).join('');
+  }
+  return entries.map(e => {
+    const cls = ['gv-one', 'gv-name'];
+    if (e.activity === 'gestion') cls.push('gv-gestion');
+    else if (e.activity === 'rucot') cls.push('gv-rucot');
+    else if (e.activity === 'guardia') cls.push('gv-guardia');
+    else if (e.activity === 'localizado') cls.push('gv-localizado');
+    return `<span class="${cls.join(' ')}" data-sid="${e.sid}">${getSurnameOf(e.sid)}</span>`;
+  }).join(' ');
+}
+
+function jumpToSurgeonMonth(sid, year, month) {
+  const select = document.getElementById('surgeon-select');
+  const label = document.getElementById('custom-select-label');
+  // Asegura que existe la opción y la selecciona
+  const opt = Array.from(select.options).find(o => +o.value === sid);
+  if (!opt) return;
+  select.value = String(sid);
+  if (label) label.textContent = opt.textContent;
+  const dropdown = document.getElementById('custom-select-dropdown');
+  if (dropdown) {
+    dropdown.querySelectorAll('.custom-select-option').forEach(o => {
+      o.classList.toggle('selected', o.dataset.value === String(sid));
+    });
+  }
+  if (year != null && month != null &&
+      availableMonths.some(m => m.year === year && m.month === month)) {
+    currentYear = year;
+    currentMonth = month;
+  }
+  closeGlobalView();
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+  setTimeout(() => {
+    document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+
+function openGlobalView() {
+  if (!parsedData) return;
+  const weeks = buildGlobalGrid();
+  const body = document.getElementById('gv-body');
+  // Filas agrupadas por bloque (mañana / tarde / guardia+saliente).
+  // CONS unificada, RUCOT se ordena al final dentro de su celda.
+  // Cada objeto puede llevar `section` con una etiqueta de banda divisoria.
+  const rowLabels = [
+    { rt:'diferida',   label:'URG',  icon:'&#127973;', section:{ id:'morning', title:'MAÑANA' } },
+    { rt:'qui_m',      label:'QUI',  icon:'&#129657;' },
+    { rt:'cons',       label:'CONS', icon:'&#128196;' },
+    { rt:'qui_t',      label:'QUI',  icon:'&#128137;', section:{ id:'afternoon', title:'TARDE' } },
+    { rt:'guardia',    label:'GPF',  icon:'&#128680;', section:{ id:'guard', title:'GUARDIA' } },
+    { rt:'localizado', label:'GLOC', icon:'&#128222;' },
+    { rt:'saliente',   label:'SAL',  icon:'&#128164;' }
+  ];
+  const DAY_ABBR = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+
+  // ¿Hay semana actual en los datos?
+  const today = new Date();
+  const todayIdx = weeks.findIndex(w => {
+    if (!w.days.length) return false;
+    const d0 = new Date(w.days[0].year, w.days[0].month, w.days[0].day);
+    const dL = w.days[w.days.length-1];
+    const dN = new Date(dL.year, dL.month, dL.day + 1);
+    return today >= d0 && today < dN;
+  });
+
+  // Navegador de semanas (sticky) con buscador + botón HOY
+  let nav = '<div class="gv-nav">';
+  nav += '<div class="gv-search-wrap">';
+  nav += '<span class="gv-search-icon">&#128269;</span>';
+  nav += '<input class="gv-search" id="gv-search" type="search" placeholder="Buscar apellido…" autocomplete="off">';
+  nav += '<button class="gv-search-clear" id="gv-search-clear" title="Limpiar">&times;</button>';
+  nav += '</div>';
+  nav += `<button class="gv-nav-today" id="gv-nav-today"${todayIdx < 0 ? ' disabled title="Hoy no está en el planning"' : ''}>HOY</button>`;
+  nav += '<span class="gv-nav-label">Semanas:</span>';
+  nav += '<div class="gv-nav-scroll">';
+  weeks.forEach((w, wi) => {
+    if (!w.days.length) return;
+    const first = w.days[0], last = w.days[w.days.length - 1];
+    const label = first.month === last.month
+      ? `${first.day}–${last.day} ${MONTH_NAMES[first.month].slice(0,3)}`
+      : `${first.day} ${MONTH_NAMES[first.month].slice(0,3)}–${last.day} ${MONTH_NAMES[last.month].slice(0,3)}`;
+    nav += `<button class="gv-nav-btn" data-week-idx="${wi}" title="Semana ${wi+1}: ${label}"><span class="gv-nav-num">S${String(wi+1).padStart(2,'0')}</span><span class="gv-nav-dates">${label}</span></button>`;
+  });
+  nav += '</div></div>';
+
+  let html = nav;
+  weeks.forEach((w, wi) => {
+    if (!w.days.length) return;
+    const first = w.days[0], last = w.days[w.days.length - 1];
+    const sameMonth = first.month === last.month;
+    const range = sameMonth
+      ? `${first.day}–${last.day} ${MONTH_NAMES[first.month]} ${last.year}`
+      : `${first.day} ${MONTH_NAMES[first.month].slice(0,3)} – ${last.day} ${MONTH_NAMES[last.month].slice(0,3)} ${last.year}`;
+    html += `<div class="gv-week" id="gv-week-${wi}" data-week-idx="${wi}">`;
+    html += `<div class="gv-week-title"><span class="gv-week-title-num">S${String(wi+1).padStart(2,'0')}</span>${range}</div>`;
+    html += `<div class="gv-grid-wrap"><div class="gv-grid">`;
+    html += `<div class="gv-row gv-day-header-row"><div class="gv-label"></div>`;
+    for (let i = 0; i < 7; i++) {
+      const d = w.days.find(x => x.dayOfWeek === i);
+      const weekendCls = (i >= 5) ? ' gv-weekend' : '';
+      html += d
+        ? `<div class="gv-cell${weekendCls}">${DAY_ABBR[i]}<span class="gv-cell-num">${d.day}</span></div>`
+        : `<div class="gv-cell gv-day-empty"></div>`;
+    }
+    html += `</div>`;
+    for (const row of rowLabels) {
+      const { rt, label, icon, section } = row;
+      if (section) {
+        html += `<div class="gv-section gv-section-${section.id}"><span>${section.title}</span></div>`;
+      }
+      html += `<div class="gv-row gv-row-${rt}"><div class="gv-label gv-label-${rt}"><span class="gv-label-icon">${icon}</span>${label}</div>`;
+      for (let i = 0; i < 7; i++) {
+        const d = w.days.find(x => x.dayOfWeek === i);
+        if (!d) { html += `<div class="gv-cell gv-day-empty"></div>`; continue; }
+        const weekendCls = (i >= 5) ? ' gv-weekend' : '';
+        const dKey = `${d.year}-${d.month}-${d.day}`;
+        let entries;
+        if (rt === 'cons') {
+          const cm = (w.cells.cons_m && w.cells.cons_m[dKey]) || [];
+          const ct = (w.cells.cons_t && w.cells.cons_t[dKey]) || [];
+          const ctNoRucot = ct.filter(e => e.activity !== 'rucot');
+          const ctRucot   = ct.filter(e => e.activity === 'rucot');
+          entries = [...cm, ...ctNoRucot, ...ctRucot];
+        } else {
+          entries = (w.cells[rt] && w.cells[rt][dKey]) || [];
+        }
+        html += `<div class="gv-cell${weekendCls}" data-y="${d.year}" data-m="${d.month}" data-d="${d.day}">${renderGlobalCell(rt, entries)}</div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div></div></div>`;
+  });
+  body.textContent = '';
+  body.insertAdjacentHTML('afterbegin', html || '<p style="color:var(--text-muted);text-align:center;padding:40px">Sin datos.</p>');
+  document.getElementById('gv-subtitle').textContent = `${weeks.length} semanas · prototipo v3`;
+  document.getElementById('gv-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  // Click delegado: apellido → vista individual; sección → colapsar; nav → scroll
+  body.onclick = (ev) => {
+    const sec = ev.target.closest('.gv-section');
+    if (sec) {
+      const secClass = [...sec.classList].find(c => c.startsWith('gv-section-'));
+      const id = secClass ? secClass.replace('gv-section-','') : null;
+      if (id === 'morning' || id === 'afternoon' || id === 'guard') {
+        body.classList.toggle(`gv-collapsed-${id}`);
+      }
+      return;
+    }
+    const navBtn = ev.target.closest('.gv-nav-btn');
+    if (navBtn) {
+      const target = document.getElementById('gv-week-' + navBtn.dataset.weekIdx);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    const nameEl = ev.target.closest('.gv-name');
+    if (nameEl) {
+      const sid = +nameEl.dataset.sid;
+      const cell = nameEl.closest('.gv-cell');
+      const y = cell ? +cell.dataset.y : null;
+      const m = cell ? +cell.dataset.m : null;
+      if (!isNaN(sid)) jumpToSurgeonMonth(sid, y, m);
+    }
+  };
+
+  // Hover en apellido → resaltar todas sus apariciones (sólo desktop)
+  const isTouch = window.matchMedia('(hover: none)').matches;
+  if (!isTouch) {
+    let activeSid = null;
+    body.addEventListener('mouseover', (ev) => {
+      const el = ev.target.closest('.gv-name');
+      if (!el) return;
+      const sid = el.dataset.sid;
+      if (activeSid === sid) return;
+      activeSid = sid;
+      body.classList.add('gv-has-hl');
+      body.querySelectorAll('.gv-name').forEach(n => {
+        n.classList.toggle('gv-hl-match', n.dataset.sid === sid);
+      });
+    });
+    body.addEventListener('mouseout', (ev) => {
+      const el = ev.target.closest('.gv-name');
+      if (!el) return;
+      const related = ev.relatedTarget && ev.relatedTarget.closest?.('.gv-name');
+      if (related) return;
+      activeSid = null;
+      body.classList.remove('gv-has-hl');
+      body.querySelectorAll('.gv-name.gv-hl-match').forEach(n => n.classList.remove('gv-hl-match'));
+    });
+  }
+
+  // Buscador por apellido
+  const searchInput = document.getElementById('gv-search');
+  const searchClear = document.getElementById('gv-search-clear');
+  const applySearch = (q) => {
+    q = (q || '').trim().toLowerCase();
+    if (!q) {
+      body.classList.remove('gv-has-search');
+      body.querySelectorAll('.gv-name.gv-search-match').forEach(n => n.classList.remove('gv-search-match'));
+      return;
+    }
+    body.classList.add('gv-has-search');
+    body.querySelectorAll('.gv-name').forEach(n => {
+      const match = n.textContent.toLowerCase().includes(q);
+      n.classList.toggle('gv-search-match', match);
+    });
+  };
+  searchInput?.addEventListener('input', () => applySearch(searchInput.value));
+  searchClear?.addEventListener('click', () => {
+    searchInput.value = '';
+    applySearch('');
+    searchInput.focus();
+  });
+
+  // Botón HOY
+  document.getElementById('gv-nav-today')?.addEventListener('click', () => {
+    if (todayIdx < 0) return;
+    const t = document.getElementById('gv-week-' + todayIdx);
+    if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  // Observer para marcar semana activa en el nav
+  if (window.IntersectionObserver) {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = e.target.dataset.weekIdx;
+          body.querySelectorAll('.gv-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.weekIdx === idx));
+        }
+      });
+    }, { root: body, rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+    body.querySelectorAll('.gv-week').forEach(el => obs.observe(el));
+  }
+
+  // Auto-scroll a la semana actual al abrir
+  if (todayIdx >= 0) {
+    setTimeout(() => {
+      const t = document.getElementById('gv-week-' + todayIdx);
+      if (t) t.scrollIntoView({ behavior: 'instant', block: 'start' });
+    }, 30);
+  }
+}
+
+function closeGlobalView() {
+  document.getElementById('gv-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('gv-overlay')?.style.display === 'flex') {
+    closeGlobalView();
+  }
+});
 
 function getMonthEntries(surgeonId) {
   return (parsedData[surgeonId] || []).filter(
