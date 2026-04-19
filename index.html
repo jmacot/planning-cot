@@ -611,7 +611,7 @@
     }
     .gv-week {
       margin-bottom: 28px; background: var(--surface);
-      border-radius: 12px; overflow: hidden;
+      border-radius: 12px; overflow: clip; /* clip no crea scroll-container → sticky funciona */
       box-shadow: 0 4px 16px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.06);
       border: 1px solid var(--border-light);
       position: relative;
@@ -857,8 +857,12 @@
       box-shadow: 0 4px 12px rgba(239,68,68,0.5);
     }
     .gv-nav-today:disabled { opacity: 0.4; cursor: not-allowed; }
-    /* Scroll wrap del grid (para móvil) */
-    .gv-grid-wrap { overflow-x: auto; scrollbar-width: thin; }
+    /* Scroll wrap del grid: sólo activa overflow en móvil (en desktop rompería
+       el position: sticky de los headers al crear un scroll-container nuevo) */
+    .gv-grid-wrap { /* transparente en desktop */ }
+    @media (max-width: 900px) {
+      .gv-grid-wrap { overflow-x: auto; scrollbar-width: thin; }
+    }
 
     /* MÓVIL */
     @media (max-width: 900px) {
