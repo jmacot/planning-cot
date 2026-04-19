@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Planning COT — analizador de planning mensual para el servicio de traumatología (COT). Sube un Excel con el planning y visualiza calendarios, guardias, rankings, gráficos D3 y retribución estimada.
+Planning COT — analizador de actividad mensual para el servicio de traumatología (COT). Sube un Excel con el planning y analiza turnos, quirófanos, consultas y guardias en una sola vista, con calendarios, gráficos D3 y retribución estimada.
 
 ## Development
 
