@@ -100,7 +100,7 @@ Si un cirujano no aparece o sus actividades son incorrectas:
 
 ## Assets
 
-- **assets/img/portada.png** — Welcome hero image
+- **assets/img/portada.jpg** — Welcome hero image
 
 ## Project structure
 
