@@ -21,7 +21,9 @@ No requiere instalacion. Funciona en cualquier navegador, incluyendo movil y tab
 ## Funcionalidades
 
 - **Sube el archivo del planning** (Excel, ODS, CSV) y analiza automaticamente
+- **Compatible con HSJDA** — banner informativo en pantalla de carga
 - **Calendario mensual** con etiquetas de actividad por dia y separacion visual manana/tarde
+- **Vista Global** — calendario anual del servicio con headers de dia y semana sticky en movil, navegador, busqueda por compañero y hover de detalles
 - **Festivos oficiales** de Andalucia y Sevilla 2026 marcados con gradiente
 - **Resumen de actividades** con toggle Mes actual / Total
 - **Contaje de turnos** semanal y mensual, descontando festivos de los turnos esperados
